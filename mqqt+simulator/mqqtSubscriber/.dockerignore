@@ -1,0 +1,9 @@
+my-env/
+venv/
+__pycache__/
+*.pyc
+logs/
+*.log
+.env
+.git/
+.gitignore

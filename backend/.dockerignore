@@ -1,0 +1,15 @@
+my-env
+venv
+__pycache__
+.pytest_cache
+.git
+.gitignore
+
+*.pyc
+*.pyo
+*.pyd
+
+logs/
+*.log
+
+alembic/versions/__pycache__

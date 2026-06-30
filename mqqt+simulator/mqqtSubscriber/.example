@@ -1,0 +1,17 @@
+# BASE_URL=http://localhost:8000
+BASE_URL=http://sunpor-backend:8000
+
+# Local test with mqqtBroker:
+# MQTT_BROKER_IP=localhost
+MQTT_BROKER_IP=sunpor-mqtt
+MQTT_BROKER_PORT=1883
+
+EMAIL=admin@sunpor.local
+PASSWORD=Admin@123456
+
+TOPIC=EX10/#
+
+# Logging (inside container LOG_DIR=/app/logs; mount host path via HOST_LOG_DIR in docker-compose)
+LOG_DIR=/app/logs
+LOG_LEVEL=INFO
+# HOST_LOG_DIR=./logs

@@ -1,0 +1,20 @@
+version: "3.9"
+networks:
+  sunporNet:
+    external: true
+
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: sunpor-mqtt
+    restart: unless-stopped
+
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+    networks:
+      - sunporNet
+
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf

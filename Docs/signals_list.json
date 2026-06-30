@@ -1,0 +1,626 @@
+[
+  {
+    "name": "Zylinder Zone 1 Temperatur Sollwert",
+    "tag": "E10L_Heizzone1TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 1 Temperatur Istwert",
+    "tag": "E10L_Heizzone1TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 1 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone1TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 2 Temperatur Sollwert",
+    "tag": "E10L_Heizzone2TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 2 Temperatur Istwert",
+    "tag": "E10L_Heizzone2TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 2 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone2TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 3 Temperatur Sollwert",
+    "tag": "E10L_Heizzone3TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 3 Temperatur Istwert",
+    "tag": "E10L_Heizzone3TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 3 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone3TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 4 Temperatur Sollwert",
+    "tag": "E10L_Heizzone4TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 4 Temperatur Istwert",
+    "tag": "E10L_Heizzone4TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 4 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone4TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 5 Temperatur Sollwert",
+    "tag": "E10L_Heizzone5TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 5 Temperatur Istwert",
+    "tag": "E10L_Heizzone5TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 5 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone5TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 6 Temperatur Sollwert",
+    "tag": "E10L_Heizzone6TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 6 Temperatur Istwert",
+    "tag": "E10L_Heizzone6TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 6 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone6TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 7 Temperatur Sollwert",
+    "tag": "E10L_Heizzone7TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 7 Temperatur Istwert",
+    "tag": "E10L_Heizzone7TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Zylinder Zone 7 Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone7TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Flansch Temperatur Sollwert",
+    "tag": "E10L_Heizzone8TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Flansch Temperatur Istwert",
+    "tag": "E10L_Heizzone8TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Flansch Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone8TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Materialaustragsteil Temperatur Sollwert",
+    "tag": "E10L_Heizzone9TemperaturSollwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Materialaustragsteil Temperatur Istwert",
+    "tag": "E10L_Heizzone9TemperaturIstwert",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Materialaustragsteil Temperatur Stellgröße (ED)",
+    "tag": "E10L_Heizzone9TemperaturStell",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Massedruck 1",
+    "tag": "E10L_MasseDruck01",
+    "unit": "BAR",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Massedruck 2",
+    "tag": "E10L_MasseDruck02",
+    "unit": "BAR",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Massedruck 3",
+    "tag": "E10L_MasseDruck03",
+    "unit": "BAR",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Massedruck 4",
+    "tag": "E10L_MasseDruck04",
+    "unit": "BAR",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Massetemperatur 1",
+    "tag": "E10L_MasseTemperatur01",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Schneckendrehzahl",
+    "tag": "E10L_ExtruderDrehzahl",
+    "unit": "UPM",
+    "factor": 1
+  },
+  {
+    "name": "Extruder Drehmoment",
+    "tag": "E10L_ExtruderDrehmoment",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Schmelzepumpe Drehzahl",
+    "tag": "E10L_SchmelzepumpeDrehzahl",
+    "unit": "UPM",
+    "factor": 1
+  },
+  {
+    "name": "Schmelzepumpe Drehmoment",
+    "tag": "E10L_SchmelzepumpeDrehmoment",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Siebwechsler Eingang Massedruck",
+    "tag": "E10GSiebwechslerEingangDruck",
+    "unit": "BAR",
+    "factor": 0.1
+  },
+  {
+    "name": "Siebwechsler Ausgang Massedruck",
+    "tag": "E10GSiebwechslerAusgangDruck",
+    "unit": "BAR",
+    "factor": 0.1
+  },
+  {
+    "name": "Anfahrventil Massedruck",
+    "tag": "E10GAnfahrventilMasseDruck",
+    "unit": "BAR",
+    "factor": 0.1
+  },
+  {
+    "name": "Wasserbox Prozesswasserdruck P1",
+    "tag": "E10GProzesswasserWasserboxDruck1",
+    "unit": "BAR",
+    "factor": 0.1
+  },
+  {
+    "name": "Wasserbox Prozesswasserdruck P2",
+    "tag": "E10GProzesswasserWasserboxDruck2",
+    "unit": "BAR",
+    "factor": 0.1
+  },
+  {
+    "name": "Anfahrventil Gehäusetemperatur",
+    "tag": "E10GAnfahrventilGehaeuseTemperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Anfahrventil Massetemperatur",
+    "tag": "E10GAnfahrventilMasseTemperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Siebwechsler Zone 1 Temperatur",
+    "tag": "E10GSiebwechslerZone1Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Siebwechsler Zone 2 Temperatur",
+    "tag": "E10GSiebwechslerZone2Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Siebwechsler Adapter Temperatur",
+    "tag": "E10GSiebwechslerAdapterTemperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Lochplatte 1 Temperatur",
+    "tag": "E10GLochplatte1Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Lochplatte 2 Temperatur",
+    "tag": "E10GLochplatte2Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Lochplatte 3 Temperatur",
+    "tag": "E10GLochplatte3Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Lochplatte 4 Temperatur",
+    "tag": "E10GLochplatte4Temperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Prozesswassertemperatur Istwert",
+    "tag": "E10GProzesswasserTemperatur",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Prozesswassertemperatur Sollwert",
+    "tag": "E10GProzesswasserTemperaturSollwert",
+    "unit": "C",
+    "factor": 0.1
+  },
+  {
+    "name": "Wasserpumpe Drehzahl",
+    "tag": "E10GWasserpumpeDrehzahl",
+    "unit": "%",
+    "factor": 0.1
+  },
+  {
+    "name": "Granulator Drehzahl Istwert",
+    "tag": "E10GGranulatorDrehzahl",
+    "unit": "UPM",
+    "factor": 0.1
+  },
+  {
+    "name": "Granulator Drehzahl Sollwert",
+    "tag": "E10GGranulatorDrehzahlSollwert",
+    "unit": "UPM",
+    "factor": 0.1
+  },
+  {
+    "name": "Prozesswasser Durchfluss Istwert",
+    "tag": "E10GProzesswasserDurchfluss",
+    "unit": "m³/h",
+    "factor": 0.1
+  },
+  {
+    "name": "Prozesswasser Durchfluss Sollwert",
+    "tag": "E10GProzesswasserDurchflussSollwert",
+    "unit": "m³/h",
+    "factor": 0.1
+  },
+  {
+    "name": "Granulator Drehmoment",
+    "tag": "E10GGranulatorDrehmoment",
+    "unit": "%",
+    "factor": 0.1
+  },
+  {
+    "name": "Messerposition",
+    "tag": "E10GMesserposition",
+    "unit": "mm",
+    "factor": 0.1
+  },
+  {
+    "name": "Granulator Hydraulik Anpresskraft Istwert",
+    "tag": "E10GAnpresskraftIstwert",
+    "unit": "%",
+    "factor": 0.1
+  },
+  {
+    "name": "Granulator Hydraulik Anpresskraft Sollwert",
+    "tag": "E10GAnpresskraftSollwert",
+    "unit": "%",
+    "factor": 0.1
+  },
+  {
+    "name": "Prozesswassertemperatur Istwert",
+    "tag": "EX10I203_temp",
+    "unit": "C",
+    "factor": 1
+  },
+  {
+    "name": "Gesamtdurchsatz Sollwert",
+    "tag": "E10L_GesamtDurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Gesamtdurchsatz Istwert",
+    "tag": "E10L_GesamtDurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 1 (EPS) Durchsatz Istwert",
+    "tag": "E10L_Dosierer1DurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 2 (Grafit) Durchsatz Istwert",
+    "tag": "E10L_Dosierer2DurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 3 (Rezyklat) Durchsatz Istwert",
+    "tag": "E10L_Dosierer3DurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 4 (600) Durchsatz Istwert",
+    "tag": "E10L_Dosierer4DurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 5 (Offspec) Durchsatz Istwert",
+    "tag": "E10L_Dosierer5DurchsatzIstwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 1 (EPS) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer1DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 2 (Grafit) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer2DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 3 (Rezyklat) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer3DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 4 (600) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer4DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 5 (Offspec) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer5DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 6 (Pentan) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer6DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 7 (Stickstoff) Durchsatz Sollwert",
+    "tag": "E10L_Dosierer7DurchsatzSollwert",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 1 (EPS) Drehzahl Istwert",
+    "tag": "E10L_Dosierer1DrehzahlIstwert",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 2 (Grafit) Drehzahl Istwert",
+    "tag": "E10L_Dosierer2DrehzahlIstwert",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 3 (Rezyklat) Drehzahl Istwert",
+    "tag": "E10L_Dosierer3DrehzahlIstwert",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 4 (600) Drehzahl Istwert",
+    "tag": "E10L_Dosierer4DrehzahlIstwert",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Dosierer 5 (Offspec) Drehzahl Istwert",
+    "tag": "E10L_Dosierer5DrehzahlIstwert",
+    "unit": "%",
+    "factor": 1
+  },
+  {
+    "name": "Fehler Waage:\nBit00 -> Fehler\nBit01 -> Fehler Wägezelle\nBit02 -> Befüllfehler\nBit03 -> Unterlast\nBit04 -> Überlast\nBit05 -> Regeldiff. neg.\nBit06 -> Regeldiff. pos.\nBit07 -> Drehzahl min\nBit08 -> Drehzahl max\nBit09 -> Speicherfehler\nBit10 -> Softstart Fehler\nBit11 -> ES-Fehler\nBit12 -> EF-Fehler\nBit13 -> FU-Fehler\nBit14 -> Komm. Fehler",
+    "tag": "E10L_Dosierer1Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer2Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer3Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer4Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer5Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer6Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer7Fehler",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "Betriebsart Waage:\n1 -> GD\n2 -> VR\n3 -> VS\n4 -> LF\n5-> EF\n6-> GL\n7-> VD\n9-> AT\n10-> M",
+    "tag": "E10L_Dosierer1Betriebsart",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer2Betriebsart",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer3Betriebsart",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer4Betriebsart",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "",
+    "tag": "E10L_Dosierer5Betriebsart",
+    "unit": "",
+    "factor": null
+  },
+  {
+    "name": "Offspec-Menge Ausschussleitung",
+    "tag": "EX10I351_masse",
+    "unit": "kg",
+    "factor": 1
+  },
+  {
+    "name": "Offspec-Menge Oktabin",
+    "tag": "EX10I352_masse",
+    "unit": "kg",
+    "factor": 1
+  },
+  {
+    "name": "Offspec-Menge Silo",
+    "tag": "EX10I353_masse",
+    "unit": "kg",
+    "factor": 1
+  },
+  {
+    "name": "Pentan Menge Istwert",
+    "tag": "EX10I121_masse",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Stickstoff Menge Istwert",
+    "tag": "Flow_Ist",
+    "unit": "kg/h",
+    "factor": 1
+  },
+  {
+    "name": "Pentanpumpe Frequenz Istwert",
+    "tag": "ActValue",
+    "unit": "Hz",
+    "factor": 1
+  },
+  {
+    "name": "Offspec-Menge Sieb GROB",
+    "tag": "MX03_Grob_sum_akt",
+    "unit": "kg",
+    "factor": 1
+  },
+  {
+    "name": "Offspec-Menge Sieb FEIN",
+    "tag": "MX03_Fein_sum_akt",
+    "unit": "kg",
+    "factor": 1
+  },
+  {
+    "name": "Antistatikmenge Istwert",
+    "tag": "DS10I120_flow",
+    "unit": "l/h",
+    "factor": 1
+  },
+  {
+    "name": "Antistatikmenge Sollwert",
+    "tag": "DS10I120_flow_soll",
+    "unit": "l/h",
+    "factor": 1
+  },
+  {
+    "name": "1 -> Material Produktion",
+    "tag": "DS10V102_1",
+    "unit": "",
+    "factor": null
+  }
+]

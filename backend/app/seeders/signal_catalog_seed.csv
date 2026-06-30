@@ -1,0 +1,105 @@
+wincc_tag,display_name,unit,datatype,factor,signal_group,signal_role,machine_area,active
+S7HMI030.WinCC.E10L_Heizzone1TemperaturSollwert,Cylinder Zone 1 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone1TemperaturIstwert,Cylinder Zone 1 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone1TemperaturStell,Cylinder Zone 1 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone2TemperaturSollwert,Cylinder Zone 2 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone2TemperaturIstwert,Cylinder Zone 2 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone2TemperaturStell,Cylinder Zone 2 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone3TemperaturSollwert,Cylinder Zone 3 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone3TemperaturIstwert,Cylinder Zone 3 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone3TemperaturStell,Cylinder Zone 3 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone4TemperaturSollwert,Cylinder Zone 4 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone4TemperaturIstwert,Cylinder Zone 4 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone4TemperaturStell,Cylinder Zone 4 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone5TemperaturSollwert,Cylinder Zone 5 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone5TemperaturIstwert,Cylinder Zone 5 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone5TemperaturStell,Cylinder Zone 5 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone6TemperaturSollwert,Cylinder Zone 6 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone6TemperaturIstwert,Cylinder Zone 6 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone6TemperaturStell,Cylinder Zone 6 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone7TemperaturSollwert,Cylinder Zone 7 Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone7TemperaturIstwert,Cylinder Zone 7 Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone7TemperaturStell,Cylinder Zone 7 Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone8TemperaturSollwert,Flange Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone8TemperaturIstwert,Flange Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone8TemperaturStell,Flange Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone9TemperaturSollwert,Material Discharge Section Temperature Setpoint,C,WORD,1,heating_zones,setpoint,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone9TemperaturIstwert,Material Discharge Section Temperature Actual Value,C,WORD,1,heating_zones,actual,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_Heizzone9TemperaturStell,Material Discharge Section Temperature Control Output,%,WORD,1,heating_zones,control_output,Heating Zones,TRUE
+S7HMI030.WinCC.E10L_MasseDruck01,Extruder Melt Pressure 1,BAR,WORD,1,melt_pressure,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_MasseDruck02,Extruder Melt Pressure 2,BAR,WORD,1,melt_pressure,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_MasseDruck03,Extruder Melt Pressure 3,BAR,WORD,1,melt_pressure,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_MasseDruck04,Extruder Melt Pressure 4,BAR,WORD,1,melt_pressure,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_MasseTemperatur01,Extruder Melt Temperature 1,C,WORD,1,melt_pressure,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_ExtruderDrehzahl,Extruder Screw Speed,UPM,WORD,1,extruder_meltpump,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_ExtruderDrehmoment,Extruder Torque,%,WORD,1,extruder_meltpump,actual,Extruder,TRUE
+S7HMI030.WinCC.E10L_SchmelzepumpeDrehzahl,Melt Pump Speed,UPM,WORD,1,extruder_meltpump,actual,Melt Pump,TRUE
+S7HMI030.WinCC.E10L_SchmelzepumpeDrehmoment,Melt Pump Torque,%,WORD,1,extruder_meltpump,actual,Melt Pump,TRUE
+S7HMI030.WinCC.E10GSiebwechslerEingangDruck,Screen Changer Inlet Melt Pressure,BAR,WORD,0.1,screen_changer,actual,Screen Changer,TRUE
+S7HMI030.WinCC.E10GSiebwechslerAusgangDruck,Screen Changer Outlet Melt Pressure,BAR,WORD,0.1,screen_changer,actual,Screen Changer,TRUE
+S7HMI030.WinCC.E10GAnfahrventilMasseDruck,Startup Valve Melt Pressure,BAR,WORD,0.1,screen_changer,actual,Startup Valve,TRUE
+S7HMI030.WinCC.E10GProzesswasserWasserboxDruck1,Water Box Process Water Pressure P1,BAR,WORD,0.1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10GProzesswasserWasserboxDruck2,Water Box Process Water Pressure P2,BAR,WORD,0.1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10GAnfahrventilGehaeuseTemperatur,Startup Valve Housing Temperature,C,WORD,0.1,screen_changer,actual,Startup Valve,TRUE
+S7HMI030.WinCC.E10GAnfahrventilMasseTemperatur,Startup Valve Melt Temperature,C,WORD,0.1,screen_changer,actual,Startup Valve,TRUE
+S7HMI030.WinCC.E10GSiebwechslerZone1Temperatur,Screen Changer Zone 1 Temperature,C,WORD,0.1,screen_changer,actual,Screen Changer,TRUE
+S7HMI030.WinCC.E10GSiebwechslerZone2Temperatur,Screen Changer Zone 2 Temperature,C,WORD,0.1,screen_changer,actual,Screen Changer,TRUE
+S7HMI030.WinCC.E10GSiebwechslerAdapterTemperatur,Screen Changer Adapter Temperature,C,WORD,0.1,screen_changer,actual,Screen Changer,TRUE
+S7HMI030.WinCC.E10GLochplatte1Temperatur,Die Plate 1 Temperature,C,WORD,0.1,screen_changer,actual,Die Plate,TRUE
+S7HMI030.WinCC.E10GLochplatte2Temperatur,Die Plate 2 Temperature,C,WORD,0.1,screen_changer,actual,Die Plate,TRUE
+S7HMI030.WinCC.E10GLochplatte3Temperatur,Die Plate 3 Temperature,C,WORD,0.1,screen_changer,actual,Die Plate,TRUE
+S7HMI030.WinCC.E10GLochplatte4Temperatur,Die Plate 4 Temperature,C,WORD,0.1,screen_changer,actual,Die Plate,TRUE
+S7HMI030.WinCC.E10GProzesswasserTemperatur,Process Water Temperature Actual Value,C,WORD,0.1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10GProzesswasserTemperaturSollwert,Process Water Temperature Setpoint,C,WORD,0.1,process_water,setpoint,Water Box,TRUE
+S7HMI030.WinCC.E10GWasserpumpeDrehzahl,Water Pump Speed,%,WORD,0.1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10GGranulatorDrehzahl,Granulator Speed Actual Value,UPM,WORD,0.1,granulator,actual,Granulator,TRUE
+S7HMI030.WinCC.E10GGranulatorDrehzahlSollwert,Granulator Speed Setpoint,UPM,WORD,0.1,granulator,setpoint,Granulator,TRUE
+S7HMI030.WinCC.E10GProzesswasserDurchfluss,Process Water Flow Actual Value,m³/h,WORD,0.1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10GProzesswasserDurchflussSollwert,Process Water Flow Setpoint,m³/h,WORD,0.1,process_water,setpoint,Water Box,TRUE
+S7HMI030.WinCC.E10GGranulatorDrehmoment,Granulator Torque,%,WORD,0.1,granulator,actual,Granulator,TRUE
+S7HMI030.WinCC.E10GMesserposition,Knife Position,mm,WORD,0.1,granulator,actual,Granulator,TRUE
+S7HMI030.WinCC.E10GAnpresskraftIstwert,Granulator Hydraulic Contact Force Actual Value,%,WORD,0.1,granulator,actual,Granulator,TRUE
+S7HMI030.WinCC.E10GAnpresskraftSollwert,Granulator Hydraulic Contact Force Setpoint,%,WORD,0.1,granulator,setpoint,Granulator,TRUE
+S7HMI030.WinCC.EX10I203_temp,Process Water Temperature Actual Value (REAL),C,REAL,1,process_water,actual,Water Box,TRUE
+S7HMI030.WinCC.E10L_GesamtDurchsatzSollwert,Total Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_GesamtDurchsatzIstwert,Total Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer1DurchsatzIstwert,Feeder 1 (EPS) Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer2DurchsatzIstwert,Feeder 2 (Graphite) Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer3DurchsatzIstwert,Feeder 3 (Recycled) Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer4DurchsatzIstwert,Feeder 4 (600) Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer5DurchsatzIstwert,Feeder 5 (Off-spec) Throughput Actual Value,kg/h,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer1DurchsatzSollwert,Feeder 1 (EPS) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer2DurchsatzSollwert,Feeder 2 (Graphite) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer3DurchsatzSollwert,Feeder 3 (Recycled) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer4DurchsatzSollwert,Feeder 4 (600) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer5DurchsatzSollwert,Feeder 5 (Off-spec) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer6DurchsatzSollwert,Feeder 6 (Pentane) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer7DurchsatzSollwert,Feeder 7 (Nitrogen) Throughput Setpoint,kg/h,REAL,1,feeders,setpoint,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer1DrehzahlIstwert,Feeder 1 (EPS) Speed Actual Value,%,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer2DrehzahlIstwert,Feeder 2 (Graphite) Speed Actual Value,%,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer3DrehzahlIstwert,Feeder 3 (Recycled) Speed Actual Value,%,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer4DrehzahlIstwert,Feeder 4 (600) Speed Actual Value,%,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer5DrehzahlIstwert,Feeder 5 (Off-spec) Speed Actual Value,%,REAL,1,feeders,actual,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer1Fehler,Feeder 1 (EPS) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer2Fehler,Feeder 2 (Graphite) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer3Fehler,Feeder 3 (Recycled) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer4Fehler,Feeder 4 (600) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer5Fehler,Feeder 5 (Off-spec) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer6Fehler,Feeder 6 (Pentane) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer7Fehler,Feeder 7 (Nitrogen) Error Code,,WORD,1,feeders,error,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer1Betriebsart,Feeder 1 (EPS) Operating Mode,,BYTE,1,feeders,mode,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer2Betriebsart,Feeder 2 (Graphite) Operating Mode,,BYTE,1,feeders,mode,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer3Betriebsart,Feeder 3 (Recycled) Operating Mode,,BYTE,1,feeders,mode,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer4Betriebsart,Feeder 4 (600) Operating Mode,,BYTE,1,feeders,mode,Feeders,TRUE
+S7HMI030.WinCC.E10L_Dosierer5Betriebsart,Feeder 5 (Off-spec) Operating Mode,,BYTE,1,feeders,mode,Feeders,TRUE
+S7HMI030.WinCC.EX10I351_masse,Off-spec Quantity Scrap Line,kg,REAL,1,offspec,quantity,Off-spec,TRUE
+S7HMI030.WinCC.EX10I352_masse,Off-spec Quantity Octabin,kg,REAL,1,offspec,quantity,Off-spec,TRUE
+S7HMI030.WinCC.EX10I353_masse,Off-spec Quantity Silo,kg,REAL,1,offspec,quantity,Off-spec,TRUE
+S7HMI030.WinCC.EX10I121_masse,Pentane Quantity Actual Value,kg/h,REAL,1,pentane_nitrogen,actual,Pentane / Nitrogen,TRUE
+S7HMI030.WinCC.EX10X132.Flow_Ist,Nitrogen Quantity Actual Value,kg/h,REAL,1,pentane_nitrogen,actual,Pentane / Nitrogen,TRUE
+S7HMI030.WinCC.EX10P101.ActValue,Pentane Pump Frequency Actual Value,Hz,REAL,1,pentane_nitrogen,actual,Pentane / Nitrogen,TRUE
+S7HMI030.WinCC.MX03_Grob_sum_akt,Off-spec Quantity Sieve Coarse,kg,REAL,1,offspec,quantity,Off-spec,TRUE
+S7HMI030.WinCC.MX03_Fein_sum_akt,Off-spec Quantity Sieve Fine,kg,REAL,1,offspec,quantity,Off-spec,TRUE
+S7HMI030.WinCC.DS10I120_flow,Antistatic Quantity Actual Value,l/h,REAL,1,pentane_nitrogen,actual,Antistatic,TRUE
+S7HMI030.WinCC.DS10I120_flow_soll,Antistatic Quantity Setpoint,l/h,REAL,1,pentane_nitrogen,setpoint,Antistatic,TRUE
+S7HMI030.WinCC.DS10V102_1,Material Production Status (1 = Producing),,WORD,1,status,status,Off-spec,TRUE

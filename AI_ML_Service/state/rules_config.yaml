@@ -1,0 +1,241 @@
+# SUNPOR Process State Rules
+# Feature naming convention (from GroupAggregator):
+#   {group}__mean_of_means      : mean of all signal means in group
+#   {group}__mean_of_lasts      : mean of all signal last_vals in group
+#   {group}__mean_of_trends     : mean of all signal trends in group
+#   {group}__mean_of_stds       : mean of all signal stds in group
+#   {group}__mean_of_rocs       : mean of all signal rates of change
+#   {group}__bad_quality_ratio  : fraction of signals with bad quality
+#
+# NOTE: mean_of_lasts is averaged across ALL signals in the group
+# (actuals + setpoints + errors + modes + control_outputs combined).
+# See calibration notes for real values per group.
+#
+# Operators: gt, lt, gte, lte, eq
+# min_conditions_ratio: fraction of conditions that must pass (AND-ish)
+# Priority: higher = evaluated first. First match wins.
+# [CONFIRMED] = calibrated from real Line E10 data
+# [ESTIMATED] = needs recalibration from real phase data
+
+phases:
+
+  fault_disturbance:
+    index: 8
+    priority: 100
+    # [ESTIMATED] — triggered by bad quality signals or extreme variance
+    # Recalibrate bad_quality_ratio threshold once fault data available
+    min_conditions_ratio: 0.4
+    conditions:
+      - feature: heating_zones__bad_quality_ratio
+        operator: gte
+        threshold: 0.3      # [ESTIMATED]
+      - feature: feeders__bad_quality_ratio
+        operator: gte
+        threshold: 0.3      # [ESTIMATED]
+      - feature: extruder_meltpump__bad_quality_ratio
+        operator: gte
+        threshold: 0.3      # [ESTIMATED]
+      - feature: melt_pressure__mean_of_stds
+        operator: gt
+        threshold: 30.0     # [ESTIMATED] abnormal pressure variance
+
+  heating_up:
+    index: 0
+    priority: 80
+    # [ESTIMATED] — temps rising, extruder not yet running
+    # Key markers: positive trend in heating, feeders/melt near zero
+    min_conditions_ratio: 0.5
+    conditions:
+      - feature: heating_zones__mean_of_trends
+        operator: gt
+        threshold: 0.01     # [ESTIMATED] rising temperature trend
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 50.0     # [ESTIMATED] feeders not producing
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: lt
+        threshold: 15.0     # [ESTIMATED] screw not running
+      - feature: melt_pressure__mean_of_lasts
+        operator: lt
+        threshold: 40.0     # [ESTIMATED] no melt pressure yet
+      - feature: status__mean_of_lasts
+        operator: lt
+        threshold: 1.0      # [ESTIMATED] not in production status
+
+  startup:
+    index: 1
+    priority: 70
+    # [ESTIMATED] — at temperature, screw ramping, feeders starting
+    # Transition: heating done, production not yet stable
+    min_conditions_ratio: 0.5
+    conditions:
+      - feature: heating_zones__mean_of_lasts
+        operator: gte
+        threshold: 50.0     # [ESTIMATED] zones approaching temp
+      - feature: heating_zones__mean_of_trends
+        operator: gte
+        threshold: 0.0      # [ESTIMATED] stable or still rising
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: gte
+        threshold: 15.0     # [ESTIMATED] screw starting
+      - feature: extruder_meltpump__mean_of_trends
+        operator: gt
+        threshold: 0.01     # [ESTIMATED] screw speed increasing
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 200.0    # [ESTIMATED] feeders not yet at full rate
+
+  stable_production:
+    index: 2
+    priority: 75
+    # priority 75: CONFIRMED phase is evaluated before the ESTIMATED startup
+    # (priority 70), so real stable data is not misread as startup. Its 7
+    # strict calibrated conditions prevent false positives on non-stable data.
+    # [CONFIRMED] — calibrated from real Line E10 data 2026-06-23
+    # Real values: feeders ~365, extruder ~49, melt_pressure ~100
+    # status=1, heating stable, granulator running
+    min_conditions_ratio: 0.7
+    conditions:
+      - feature: status__mean_of_lasts
+        operator: gte
+        threshold: 1.0      # [CONFIRMED] production status = 1
+      - feature: feeders__mean_of_lasts
+        operator: gte
+        threshold: 300.0    # [CONFIRMED] real: ~365
+      - feature: feeders__mean_of_stds
+        operator: lt
+        threshold: 150.0    # [CONFIRMED] stable throughput, low variance
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: gte
+        threshold: 40.0     # [CONFIRMED] real: ~49
+      - feature: melt_pressure__mean_of_lasts
+        operator: gte
+        threshold: 80.0     # [CONFIRMED] real: ~100 bar
+      - feature: granulator__mean_of_lasts
+        operator: gte
+        threshold: 200.0    # [CONFIRMED] real: ~323
+      - feature: heating_zones__mean_of_stds
+        operator: lt
+        threshold: 5.0      # [CONFIRMED] very stable, real std ~0.1
+
+  low_production:
+    index: 3
+    priority: 55
+    # [ESTIMATED] — partial throughput, 20-70% of stable
+    # Recalibrate once low-production data collected
+    min_conditions_ratio: 0.6
+    conditions:
+      - feature: feeders__mean_of_lasts
+        operator: gte
+        threshold: 50.0     # [ESTIMATED] some material flowing
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 300.0    # [ESTIMATED] below stable threshold
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: gte
+        threshold: 15.0     # [ESTIMATED] screw running
+      - feature: melt_pressure__mean_of_lasts
+        operator: gte
+        threshold: 40.0     # [ESTIMATED] some pressure present
+      - feature: status__mean_of_lasts
+        operator: gte
+        threshold: 1.0      # [ESTIMATED] still in production status
+
+  cleaning_run:
+    index: 4
+    priority: 50
+    # [ESTIMATED] — process water active, feeders off
+    # Recalibrate once cleaning data collected
+    min_conditions_ratio: 0.5
+    conditions:
+      - feature: process_water__mean_of_lasts
+        operator: gt
+        threshold: 49.0     # [ESTIMATED] real stable: ~49, cleaning may differ
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 50.0     # [ESTIMATED] no material feeding
+      - feature: status__mean_of_lasts
+        operator: lt
+        threshold: 1.0      # [ESTIMATED] not in production status
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: gt
+        threshold: 10.0     # [ESTIMATED] screw may still be running
+
+  empty_run:
+    index: 5
+    priority: 45
+    # [ESTIMATED] — extruder running, no material, low pressure
+    min_conditions_ratio: 0.5
+    conditions:
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: gte
+        threshold: 20.0     # [ESTIMATED] screw running
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 50.0     # [ESTIMATED] no feeders active
+      - feature: melt_pressure__mean_of_lasts
+        operator: lt
+        threshold: 40.0     # [ESTIMATED] low/no melt pressure
+      - feature: status__mean_of_lasts
+        operator: lt
+        threshold: 1.0      # [ESTIMATED]
+
+  cooling_down:
+    index: 6
+    priority: 40
+    # [ESTIMATED] — temps dropping, everything slowing
+    min_conditions_ratio: 0.5
+    conditions:
+      - feature: heating_zones__mean_of_trends
+        operator: lt
+        threshold: -0.01    # [ESTIMATED] temperature falling
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 50.0     # [ESTIMATED] feeders off
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: lt
+        threshold: 15.0     # [ESTIMATED] screw stopped
+      - feature: melt_pressure__mean_of_lasts
+        operator: lt
+        threshold: 40.0     # [ESTIMATED] pressure released
+
+  shutdown:
+    index: 7
+    priority: 30
+    # [ESTIMATED] — everything at rest, temps low
+    min_conditions_ratio: 0.6
+    conditions:
+      - feature: heating_zones__mean_of_lasts
+        operator: lt
+        threshold: 30.0     # [ESTIMATED] cold machine
+      - feature: feeders__mean_of_lasts
+        operator: lt
+        threshold: 10.0     # [ESTIMATED] all signals near zero
+      - feature: extruder_meltpump__mean_of_lasts
+        operator: lt
+        threshold: 10.0     # [ESTIMATED]
+      - feature: melt_pressure__mean_of_lasts
+        operator: lt
+        threshold: 20.0     # [ESTIMATED]
+      - feature: status__mean_of_lasts
+        operator: lt
+        threshold: 1.0      # [ESTIMATED]
+
+# Fallback when no phase matches
+fallback_phase: shutdown
+fallback_index: 7
+
+# Skip prediction if feature vector not ready enough
+min_vector_ready_ratio: 0.5
+
+# Calibration tracking — update when new phase data collected
+calibration_status:
+  stable_production: "CONFIRMED 2026-06-23 Line E10"
+  heating_up:        "ESTIMATED — needs real data"
+  startup:           "ESTIMATED — needs real data"
+  low_production:    "ESTIMATED — needs real data"
+  cleaning_run:      "ESTIMATED — needs real data"
+  empty_run:         "ESTIMATED — needs real data"
+  cooling_down:      "ESTIMATED — needs real data"
+  shutdown:          "ESTIMATED — needs real data"
+  fault_disturbance: "ESTIMATED — needs real data"

@@ -1,0 +1,25 @@
+networks:
+  sunporNet:
+    external: true
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: sunpor-timescaledb
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: sunpor_db
+      POSTGRES_USER: sunpor_user
+      POSTGRES_PASSWORD: sunpor_password
+
+    ports:
+      - "5432:5432"
+    networks:
+      - sunporNet
+      
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

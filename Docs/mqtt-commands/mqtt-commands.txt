@@ -1,0 +1,1 @@
+docker logs sunpor-mqtt 2>&1 | grep "97f26cbe-6ba2-472f-88b"

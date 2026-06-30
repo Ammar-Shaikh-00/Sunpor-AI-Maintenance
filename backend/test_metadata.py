@@ -1,0 +1,4 @@
+from app.db.base import Base
+from app.models import *
+
+print(Base.metadata.tables.keys())

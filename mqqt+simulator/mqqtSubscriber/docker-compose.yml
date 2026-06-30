@@ -1,0 +1,25 @@
+services:
+
+  mqtt-subscriber:
+    container_name: mqtt-subscriber
+
+    build: .
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      LOG_DIR: /app/logs
+      TOPIC: EX10/#
+
+    volumes:
+      - ${HOST_LOG_DIR:-./logs}:/app/logs
+
+    networks:
+      - sunporNet
+
+networks:
+  sunporNet:
+    external: true

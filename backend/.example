@@ -1,0 +1,19 @@
+DATABASE_URL=postgresql+psycopg2://sunpor_user:sunpor_password@sunpor-timescaledb:5432/sunpor_db
+# DATABASE_URL=postgresql+psycopg2://sunpor_user:sunpor_password@localhost:5432/sunpor_db
+
+APP_NAME=SUNPOR Backend
+APP_ENV=development
+
+SECRET_KEY=CHANGE_ME
+ALGORITHM=HS256
+
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+LOG_DIR=logs
+LOG_LEVEL=INFO
+LOG_MAX_BYTES=10485760
+LOG_BACKUP_COUNT=5
+SQLALCHEMY_LOG_LEVEL=WARNING
+
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://localhost:3000,http://localhost:3001
+APP_TAGLINE=Extrusion Production Intelligence

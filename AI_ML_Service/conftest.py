@@ -1,0 +1,6 @@
+"""Pytest bootstrap: ensure the service root is importable as the package root."""
+
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(__file__))

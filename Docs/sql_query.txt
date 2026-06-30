@@ -1,0 +1,33 @@
+SELECT st.timestamp,st.value_raw,
+    st.quality,
+
+    pl.name AS production_line_name,
+    ma.name AS machine_area_name,
+
+    sc.wincc_tag,
+    sc.display_name,
+    sc.unit,
+    sc.datatype,
+    sc.factor,
+    sc.signal_group,
+    sc.signal_role
+
+FROM signal_timeseries st
+
+INNER JOIN signal_catalog sc
+    ON st.signal_id = sc.id
+
+LEFT JOIN production_line pl
+    ON sc.production_line_id = pl.id
+
+LEFT JOIN machine_area ma
+    ON sc.machine_area_id = ma.id
+
+ORDER BY st.timestamp DESC;
+
+SELECT st.timestamp, st.value_raw, st.quality, pl.name AS production_line_name, ma.name AS machine_area_name, sc.wincc_tag, sc.display_name, sc.unit, sc.datatype, sc.factor, sc.signal_group, sc.signal_role FROM signal_timeseries st INNER JOIN signal_catalog sc ON st.signal_id = sc.id LEFT JOIN production_lines pl ON sc.production_line_id = pl.id LEFT JOIN machine_areas ma ON sc.machine_area_id = ma.id ORDER BY st.timestamp DESC limit 1;
+
+
+query to csv:
+
+docker exec -i sunpor-timescaledb psql -U sunpor_user -d sunpor_db -c "\copy (SELECT st.timestamp, st.value_raw, st.quality, pl.name AS production_line_name, ma.name AS machine_area_name, sc.wincc_tag, sc.display_name, sc.unit, sc.datatype, sc.factor, sc.signal_group, sc.signal_role FROM signal_timeseries st INNER JOIN signal_catalog sc ON st.signal_id = sc.id LEFT JOIN production_lines pl ON sc.production_line_id = pl.id LEFT JOIN machine_areas ma ON sc.machine_area_id = ma.id ORDER BY st.timestamp DESC) TO STDOUT WITH CSV HEADER" > signal_data.csv

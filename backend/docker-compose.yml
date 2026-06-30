@@ -1,0 +1,27 @@
+networks:
+  sunporNet:
+    external: true
+
+services:
+  backend:
+    build: .
+
+    container_name: sunpor-backend
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      DATABASE_URL: postgresql+psycopg2://sunpor_user:sunpor_password@sunpor-timescaledb:5432/sunpor_db
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./logs:/app/logs
+
+    networks:
+      - sunporNet
+
