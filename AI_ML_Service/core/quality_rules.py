@@ -1,10 +1,18 @@
 """Data-quality evaluation for incoming signal values.
 
 Produces the ``quality`` tag written into each batch payload value. Tags match
-the backend schema. Range bounds are defined per *signal_group* (never per
-individual signal). The lower bound is relaxed for ``control_output`` roles
-only — PID heating outputs may be negative; measurements (actual, pressure,
-throughput, etc.) still require non-negative values.
+the backend schema. Range bounds are looked up via a role-first / group+role
+combined key strategy — never per individual signal.
+
+Bounds in ``SIGNAL_GROUP_ROLE_BOUNDS`` and ``SIGNAL_ROLE_BOUNDS`` are defined
+in physical/engineering units (°C, bar, RPM, kg/h). The range check compares
+``value_raw × factor`` (i.e. the scaled value) against those limits.
+
+Lookup priority (highest wins):
+
+1. ``SIGNAL_GROUP_ROLE_BOUNDS[(signal_group, signal_role)]``
+2. ``SIGNAL_ROLE_BOUNDS[signal_role]``
+3. No match → skip range check (``GOOD`` unless staleness applies)
 """
 
 from __future__ import annotations
@@ -13,48 +21,66 @@ from typing import Optional
 
 from core.config import get_settings
 
-# Quality tags (string values must match the backend schema).
 GOOD = "GOOD"
 STALE = "STALE"
 OUT_OF_RANGE = "OUT_OF_RANGE"
 MISSING = "MISSING"
 BAD = "BAD"
 
-# Physically safe min/max on the RAW scale, per signal_group. These are the
-# only tunable values; they are deliberately broad sanity limits, not
-# per-signal calibration.
-SIGNAL_GROUP_BOUNDS: dict[str, tuple[float, float]] = {
-    "heating_zones": (0, 5000),
-    "feeders": (0, 50000),
-    "screen_changer": (0, 10000),
-    "process_water": (0, 10000),
-    "granulator": (0, 10000),
-    "melt_pressure": (0, 10000),
-    "offspec": (0, 10000),
-    "pentane_nitrogen": (0, 10000),
-    "extruder_meltpump": (0, 10000),
-    "status": (0, 100),
+# Role-only bounds — apply to ALL signals of this role regardless of group.
+SIGNAL_ROLE_BOUNDS: dict[str, tuple[float, float]] = {
+    "control_output": (-110.0, 110.0),
+    "error": (0.0, 9999.0),
+    "mode": (0.0, 99.0),
+    "status": (0.0, 1.0),
 }
 
-# PID control outputs (e.g. heating zone Stellgröße) may be negative.
-# This overrides the group min (0) for that role only — values are never
-# flipped; we simply do not flag legitimate negative control output as OOR.
-CONTROL_OUTPUT_MIN = -5000
+# (signal_group, signal_role) combined key — physical limits per group+role.
+SIGNAL_GROUP_ROLE_BOUNDS: dict[tuple[str, str], tuple[float, float]] = {
+    ("heating_zones", "actual"): (0.0, 350.0),
+    ("heating_zones", "setpoint"): (0.0, 350.0),
+    ("feeders", "actual"): (0.0, 20000.0),
+    ("feeders", "setpoint"): (0.0, 20000.0),
+    ("feeders", "quantity"): (0.0, 999999.0),
+    ("melt_pressure", "actual"): (0.0, 500.0),
+    ("melt_pressure", "setpoint"): (0.0, 500.0),
+    ("screen_changer", "actual"): (0.0, 400.0),
+    ("screen_changer", "setpoint"): (0.0, 400.0),
+    ("extruder_meltpump", "actual"): (0.0, 200.0),
+    ("extruder_meltpump", "setpoint"): (0.0, 200.0),
+    ("granulator", "actual"): (0.0, 2000.0),
+    ("granulator", "setpoint"): (0.0, 2000.0),
+    ("process_water", "actual"): (0.0, 200.0),
+    ("process_water", "setpoint"): (0.0, 200.0),
+    ("pentane_nitrogen", "actual"): (0.0, 500.0),
+    ("offspec", "quantity"): (0.0, 999999.0),
+}
 
-# Roles allowed to use CONTROL_OUTPUT_MIN instead of the group minimum.
-NEGATIVE_ALLOWED_ROLES = frozenset({"control_output"})
+
+def _lookup_bounds(
+    group: str, role: str
+) -> Optional[tuple[float, float]]:
+    """Return bounds for a (group, role) pair using the documented priority."""
+    combined = SIGNAL_GROUP_ROLE_BOUNDS.get((group, role))
+    if combined is not None:
+        return combined
+    return SIGNAL_ROLE_BOUNDS.get(role)
 
 
 class QualityEvaluator:
     """Assigns a quality tag to each incoming raw signal value."""
 
-    def __init__(self, catalog: list[dict], stale_count: Optional[int] = None) -> None:
+    def __init__(
+        self, catalog: list[dict], stale_count: Optional[int] = None
+    ) -> None:
+        settings = get_settings()
         if stale_count is None:
-            stale_count = get_settings().STALE_COUNT
+            stale_count = settings.STALE_COUNT
         self._stale_count = stale_count
+        self._stale_exempt_roles = set(settings.STALE_EXEMPT_ROLES)
 
-        # signal_id -> {group, role, factor, min, max}  (bounds on raw scale)
-        self._lookup: dict[int, dict] = {}
+        # signal_id -> {signal_group, signal_role, factor}
+        self._catalog_map: dict[int, dict] = {}
         # signal_id -> (last_value, consecutive_identical_count)
         self._stale_tracker: dict[int, tuple[Optional[float], int]] = {}
 
@@ -62,40 +88,43 @@ class QualityEvaluator:
             signal_id = signal.get("id")
             if signal_id is None:
                 continue
-            group = signal.get("signal_group")
-            role = signal.get("signal_role", "")
-            factor = signal.get("factor", 1) or 1
-            bound_min, bound_max = SIGNAL_GROUP_BOUNDS.get(group, (None, None))
-            if role in NEGATIVE_ALLOWED_ROLES and bound_min is not None:
-                bound_min = CONTROL_OUTPUT_MIN
-            self._lookup[signal_id] = {
-                "group": group,
-                "role": role,
-                "factor": factor,
-                "min": bound_min,
-                "max": bound_max,
+            self._catalog_map[signal_id] = {
+                "signal_group": signal.get("signal_group", "") or "",
+                "signal_role": signal.get("signal_role", "") or "",
+                "factor": signal.get("factor", 1) or 1,
             }
 
     def evaluate(self, signal_id: int, value_raw: float) -> str:
         """Return the quality tag for a single raw value."""
-        info = self._lookup.get(signal_id)
+        info = self._catalog_map.get(signal_id)
+        if info is None:
+            return GOOD
 
-        # Track consecutive identical values for staleness detection.
-        last_value, count = self._stale_tracker.get(signal_id, (None, 0))
-        count = count + 1 if last_value == value_raw else 1
-        self._stale_tracker[signal_id] = (value_raw, count)
+        group = info["signal_group"]
+        role = info["signal_role"]
+        factor = info["factor"]
 
-        # 1) Range check (bounds × factor, compared on the raw scale).
-        if info and info["min"] is not None and info["max"] is not None:
-            factor = info["factor"]
-            raw_min = info["min"] * factor
-            raw_max = info["max"] * factor
-            if value_raw < raw_min or value_raw > raw_max:
+        # 1) Bounds check — on scaled value (physical units).
+        bounds = _lookup_bounds(group, role)
+        if bounds is not None:
+            value_for_check = round(value_raw * factor, 4)
+            lo, hi = bounds
+            if not (lo <= value_for_check <= hi):
                 return OUT_OF_RANGE
 
-        # 2) Staleness check.
-        if count >= self._stale_count:
-            return STALE
+        # 2) Stale check — skip exempt roles (setpoint, mode, status, quantity).
+        if role in self._stale_exempt_roles:
+            return GOOD
+
+        last_val, count = self._stale_tracker.get(signal_id, (None, 0))
+        if last_val is not None and value_raw == last_val:
+            count += 1
+            self._stale_tracker[signal_id] = (value_raw, count)
+            if count >= self._stale_count:
+                return STALE
+        else:
+            count = 1
+            self._stale_tracker[signal_id] = (value_raw, count)
 
         return GOOD
 

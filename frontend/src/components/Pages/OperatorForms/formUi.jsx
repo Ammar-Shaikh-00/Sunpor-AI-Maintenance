@@ -45,3 +45,15 @@ export function toLocalInputValue(date = new Date()) {
   const local = new Date(date.getTime() - offset * 60 * 1000);
   return local.toISOString().slice(0, 16);
 }
+
+export function FormLoadState({ loading, error, loadingLabel, children }) {
+  if (loading) {
+    return <div className="text-slate-500">{loadingLabel}</div>;
+  }
+
+  if (error) {
+    return <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">{error}</div>;
+  }
+
+  return children;
+}

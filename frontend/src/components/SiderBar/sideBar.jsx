@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { NavIcon } from "../../assets/Data/ConstantData";
 import { Link, useLocation } from "react-router-dom";
 import safeApi, { ENDPOINTS } from "../../api/safeApi";
@@ -27,6 +28,7 @@ const getRunStatusClass = (status = "") => {
 };
 
 export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
   const [menuState, setMenuState] = useState(menuData);
@@ -49,16 +51,16 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
   }, []);
 
 
-    const handleSetActive = (clickedLabel) => {
+    const handleSetActive = (clickedKey) => {
         const updatedMenu = menuState.map((section) => ({
             ...section,
             items: section.items.map((item) => ({
             ...item,
-            active: item.label === clickedLabel,
+            active: item.labelKey === clickedKey,
             children: item.children
                 ? item.children.map((child) => ({
                     ...child,
-                    active: child.label === clickedLabel,
+                    active: child.labelKey === clickedKey,
                 }))
                 : undefined,
             })),
@@ -112,9 +114,9 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                     <div key={i}>
 
                     {/* Section Title */}
-                    { open && section.title && (
+                    { open && section.titleKey && (
                         <div className="text-xs text-gray-400 px-3 mb-2">
-                        {section.title}
+                        {t(section.titleKey)}
                         </div>
                     )}
 
@@ -127,9 +129,9 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                             <div
                                 onClick={() =>{
                                         if (item.children) {
-                                            toggleSubmenu(item.label);
+                                            toggleSubmenu(item.labelKey);
                                         }
-                                            handleSetActive(item.label);
+                                            handleSetActive(item.labelKey);
                                     }
                                 }
                                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer
@@ -137,22 +139,21 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                                 ${item.active ? "bg-purple-100 text-purple-800" : ""}
                                 `}
                             >
-                                < NavIcon name={item.icon} active={true} />
-                                {open && <span>{item.label}</span>}
+                                <NavIcon name={item.icon} active={item.active} />
+                                {open && <span>{t(item.labelKey)}</span>}
                             </div>
                         </Link>
 
                         {/* Submenu */}
-                        {item.children && openMenus[item.label] && (
+                        {item.children && openMenus[item.labelKey] && (
                             <div className="ml-8 mt-1 space-y-1">
                             {item.children.map((sub, subIdx) => (
-                                <Link to={sub.path}>
+                                <Link key={subIdx} to={sub.path}>
                                     <div
-                                    key={subIdx}
                                     className="flex px-3 py-1 rounded-lg hover:bg-purple-50 cursor-pointer text-sm"
                                     >
-                                    < NavIcon name={sub.icon} active={true} />
-                                    { open && sub.label}
+                                    <NavIcon name={sub.icon} active={sub.active} />
+                                    { open && t(sub.labelKey)}
                                     </div>
                                 </Link>
                             ))}
@@ -167,7 +168,7 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                 <div className="mt-auto pt-6">
                     {open && (
                         <div className="px-3 pb-2 text-xs uppercase tracking-wide text-gray-400">
-                            Production Runs
+                            {t("sidebar.productionRuns")}
                         </div>
                     )}
 
@@ -204,9 +205,10 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                                         {open && (
                                             <>
                                                 <div className="mt-2 text-sm text-white/90">
-                                                    Run #{run.id}
-                                                    <span className="mx-1 text-white/40">|</span>
-                                                    Line {run.production_line_id || "--"}
+                                                    {t("sidebar.runLine", {
+                                                      id: run.id,
+                                                      line: run.production_line_id || "—",
+                                                    })}
                                                 </div>
                                                 <div className="mt-2 text-right text-xs text-white/70">
                                                     {formatRunTime(run.start_time)}
@@ -224,7 +226,7 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                         >
                             <div className={`flex items-center justify-center gap-2 rounded-lg border border-purple-500 px-3 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-50 ${open ? "" : "px-2"}`}>
                                 <Plus size={16} />
-                                {open && <span>New Production Run</span>}
+                                {open && <span>{t("sidebar.newProductionRun")}</span>}
                             </div>
                         </Link>
                     </div>

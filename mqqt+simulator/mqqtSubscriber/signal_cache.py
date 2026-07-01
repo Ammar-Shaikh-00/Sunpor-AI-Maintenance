@@ -18,6 +18,7 @@ class SignalValueCache:
     def __init__(self) -> None:
         self._lock = threading.Lock()
         self._values: dict[str, CachedSignalValue] = {}
+        self._dirty = False
 
     def update(
         self,
@@ -34,6 +35,15 @@ class SignalValueCache:
                 quality=quality,
                 updated_at=updated_at,
             )
+            self._dirty = True
+
+    def is_dirty(self) -> bool:
+        with self._lock:
+            return self._dirty
+
+    def clear_dirty(self) -> None:
+        with self._lock:
+            self._dirty = False
 
     def snapshot(self) -> dict[str, CachedSignalValue]:
         with self._lock:
@@ -46,4 +56,5 @@ class SignalValueCache:
     def initialize(self, values: dict[str, CachedSignalValue]) -> int:
         with self._lock:
             self._values = copy.deepcopy(values)
+            self._dirty = False
             return len(self._values)

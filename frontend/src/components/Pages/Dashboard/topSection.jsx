@@ -1,11 +1,13 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { useAppBranding } from "../../../store/backendStore";
 
 export default function TopSection({ summary }) {
+  const { t } = useTranslation();
   const { companyName, tagline } = useAppBranding();
   const dashboardTitle = companyName
-    ? `${companyName} Extrusion Dashboard`
-    : "Extrusion Dashboard";
+    ? t("dashboard.title", { company: companyName })
+    : t("dashboard.titleFallback");
 
   return (
     <div className="mb-8">
@@ -13,7 +15,7 @@ export default function TopSection({ summary }) {
         <div>
           <h1 className="mb-2 text-3xl text-slate-900">{dashboardTitle}</h1>
           <p className="text-sm text-slate-600">
-            {tagline || "Production intelligence for line E10"}
+            {tagline || t("dashboard.subtitle")}
           </p>
         </div>
       </div>
@@ -22,20 +24,24 @@ export default function TopSection({ summary }) {
         <div className="min-w-[180px] flex-1 rounded-xl border border-slate-200/80 bg-white/95 px-5 py-3 shadow-md backdrop-blur-sm">
           <div className="mb-1 flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-xs text-slate-500">DATA PIPELINE</span>
+            <span className="text-xs text-slate-500">{t("dashboard.dataPipeline")}</span>
           </div>
-          <div className="text-base text-emerald-600">MQTT Snapshot Active</div>
+          <div className="text-base text-emerald-600">{t("dashboard.mqttActive")}</div>
         </div>
 
         <div className="min-w-[180px] flex-1 rounded-xl border border-slate-200/80 bg-white/95 px-5 py-3 shadow-md backdrop-blur-sm">
           <div className="mb-1 flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-violet-500" />
             <span className="text-xs text-slate-500">
-              {companyName ? `${companyName.toUpperCase()} BACKEND` : "BACKEND"}
+              {companyName
+                ? t("dashboard.backendCompany", { company: companyName.toUpperCase() })
+                : t("dashboard.backend")}
             </span>
           </div>
           <div className="text-base capitalize text-violet-700">
-            {summary?.backendStatus || "online"}
+            {t(`login.status.${summary?.backendStatus || "online"}`, {
+              defaultValue: summary?.backendStatus || "online",
+            })}
           </div>
         </div>
       </div>

@@ -29,11 +29,14 @@ def _catalog(n: int) -> list[dict]:
         "granulator",
         "status",
     ]
+    # Roles must match the quality evaluator's new bounds tables.
+    roles = ["actual", "actual", "actual", "actual", "status"]
     return [
         {
             "id": i,
             "wincc_tag": f"TAG_{i}",
             "signal_group": groups[i - 1],
+            "signal_role": roles[i - 1],
             "factor": 1,
         }
         for i in range(1, n + 1)
@@ -64,7 +67,7 @@ def _build(catalog, snapshot):
     client = FakeSignalClient(snapshot)
     evaluator = QualityEvaluator(catalog, stale_count=5)
     cleaner = DataCleaner(catalog, evaluator)
-    buffer = RollingWindowBuffer([s["id"] for s in catalog], window_size=30)
+    buffer = RollingWindowBuffer([s["id"] for s in catalog], max_samples=30)
     poller = IngestionPoller(catalog, client, cleaner, buffer)
     return poller, buffer
 
@@ -97,7 +100,7 @@ def test_stats_after_one_poll():
 def test_out_of_range_quality_preserved_in_buffer():
     catalog = _catalog(5)
     snapshot = _snapshot(5)
-    # status (signal 5) bounds raw max 100 -> 999 forces OUT_OF_RANGE,
+    # Signal 5 has role=status, bounds (0, 1). 999 forces OUT_OF_RANGE,
     # but the record is still valid and buffered with that quality tag.
     snapshot[4]["value_raw"] = 999.0
     snapshot[4]["value_scaled"] = 999.0
@@ -139,7 +142,7 @@ def test_feature_engine_on_tick_called():
     client = FakeSignalClient(_snapshot(5))
     evaluator = QualityEvaluator(catalog, stale_count=5)
     cleaner = DataCleaner(catalog, evaluator)
-    buffer = RollingWindowBuffer([s["id"] for s in catalog], window_size=30)
+    buffer = RollingWindowBuffer([s["id"] for s in catalog], max_samples=30)
 
     class FakeEngine:
         def __init__(self):

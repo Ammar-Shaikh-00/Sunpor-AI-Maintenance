@@ -38,6 +38,11 @@ class User(Base, TimestampMixin):
         default=True
     )
 
+    email_notifications_enabled: Mapped[bool] = mapped_column(
+        Boolean,
+        default=True
+    )
+
     roles = relationship(
         "Role",
         secondary="user_roles",

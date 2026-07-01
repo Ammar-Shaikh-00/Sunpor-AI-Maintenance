@@ -6,7 +6,7 @@ exercised by the suite.
 
 import os
 
-from features.models import FeatureVector, SignalFeatures
+from features.models import FeatureVector, SignalFeatures, WindowFeatures
 from state.group_aggregator import GroupAggregator
 from state.rule_engine import RuleEngine
 
@@ -93,6 +93,23 @@ def _sf(signal_id, group, last_val):
     )
 
 
+def _vector_with_signals(signal_map: dict) -> FeatureVector:
+    """Build a FeatureVector with a single '5min' window over ``signal_map``."""
+    wf = WindowFeatures(
+        window_key="5min",
+        sample_count=30,
+        signal_features=signal_map,
+        is_ready=True,
+        ready_ratio=1.0,
+    )
+    return FeatureVector(
+        model_key="process_state",
+        timestamp=__import__("datetime").datetime.now(),
+        windows={"5min": wf},
+        is_ready=True,
+    )
+
+
 def test_group_aggregator_real_values():
     # 4 extruder_meltpump signals matching real data: 120, 46, 17, 11.
     catalog = [
@@ -102,19 +119,23 @@ def test_group_aggregator_real_values():
         {"id": 4, "signal_group": "extruder_meltpump"},
     ]
     agg = GroupAggregator(catalog)
-    vector = FeatureVector(
-        model_key="process_state",
-        timestamp=__import__("datetime").datetime.now(),
-        signal_features={
+    vector = _vector_with_signals(
+        {
             1: _sf(1, "extruder_meltpump", 120.0),
             2: _sf(2, "extruder_meltpump", 46.0),
             3: _sf(3, "extruder_meltpump", 17.0),
             4: _sf(4, "extruder_meltpump", 11.0),
-        },
-        is_ready=True,
-        ready_ratio=1.0,
+        }
     )
-    out = agg.aggregate(vector)
+    out = agg.aggregate(vector, window_key="5min")
     # mean of lasts = (120 + 46 + 17 + 11) / 4 = 48.5
     assert abs(out["extruder_meltpump__mean_of_lasts"] - 48.5) < 1.0
     assert out["extruder_meltpump__bad_quality_ratio"] == 0.0
+
+
+def test_group_aggregator_returns_empty_for_missing_window():
+    catalog = [{"id": 1, "signal_group": "feeders"}]
+    agg = GroupAggregator(catalog)
+    vector = _vector_with_signals({1: _sf(1, "feeders", 100.0)})
+    # No '15min' window in the fixture -> aggregator returns {} without raising.
+    assert agg.aggregate(vector, window_key="15min") == {}

@@ -76,7 +76,7 @@ async def lifespan(app: FastAPI):
         logger.info("Feature catalog summary: %s", summary)
 
         signal_ids = [s["id"] for s in catalog if s.get("id") is not None]
-        window_buffer = RollingWindowBuffer(signal_ids, settings.WINDOW_SIZE)
+        window_buffer = RollingWindowBuffer(signal_ids, settings.MAX_BUFFER_SAMPLES)
         feature_engine = FeatureEngine(catalog, feature_catalog)
         process_state_detector = ProcessStateDetector(
             catalog,

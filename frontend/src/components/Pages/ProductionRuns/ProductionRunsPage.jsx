@@ -1,27 +1,29 @@
+import { useTranslation } from "react-i18next";
 import { useProductionRuns } from "../../../hooks/useSunporData";
 import { FormCard } from "../OperatorForms/formUi";
 
 export default function ProductionRunsPage() {
+  const { t } = useTranslation();
   const { runs, loading } = useProductionRuns(50);
 
   return (
     <FormCard
-      title="Production Runs"
-      description="Recent production runs recorded for this site."
+      title={t("productionRuns.title")}
+      description={t("productionRuns.description")}
     >
       {loading ? (
-        <div className="text-slate-500">Loading production runs...</div>
+        <div className="text-slate-500">{t("productionRuns.loading")}</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b text-slate-500">
               <tr>
-                <th className="px-3 py-2">ID</th>
-                <th className="px-3 py-2">Status</th>
-                <th className="px-3 py-2">Material Type</th>
-                <th className="px-3 py-2">Shift</th>
-                <th className="px-3 py-2">Start</th>
-                <th className="px-3 py-2">Trial</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.id")}</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.status")}</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.materialType")}</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.shift")}</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.start")}</th>
+                <th className="px-3 py-2">{t("productionRuns.columns.trial")}</th>
               </tr>
             </thead>
             <tbody>
@@ -32,9 +34,13 @@ export default function ProductionRunsPage() {
                   <td className="px-3 py-3">{run.material_type_id}</td>
                   <td className="px-3 py-3">{run.shift_id}</td>
                   <td className="px-3 py-3">
-                    {run.start_time ? new Date(run.start_time).toLocaleString() : "--"}
+                    {run.start_time
+                      ? new Date(run.start_time).toLocaleString("de-DE")
+                      : "—"}
                   </td>
-                  <td className="px-3 py-3">{run.is_trial ? "Yes" : "No"}</td>
+                  <td className="px-3 py-3">
+                    {run.is_trial ? t("common.yes") : t("common.no")}
+                  </td>
                 </tr>
               ))}
             </tbody>

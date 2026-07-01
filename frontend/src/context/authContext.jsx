@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react";
 import api, { getAccessToken, setAccessToken } from "../api";
 import { ENDPOINTS } from "../api/sunpor";
 
@@ -12,10 +12,7 @@ export function AuthProvider({ children }) {
   const fetchUserProfile = async () => {
     try {
       const response = await api.get(ENDPOINTS.me);
-      setUser({
-        ...response.data,
-        role: "operator",
-      });
+      setUser(response.data);
     } catch (error) {
       console.error("Failed to fetch user profile:", error);
       setUser(null);
@@ -60,6 +57,34 @@ export function AuthProvider({ children }) {
     window.location.href = "/login";
   };
 
+  const permissions = useMemo(
+    () => new Set(user?.permissions || []),
+    [user?.permissions]
+  );
+
+  const hasPermission = useCallback(
+    (permissionCode) => {
+      if (!permissionCode) return true;
+      return (
+        permissions.has(permissionCode) || permissions.has("system.admin")
+      );
+    },
+    [permissions]
+  );
+
+  const hasAnyPermission = useCallback(
+    (permissionCodes = []) => {
+      if (!permissionCodes.length) return true;
+      return permissionCodes.some((code) => hasPermission(code));
+    },
+    [hasPermission]
+  );
+
+  const roleLabel = useMemo(() => {
+    if (!user?.roles?.length) return "USER";
+    return user.roles.map((role) => role.name).join(", ");
+  }, [user?.roles]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -67,8 +92,12 @@ export function AuthProvider({ children }) {
         token,
         login,
         logout,
+        refreshUser: fetchUserProfile,
         isAuthenticated: !!token,
         isLoading,
+        hasPermission,
+        hasAnyPermission,
+        roleLabel,
       }}
     >
       {children}

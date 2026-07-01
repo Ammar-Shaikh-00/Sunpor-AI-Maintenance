@@ -11,6 +11,9 @@ PASSWORD=Admin@123456
 
 TOPIC=EX10/#
 
+# Post cached signals every N seconds, only when new MQTT messages updated the cache
+SNAPSHOT_INTERVAL_SECONDS=5
+
 # Logging (inside container LOG_DIR=/app/logs; mount host path via HOST_LOG_DIR in docker-compose)
 LOG_DIR=/app/logs
 LOG_LEVEL=INFO

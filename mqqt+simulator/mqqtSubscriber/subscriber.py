@@ -52,6 +52,8 @@ PASSWORD = os.getenv("PASSWORD")
 
 TOPIC = os.getenv("TOPIC")
 
+SNAPSHOT_INTERVAL_SECONDS = float(os.getenv("SNAPSHOT_INTERVAL_SECONDS", "2"))
+
 
 
 REQUIRED_ENV_VARS = (
@@ -79,6 +81,10 @@ HEADERS: dict[str, str] = {}
 signal_cache = SignalValueCache()
 
 tag_map: dict[str, dict] = {}
+
+_stop_event = threading.Event()
+
+_poster_thread: threading.Thread | None = None
 
 
 
@@ -438,22 +444,6 @@ def on_message(client, userdata, msg):
 
 
 
-        post_snapshot(
-
-            cache=signal_cache,
-
-            tag_map=tag_map,
-
-            base_url=BASE_URL,
-
-            get_headers=get_headers,
-
-            refresh_headers=refresh_headers,
-
-        )
-
-
-
     except json.JSONDecodeError:
 
         logger.exception(
@@ -506,9 +496,97 @@ def on_disconnect(client, userdata, rc, properties=None):
 
 
 
+def snapshot_poster_loop() -> None:
+
+    logger.info(
+
+        "Snapshot poster started | interval=%ss | posts only when cache changed",
+
+        SNAPSHOT_INTERVAL_SECONDS,
+
+    )
+
+
+
+    while not _stop_event.wait(SNAPSHOT_INTERVAL_SECONDS):
+
+        if not signal_cache.is_dirty():
+
+            logger.debug("Skipping snapshot — no new MQTT updates since last post")
+
+            continue
+
+
+
+        if signal_cache.count() == 0:
+
+            logger.debug("Skipping snapshot — cache is empty")
+
+            continue
+
+
+
+        success = post_snapshot(
+
+            cache=signal_cache,
+
+            tag_map=tag_map,
+
+            base_url=BASE_URL,
+
+            get_headers=get_headers,
+
+            refresh_headers=refresh_headers,
+
+        )
+
+
+
+        if success:
+
+            signal_cache.clear_dirty()
+
+
+
+
+
+def start_snapshot_poster() -> threading.Thread:
+
+    global _poster_thread
+
+
+
+    _stop_event.clear()
+
+    _poster_thread = threading.Thread(
+
+        target=snapshot_poster_loop,
+
+        name="snapshot-poster",
+
+        daemon=True,
+
+    )
+
+    _poster_thread.start()
+
+    return _poster_thread
+
+
+
+
+
 def shutdown(mqtt_client: mqtt.Client | None = None) -> None:
 
     logger.info("Shutting down subscriber...")
+
+
+
+    _stop_event.set()
+
+    if _poster_thread is not None and _poster_thread.is_alive():
+
+        _poster_thread.join(timeout=SNAPSHOT_INTERVAL_SECONDS + 2)
 
 
 
@@ -554,7 +632,13 @@ def main():
 
         logger.info("Subscribe topic: %s", TOPIC)
 
-        logger.info("Snapshot mode: post on each MQTT message")
+        logger.info(
+
+            "Snapshot mode: post every %ss when cache has new MQTT updates",
+
+            SNAPSHOT_INTERVAL_SECONDS,
+
+        )
 
 
 
@@ -563,6 +647,8 @@ def main():
         tag_map = load_signal_catalog()
 
         load_cache_from_latest_timeseries(tag_map)
+
+        start_snapshot_poster()
 
 
 

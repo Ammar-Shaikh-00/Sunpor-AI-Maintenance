@@ -38,7 +38,10 @@ class ProcessStateDetector:
         self._aggregator = GroupAggregator(catalog)
         self._rule_engine = RuleEngine(rules_config_path)
         self._writer = PredictionWriter(signal_client, auth_client)
-        self._predict_every = get_settings().PREDICT_EVERY_N_POLLS
+        settings = get_settings()
+        self._predict_every = settings.PREDICT_EVERY_N_POLLS
+        # Rule-based state uses the primary window (5min by default).
+        self._window_key = settings.PRIMARY_WINDOW_KEY
 
         self.last_result = None
         self.history = deque(maxlen=100)
@@ -51,13 +54,18 @@ class ProcessStateDetector:
         """Evaluate the current vector and write a prediction (cadence-gated)."""
         if not vector.is_ready:
             return
-        if vector.ready_ratio < self._rule_engine.min_vector_ready_ratio:
+        primary = vector.windows.get(self._window_key)
+        if primary is None:
+            return
+        if primary.ready_ratio < self._rule_engine.min_vector_ready_ratio:
             return
         if self._predict_every <= 0 or poll_count % self._predict_every != 0:
             return
 
         try:
-            group_features = self._aggregator.aggregate(vector)
+            group_features = self._aggregator.aggregate(
+                vector, window_key=self._window_key
+            )
             result = self._rule_engine.evaluate(group_features)
             self.last_result = result
             self.history.append(

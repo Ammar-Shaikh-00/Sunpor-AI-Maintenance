@@ -23,7 +23,8 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = (
         "http://localhost:5173,http://127.0.0.1:5173,"
         "http://localhost:4173,http://127.0.0.1:4173,"
-        "http://localhost:3000,http://localhost:3001"
+        "http://localhost:3000,http://100.93.158.60:3000/,http://100.75.166.124:3000/"
+
     )
     APP_TAGLINE: str = "Extrusion Production Intelligence"
 

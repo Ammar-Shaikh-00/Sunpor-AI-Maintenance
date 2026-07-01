@@ -1,11 +1,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { useFormOptions } from "../../../hooks/useSunporData";
-import { Field, FormCard, inputClass, toLocalInputValue } from "./formUi";
+import { Field, FormCard, FormLoadState, inputClass, toLocalInputValue } from "./formUi";
 
 export default function ProductionStartForm() {
-  const { options, loading } = useFormOptions();
+  const { t } = useTranslation();
+  const { options, loading, error } = useFormOptions();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     company_id: "",
@@ -17,8 +19,14 @@ export default function ProductionStartForm() {
     comment: "",
   });
 
-  if (loading) {
-    return <div className="text-slate-500">Loading form options...</div>;
+  if (loading || error) {
+    return (
+      <FormLoadState
+        loading={loading}
+        error={error}
+        loadingLabel={t("forms.common.loadingOptions")}
+      />
+    );
   }
 
   const onChange = (event) => {
@@ -44,28 +52,31 @@ export default function ProductionStartForm() {
       };
 
       await safeApi.post(ENDPOINTS.productionRuns, payload);
-      toast.success("Production run started");
+      toast.success(t("forms.productionStart.success"));
     } catch (error) {
-      toast.error(error?.response?.data?.detail || "Failed to save production run");
+      toast.error(error?.response?.data?.detail || t("forms.productionStart.error"));
     } finally {
       setSubmitting(false);
     }
   };
 
+  const trialLabel = (value) =>
+    value === "Yes" ? t("common.yes") : value === "No" ? t("common.no") : value;
+
   return (
     <FormCard
-      title="Production Start / Product"
-      description="Record the start of a production run with material type and shift."
+      title={t("forms.productionStart.title")}
+      description={t("forms.productionStart.description")}
     >
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Company" required>
+        <Field label={t("forms.common.company")} required>
           <select
             name="company_id"
             value={form.company_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.companies || []).map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -74,14 +85,14 @@ export default function ProductionStartForm() {
           </select>
         </Field>
 
-        <Field label="Production Line" required>
+        <Field label={t("forms.common.productionLine")} required>
           <select
             name="production_line_id"
             value={form.production_line_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.production_lines || []).map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -90,14 +101,14 @@ export default function ProductionStartForm() {
           </select>
         </Field>
 
-        <Field label="Material Type" required>
+        <Field label={t("forms.common.materialType")} required>
           <select
             name="material_type_id"
             value={form.material_type_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.material_types || []).map((item) => (
               <option key={item.id} value={item.id}>
                 {item.code}
@@ -106,14 +117,14 @@ export default function ProductionStartForm() {
           </select>
         </Field>
 
-        <Field label="Shift" required>
+        <Field label={t("forms.common.shift")} required>
           <select
             name="shift_id"
             value={form.shift_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.shifts || []).map((item) => (
               <option key={item.id} value={item.id}>
                 {item.name}
@@ -122,7 +133,7 @@ export default function ProductionStartForm() {
           </select>
         </Field>
 
-        <Field label="Trial">
+        <Field label={t("common.trial")}>
           <select
             name="is_trial"
             value={form.is_trial}
@@ -132,14 +143,14 @@ export default function ProductionStartForm() {
             {(options?.dropdowns?.trial_option || [{ value: "No" }, { value: "Yes" }]).map(
               (item) => (
                 <option key={item.value} value={item.value}>
-                  {item.value}
+                  {trialLabel(item.value)}
                 </option>
               )
             )}
           </select>
         </Field>
 
-        <Field label="Start Time" required>
+        <Field label={t("forms.common.startTime")} required>
           <input
             type="datetime-local"
             name="start_time"
@@ -149,7 +160,7 @@ export default function ProductionStartForm() {
           />
         </Field>
 
-        <Field label="Comment">
+        <Field label={t("common.comment")}>
           <textarea
             name="comment"
             value={form.comment}
@@ -165,7 +176,7 @@ export default function ProductionStartForm() {
             disabled={submitting}
             className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
           >
-            {submitting ? "Saving..." : "Start Production Run"}
+            {submitting ? t("common.saving") : t("forms.productionStart.submit")}
           </button>
         </div>
       </form>

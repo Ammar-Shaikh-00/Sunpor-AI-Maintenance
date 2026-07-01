@@ -1,12 +1,14 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
-import { Field, FormCard, inputClass, toLocalInputValue } from "./formUi";
+import { Field, FormCard, FormLoadState, inputClass, toLocalInputValue } from "./formUi";
 
 export default function MaterialBlockingForm() {
-  const { options, loading } = useFormOptions();
-  const { runs } = useProductionRuns();
+  const { t } = useTranslation();
+  const { options, loading, error } = useFormOptions();
+  const { runs, loading: runsLoading, error: runsError } = useProductionRuns();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     production_run_id: "",
@@ -36,41 +38,52 @@ export default function MaterialBlockingForm() {
         comment: form.comment || null,
         created_by: options?.current_user_id,
       });
-      toast.success("Material block saved");
+      toast.success(t("forms.materialBlocking.success"));
     } catch (error) {
-      toast.error(error?.response?.data?.detail || "Failed to save material block");
+      toast.error(error?.response?.data?.detail || t("forms.materialBlocking.error"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (loading || runsLoading) {
+    return (
+      <FormLoadState
+        loading
+        loadingLabel={t("forms.common.loading")}
+      />
+    );
+  }
+
+  if (error || runsError) {
+    return <FormLoadState error={error || runsError} />;
+  }
 
   return (
     <FormCard
-      title="Subsequent Material Blocking"
-      description="Record a later-identified problematic production period."
+      title={t("forms.materialBlocking.title")}
+      description={t("forms.materialBlocking.description")}
     >
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Production Run" required>
+        <Field label={t("forms.common.productionRun")} required>
           <select
             name="production_run_id"
             value={form.production_run_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select run...</option>
+            <option value="">{t("forms.common.selectRun")}</option>
             {runs.map((run) => (
               <option key={run.id} value={run.id}>
-                Run #{run.id}
+                {t("forms.common.runOption", { id: run.id })}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="Reason" required>
+        <Field label={t("forms.common.reason")} required>
           <select name="reason" value={form.reason} onChange={onChange} className={inputClass}>
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.dropdowns?.material_block_reason || []).map((item) => (
               <option key={item.id} value={item.value}>
                 {item.value}
@@ -79,7 +92,7 @@ export default function MaterialBlockingForm() {
           </select>
         </Field>
 
-        <Field label="From" required>
+        <Field label={t("forms.common.from")} required>
           <input
             type="datetime-local"
             name="from_time"
@@ -89,7 +102,7 @@ export default function MaterialBlockingForm() {
           />
         </Field>
 
-        <Field label="To" required>
+        <Field label={t("forms.common.to")} required>
           <input
             type="datetime-local"
             name="to_time"
@@ -99,7 +112,7 @@ export default function MaterialBlockingForm() {
           />
         </Field>
 
-        <Field label="Affected Material" required>
+        <Field label={t("forms.common.affectedMaterial")} required>
           <input
             name="affected_material"
             value={form.affected_material}
@@ -108,7 +121,7 @@ export default function MaterialBlockingForm() {
           />
         </Field>
 
-        <Field label="Comment">
+        <Field label={t("common.comment")}>
           <textarea
             name="comment"
             value={form.comment}
@@ -124,7 +137,7 @@ export default function MaterialBlockingForm() {
             disabled={submitting}
             className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white"
           >
-            {submitting ? "Saving..." : "Save Material Block"}
+            {submitting ? t("common.saving") : t("forms.materialBlocking.submit")}
           </button>
         </div>
       </form>

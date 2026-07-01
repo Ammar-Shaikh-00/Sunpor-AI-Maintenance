@@ -77,13 +77,27 @@ async def features_for_model(model_key: str, request: Request) -> dict:
     vector = engine.get_vector(model_key) if engine is not None else None
     if vector is None:
         raise HTTPException(status_code=404, detail=f"no vector for '{model_key}'")
+
+    windows_out: dict[str, dict] = {}
+    signal_count = 0
+    for window_key, wf in vector.windows.items():
+        windows_out[window_key] = {
+            "is_ready": wf.is_ready,
+            "sample_count": wf.sample_count,
+            "ready_ratio": wf.ready_ratio,
+        }
+        # All windows share the same signal set; take the first for reporting.
+        if signal_count == 0:
+            signal_count = len(wf.signal_features)
+
     return {
         "model_key": vector.model_key,
         "timestamp": vector.timestamp.isoformat(),
         "is_ready": vector.is_ready,
-        "ready_ratio": vector.ready_ratio,
+        "windows": windows_out,
         "features_flat": vector.features_flat,
-        "signal_count": len(vector.signal_features),
+        "features_flat_count": len(vector.features_flat),
+        "signal_count": signal_count,
     }
 
 

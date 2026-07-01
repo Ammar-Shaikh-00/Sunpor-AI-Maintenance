@@ -1,6 +1,6 @@
 function resolveApiBaseUrl() {
   const configured = import.meta.env.VITE_API_URL;
-
+  console.log("configured", configured);
   if (configured !== undefined && configured !== "") {
     return configured.replace(/\/$/, "");
   }
@@ -18,7 +18,7 @@ function resolveApiBaseUrl() {
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
-
+console.log("API_BASE_URL", API_BASE_URL);
 const ACCESS_TOKEN_KEY = "access_token";
 
 let accessToken = null;
@@ -54,6 +54,7 @@ export const ENDPOINTS = {
   login: "/auth/login",
   me: "/auth/me",
   logout: "/auth/logout",
+  resetPassword: "/auth/reset-password",
   formOptions: "/form-options",
   productionRuns: "/production-runs",
   productionEvents: "/production-events",
@@ -62,4 +63,9 @@ export const ENDPOINTS = {
   dailyQuality: "/daily-quality-inputs",
   signalCatalog: "/signal-catalog",
   signalLatest: "/signal-timeseries/latest",
+  users: "/users",
+  roles: "/roles",
+  permissionsCatalog: "/permissions/catalog",
+  dataExportCatalog: "/data-export/catalog",
+  dataExportQuery: "/data-export/query",
 };

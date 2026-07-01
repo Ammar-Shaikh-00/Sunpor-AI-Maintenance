@@ -1,0 +1,52 @@
+# SUNPOR monitoring — Prometheus scrape configuration
+# Deploy path on server: monitoring/prometheus/prometheus.yml
+#
+# Labels `server` and `platform` power Grafana dashboard variables.
+# When adding a new edge node, append targets under both job blocks below.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+        labels:
+          server: monitoring-server
+          platform: sunpor
+
+  - job_name: node-exporter
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+          - 100.75.166.124:9100
+        labels:
+          server: edge-s01
+          platform: sunpor
+          role: edge
+      - targets:
+          - 100.93.158.60:9100
+        labels:
+          server: edge-s02
+          platform: sunpor
+          role: edge
+
+  - job_name: cadvisor
+    scrape_interval: 15s
+    scrape_timeout: 30s
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 100.75.166.124:8080
+        labels:
+          server: edge-s01
+          platform: sunpor
+          role: edge
+      - targets:
+          - 100.93.158.60:8080
+        labels:
+          server: edge-s02
+          platform: sunpor
+          role: edge

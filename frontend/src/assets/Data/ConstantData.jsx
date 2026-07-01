@@ -1,78 +1,103 @@
 export const menuData = [
   {
-    title: "Operations",
+    titleKey: "menu.sections.operations",
     items: [
       {
-        label: "Dashboard",
+        labelKey: "menu.dashboard",
         icon: "dashboard",
         active: true,
         path: "/",
       },
       {
-        label: "Production Runs",
-        icon: "productionRun",
+        labelKey: "menu.productionRuns",
+        icon: "list",
         path: "/production-runs",
+        active: false,
+      },
+      {
+        labelKey: "menu.dataExport",
+        icon: "export",
+        path: "/data-export",
         active: false,
       },
     ],
   },
   {
-    title: "Operator Forms",
+    titleKey: "menu.sections.operatorForms",
     items: [
       {
-        label: "Production Start",
-        icon: "productionRun",
+        labelKey: "menu.productionStart",
+        icon: "playStart",
         path: "/forms/production-start",
         active: false,
       },
       {
-        label: "Extruder Events",
-        icon: "machines",
+        labelKey: "menu.extruderEvents",
+        icon: "extruder",
         path: "/forms/extruder-events",
         active: false,
       },
       {
-        label: "Granulator / Knife",
-        icon: "machines",
+        labelKey: "menu.granulatorEvents",
+        icon: "knife",
         path: "/forms/granulator-events",
         active: false,
       },
       {
-        label: "Cleaning",
-        icon: "settings",
+        labelKey: "menu.cleaning",
+        icon: "cleaning",
         path: "/forms/cleaning",
         active: false,
       },
       {
-        label: "Faults",
-        icon: "alarms",
+        labelKey: "menu.faults",
+        icon: "alert",
         path: "/forms/faults",
         active: false,
       },
       {
-        label: "Material Behavior",
-        icon: "profile",
+        labelKey: "menu.materialBehavior",
+        icon: "observe",
         path: "/forms/material-behavior",
         active: false,
       },
       {
-        label: "Material Blocking",
-        icon: "tickets",
+        labelKey: "menu.materialBlocking",
+        icon: "block",
         path: "/forms/material-blocking",
         active: false,
       },
       {
-        label: "Daily Quality",
-        icon: "reports",
+        labelKey: "menu.dailyQuality",
+        icon: "quality",
         path: "/forms/daily-quality",
         active: false,
       },
     ],
   },
+  {
+    titleKey: "menu.sections.administration",
+    items: [
+      {
+        labelKey: "menu.users",
+        icon: "users",
+        path: "/admin/users",
+        active: false,
+        permission: "user.view",
+      },
+      {
+        labelKey: "menu.roles",
+        icon: "shield",
+        path: "/admin/roles",
+        active: false,
+        permission: "role.view",
+      },
+    ],
+  },
 ];
 
-export function NavIcon({ name, active }) {
-  const common = "w-5 h-5";
+export function NavIcon({ name, active = false }) {
+  const common = "w-5 h-5 shrink-0";
   const stroke = active ? "#6D28D9" : "#8B5CF6";
 
   const Svg = ({ children }) => (
@@ -100,58 +125,108 @@ export function NavIcon({ name, active }) {
           <path d="M4 17h6v3H6a2 2 0 0 1-2-2v-1z" />
         </Svg>
       );
-    case "machines":
+    case "list":
       return (
         <Svg>
-          <rect x="4" y="6" width="16" height="10" rx="2" />
-          <path d="M7 20h10" />
-          <path d="M8 10h8" />
+          <path d="M8 6h13" />
+          <path d="M8 12h13" />
+          <path d="M8 18h13" />
+          <path d="M3 6h.01" />
+          <path d="M3 12h.01" />
+          <path d="M3 18h.01" />
         </Svg>
       );
-    case "productionRun":
+    case "playStart":
       return (
         <Svg>
-          <path d="M12 8a4 4 0 1 1 0 8a4 4 0 0 1 0-8z" />
-          <path d="M11 10l4 2-4 2z" />
+          <circle cx="12" cy="12" r="9" />
+          <path d="M10 8.5v7l5.5-3.5L10 8.5z" />
         </Svg>
       );
-    case "profile":
+    case "extruder":
       return (
         <Svg>
-          <path d="M16 11a4 4 0 1 0-8 0" />
-          <path d="M4 21a8 8 0 0 1 16 0" />
+          <rect x="3" y="9" width="18" height="6" rx="2" />
+          <path d="M6 12h3" />
+          <path d="M11 12h3" />
+          <path d="M16 12h3" />
+          <path d="M3 12H1" />
+          <path d="M23 12h-2" />
         </Svg>
       );
-    case "alarms":
+    case "knife":
       return (
         <Svg>
-          <path d="M18 8a6 6 0 1 0-12 0c0 7-2 7-2 7h16s-2 0-2-7" />
-          <path d="M9.5 19a2.5 2.5 0 0 0 5 0" />
+          <path d="M5 19L19 5" />
+          <path d="M7 17l2 2" />
+          <path d="M15 7l2-2" />
         </Svg>
       );
-    case "tickets":
+    case "cleaning":
       return (
         <Svg>
-          <path d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2" />
-          <path d="M6 7v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" />
+          <path d="M12 2.5c-2.5 4.5-7 6.5-7 11a7 7 0 0 0 14 0c0-4.5-4.5-6.5-7-11z" />
         </Svg>
       );
-    case "reports":
+    case "alert":
       return (
         <Svg>
-          <rect x="6" y="4" width="12" height="16" rx="2" />
-          <path d="M9 9h6" />
-          <path d="M9 13h6" />
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <path d="M12 9v4" />
+          <path d="M12 17h.01" />
         </Svg>
       );
-    case "settings":
+    case "observe":
       return (
         <Svg>
-          <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" />
-          <path d="M19.4 15a1.8 1.8 0 0 0 .4 2l-1.2 2.1a2 2 0 0 1-2.3.9l-1.6-.6a8.2 8.2 0 0 1-1.7 1l-.2 1.7a2 2 0 0 1-2 1.8h-2.4a2 2 0 0 1-2-1.8l-.2-1.7a8.2 8.2 0 0 1-1.7-1l-1.6.6a2 2 0 0 1-2.3-.9L4.2 17a1.8 1.8 0 0 0 .4-2 8 8 0 0 1 0-2l-.4-2 1.2-2.1a2 2 0 0 1 2.3-.9l1.6.6a8.2 8.2 0 0 1 1.7-1l.2-1.7a2 2 0 0 1 2-1.8h2.4a2 2 0 0 1 2 1.8l.2 1.7a8.2 8.2 0 0 1 1.7 1l1.6-.6a2 2 0 0 1 2.3.9l1.2 2.1-.4 2a8 8 0 0 1 0 2z" />
+          <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z" />
+          <circle cx="12" cy="12" r="3" />
+        </Svg>
+      );
+    case "block":
+      return (
+        <Svg>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M4.5 4.5l15 15" />
+        </Svg>
+      );
+    case "quality":
+      return (
+        <Svg>
+          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+          <rect x="9" y="3" width="6" height="4" rx="1" />
+          <path d="M9 14l2 2 4-4" />
+        </Svg>
+      );
+    case "users":
+      return (
+        <Svg>
+          <path d="M16 11a3 3 0 1 0-6 0" />
+          <path d="M3 21a7 7 0 0 1 14 0" />
+          <path d="M18 8a2.5 2.5 0 1 0 0 5" />
+          <path d="M21 21a5 5 0 0 0-4-2" />
+        </Svg>
+      );
+    case "shield":
+      return (
+        <Svg>
+          <path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z" />
+          <path d="M9 12l2 2 4-4" />
+        </Svg>
+      );
+    case "export":
+      return (
+        <Svg>
+          <path d="M12 3v12" />
+          <path d="M8 11l4 4 4-4" />
+          <path d="M4 21h16" />
         </Svg>
       );
     default:
-      return null;
+      return (
+        <Svg>
+          <circle cx="12" cy="12" r="3" />
+        </Svg>
+      );
   }
 }

@@ -10,6 +10,10 @@ RUN npm install
 # Copy project files
 COPY . .
 
+# Build-time API URL (baked into the static bundle)
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=$VITE_API_URL
+
 # Build the project
 RUN npm run build
 

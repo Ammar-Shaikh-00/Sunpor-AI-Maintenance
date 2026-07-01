@@ -10,7 +10,9 @@ from app.schemas.auth import LoginRequest
 from app.schemas.auth import TokenResponse
 from app.schemas.auth import ChangePasswordRequest
 from app.schemas.auth import ResetPasswordRequest
+from app.schemas.user import UserMeResponse
 from app.schemas.user import UserResponse
+from app.permissions.utils import get_user_permission_codes
 
 from app.services.auth_service import authenticate_user
 from app.services.audit_service import create_audit_log
@@ -103,12 +105,23 @@ def logout(
     }
 
 
-@router.get("/me", response_model=UserResponse)
+@router.get("/me", response_model=UserMeResponse)
 def me(
     current_user: User = Depends(get_current_user)
 ):
 
-    return current_user
+    return UserMeResponse(
+        id=current_user.id,
+        first_name=current_user.first_name,
+        last_name=current_user.last_name,
+        email=current_user.email,
+        is_active=current_user.is_active,
+        email_notifications_enabled=current_user.email_notifications_enabled,
+        roles=current_user.roles,
+        permissions=sorted(get_user_permission_codes(current_user)),
+        created_at=current_user.created_at,
+        updated_at=current_user.updated_at,
+    )
 
 
 @router.post("/change-password")

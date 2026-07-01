@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 
 export default function LatestSignalValues() {
+  const { t } = useTranslation();
   const [signals, setSignals] = useState([]);
   const [catalog, setCatalog] = useState({});
   const [loading, setLoading] = useState(true);
@@ -19,7 +21,7 @@ export default function LatestSignalValues() {
       ]);
 
       if (latestRes.fallback) {
-        throw new Error(latestRes.error || "Failed to load latest signal values");
+        throw new Error(latestRes.error || t("dashboard.latestSignals.loadFailed"));
       }
 
       const catalogMap = {};
@@ -48,7 +50,7 @@ export default function LatestSignalValues() {
         setTimeout(() => setChangedIds([]), 800);
       }
     } catch (err) {
-      setError(err.message || "Failed to fetch latest values");
+      setError(err.message || t("dashboard.latestSignals.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -61,7 +63,11 @@ export default function LatestSignalValues() {
   }, []);
 
   if (loading) {
-    return <div className="p-4 text-center text-gray-500">Loading latest signal values...</div>;
+    return (
+      <div className="p-4 text-center text-gray-500">
+        {t("dashboard.latestSignals.loading")}
+      </div>
+    );
   }
 
   if (error) {
@@ -69,8 +75,8 @@ export default function LatestSignalValues() {
   }
 
   const formattedDate = snapshotTime
-    ? new Date(snapshotTime).toLocaleString()
-    : "--";
+    ? new Date(snapshotTime).toLocaleString("de-DE")
+    : "—";
 
   const sortedSignals = [...signals].sort((a, b) => {
     const nameA = catalog[a.signal_id]?.display_name || "";
@@ -108,16 +114,22 @@ export default function LatestSignalValues() {
     <div className="mb-8 space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Latest Signal Values</h2>
+          <h2 className="text-xl font-semibold text-slate-900">
+            {t("dashboard.latestSignals.title")}
+          </h2>
           <p className="text-sm text-slate-500">
-            Live snapshot from signal_timeseries (refreshes every 5 seconds)
+            {t("dashboard.latestSignals.subtitle")}
           </p>
         </div>
-        <span className="text-sm text-gray-500">Snapshot: {formattedDate}</span>
+        <span className="text-sm text-gray-500">
+          {t("dashboard.latestSignals.snapshot", { time: formattedDate })}
+        </span>
       </div>
 
       <div>
-        <h3 className="mb-2 text-md font-semibold text-gray-700">Main Signals</h3>
+        <h3 className="mb-2 text-md font-semibold text-gray-700">
+          {t("dashboard.latestSignals.mainSignals")}
+        </h3>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
           {primarySignals.map((row) => renderCard(row))}
         </div>
@@ -129,14 +141,18 @@ export default function LatestSignalValues() {
             onClick={() => setShowMore(!showMore)}
             className="rounded-lg bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700"
           >
-            {showMore ? "Hide Values" : "More Values"}
+            {showMore
+              ? t("dashboard.latestSignals.hideValues")
+              : t("dashboard.latestSignals.moreValues")}
           </button>
         </div>
       ) : null}
 
       {showMore ? (
         <div>
-          <h3 className="mb-2 text-md font-semibold text-gray-700">All Signals</h3>
+          <h3 className="mb-2 text-md font-semibold text-gray-700">
+            {t("dashboard.latestSignals.allSignals")}
+          </h3>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
             {otherSignals.map((row) => renderCard(row))}
           </div>

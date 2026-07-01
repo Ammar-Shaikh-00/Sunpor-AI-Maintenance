@@ -42,7 +42,7 @@ function AlertToggle({ status, onToggle, loading }) {
 
   return (
     <div className="flex gap-2 items-center">
-      <span className="text-xs">{t('alertService')}</span>
+      <span className="text-xs">{t("header.alertService")}</span>
       <button
         onClick={onToggle}
         disabled={loading}
@@ -52,7 +52,6 @@ function AlertToggle({ status, onToggle, loading }) {
             : "bg-red-50 text-red-700 border-red-200"
         } ${loading ? "opacity-50 cursor-not-allowed" : "hover:scale-105"}`}
       >
-        {/* Toggle UI */}
         <div
           className={`w-7 h-3 flex items-center rounded-full p-1 transition ${
             status ? "bg-green-500" : "bg-gray-300"
@@ -65,9 +64,8 @@ function AlertToggle({ status, onToggle, loading }) {
           />
         </div>
 
-        {/* Label */}
         <span className="text-xs">
-          {status ? t('active') : t('inactive')}
+          {status ? t("common.active") : t("common.inactive")}
         </span>
       </button>
     </div>
@@ -79,7 +77,7 @@ function UserMenu({ user, role, onLogout }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
 
-  const name = user?.name || user?.email || t('user');
+  const name = user?.name || user?.email || t("header.user");
 
   return (
     <div className="relative">
@@ -104,7 +102,7 @@ function UserMenu({ user, role, onLogout }) {
         <div className="absolute right-0 mt-2 w-48 bg-white  rounded-lg shadow z-50">
           <div className="px-4 py-3 border-b">
             <div className="text-sm font-medium">
-              {t('role')}: {role}
+              {t("header.role")}: {role}
             </div>
             <div className="text-xs text-gray-500 truncate">{user?.email}</div>
           </div>
@@ -116,7 +114,7 @@ function UserMenu({ user, role, onLogout }) {
             }}
             className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
           >
-            {t('logout')}
+            {t("header.logout")}
           </button>
         </div>
       )}
@@ -156,8 +154,8 @@ export default function Header({
 
   // Dynamic KI Status Label
   const statusLabel = aiLoading
-    ? t('loading')
-    : t('kiStatus', { status: aiStatus || t('unknown') });
+    ? t("header.loading")
+    : t("header.kiStatus", { status: aiStatus || t("header.unknown") });
 
   return (
     <header className="mb-6">

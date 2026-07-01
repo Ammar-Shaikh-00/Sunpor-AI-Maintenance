@@ -1,8 +1,9 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
-import { Field, FormCard, inputClass, toLocalInputValue } from "./formUi";
+import { Field, FormCard, FormLoadState, inputClass, toLocalInputValue } from "./formUi";
 
 export default function ProductionEventForm({
   title,
@@ -11,8 +12,9 @@ export default function ProductionEventForm({
   level2OptionsKey,
   level3OptionsKey,
 }) {
-  const { options, loading } = useFormOptions();
-  const { runs } = useProductionRuns();
+  const { t } = useTranslation();
+  const { options, loading, error } = useFormOptions();
+  const { runs, loading: runsLoading, error: runsError } = useProductionRuns();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     production_run_id: "",
@@ -44,16 +46,25 @@ export default function ProductionEventForm({
         comment: form.comment || null,
         operator_id: options?.current_user_id,
       });
-      toast.success("Event saved");
+      toast.success(t("forms.events.success"));
     } catch (error) {
-      toast.error(error?.response?.data?.detail || "Failed to save event");
+      toast.error(error?.response?.data?.detail || t("forms.events.error"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) {
-    return <div className="text-slate-500">Loading form options...</div>;
+  if (loading || runsLoading) {
+    return (
+      <FormLoadState
+        loading
+        loadingLabel={t("forms.common.loadingOptions")}
+      />
+    );
+  }
+
+  if (error || runsError) {
+    return <FormLoadState error={error || runsError} />;
   }
 
   const level2Options = options?.dropdowns?.[level2OptionsKey] || [];
@@ -62,23 +73,23 @@ export default function ProductionEventForm({
   return (
     <FormCard title={title} description={description}>
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Production Run" required>
+        <Field label={t("forms.common.productionRun")} required>
           <select
             name="production_run_id"
             value={form.production_run_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select run...</option>
+            <option value="">{t("forms.common.selectRun")}</option>
             {runs.map((run) => (
               <option key={run.id} value={run.id}>
-                Run #{run.id} - {run.status}
+                {t("forms.common.runStatusOption", { id: run.id, status: run.status })}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="Event Time" required>
+        <Field label={t("forms.common.eventTime")} required>
           <input
             type="datetime-local"
             name="event_time"
@@ -88,9 +99,9 @@ export default function ProductionEventForm({
           />
         </Field>
 
-        <Field label="Level 2" required>
+        <Field label={t("forms.common.level2")} required>
           <select name="level_2" value={form.level_2} onChange={onChange} className={inputClass}>
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {level2Options.map((item) => (
               <option key={item.id} value={item.value}>
                 {item.value}
@@ -99,9 +110,9 @@ export default function ProductionEventForm({
           </select>
         </Field>
 
-        <Field label="Level 3" required>
+        <Field label={t("forms.common.level3")} required>
           <select name="level_3" value={form.level_3} onChange={onChange} className={inputClass}>
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {level3Options.map((item) => (
               <option key={item.id} value={item.value}>
                 {item.value}
@@ -110,11 +121,11 @@ export default function ProductionEventForm({
           </select>
         </Field>
 
-        <Field label="Reason">
+        <Field label={t("forms.common.reason")}>
           <input name="reason" value={form.reason} onChange={onChange} className={inputClass} />
         </Field>
 
-        <Field label="Comment">
+        <Field label={t("common.comment")}>
           <textarea
             name="comment"
             value={form.comment}
@@ -130,7 +141,7 @@ export default function ProductionEventForm({
             disabled={submitting}
             className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
           >
-            {submitting ? "Saving..." : "Save Event"}
+            {submitting ? t("common.saving") : t("forms.common.saveEvent")}
           </button>
         </div>
       </form>

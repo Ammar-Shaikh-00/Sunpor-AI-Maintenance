@@ -1,14 +1,17 @@
-version: "3.9"
-
 services:
   frontend:
-    build: .
-    container_name: pm-updated-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://100.93.158.60:8000}
+    container_name: sunpor-frontend
     ports:
-      - "3001:80"
+      - "${FRONTEND_PORT:-3000}:80"
     restart: unless-stopped
     networks:
-      - pm-network
+      - sunporNet
+
 networks:
-  pm-network:
-      external: true
+  sunporNet:
+    external: true

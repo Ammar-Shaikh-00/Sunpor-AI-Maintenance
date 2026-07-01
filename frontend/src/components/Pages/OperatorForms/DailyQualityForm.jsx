@@ -1,12 +1,14 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
-import { Field, FormCard, inputClass, toLocalInputValue } from "./formUi";
+import { Field, FormCard, FormLoadState, inputClass, toLocalInputValue } from "./formUi";
 
 export default function DailyQualityForm() {
-  const { options, loading } = useFormOptions();
-  const { runs } = useProductionRuns();
+  const { t } = useTranslation();
+  const { options, loading, error } = useFormOptions();
+  const { runs, loading: runsLoading, error: runsError } = useProductionRuns();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     production_run_id: "",
@@ -37,41 +39,52 @@ export default function DailyQualityForm() {
         foaming_behavior: form.foaming_behavior,
         comment: form.comment || null,
       });
-      toast.success("Daily quality data saved");
+      toast.success(t("forms.dailyQuality.success"));
     } catch (error) {
-      toast.error(error?.response?.data?.detail || "Failed to save quality data");
+      toast.error(error?.response?.data?.detail || t("forms.dailyQuality.error"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (loading || runsLoading) {
+    return (
+      <FormLoadState
+        loading
+        loadingLabel={t("forms.common.loading")}
+      />
+    );
+  }
+
+  if (error || runsError) {
+    return <FormLoadState error={error || runsError} />;
+  }
 
   return (
     <FormCard
-      title="Daily Quality Data"
-      description="Enter open holes, sieve analysis, and foaming behavior."
+      title={t("forms.dailyQuality.title")}
+      description={t("forms.dailyQuality.description")}
     >
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Production Run" required>
+        <Field label={t("forms.common.productionRun")} required>
           <select
             name="production_run_id"
             value={form.production_run_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select run...</option>
+            <option value="">{t("forms.common.selectRun")}</option>
             {runs.map((run) => (
               <option key={run.id} value={run.id}>
-                Run #{run.id}
+                {t("forms.common.runOption", { id: run.id })}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="Shift" required>
+        <Field label={t("forms.common.shift")} required>
           <select name="shift" value={form.shift} onChange={onChange} className={inputClass}>
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.shifts || []).map((item) => (
               <option key={item.id} value={item.name}>
                 {item.name}
@@ -80,7 +93,7 @@ export default function DailyQualityForm() {
           </select>
         </Field>
 
-        <Field label="Input Time" required>
+        <Field label={t("forms.common.inputTime")} required>
           <input
             type="datetime-local"
             name="input_time"
@@ -90,7 +103,7 @@ export default function DailyQualityForm() {
           />
         </Field>
 
-        <Field label="Open Holes %" required>
+        <Field label={t("forms.dailyQuality.openHoles")} required>
           <input
             type="number"
             step="0.01"
@@ -101,7 +114,7 @@ export default function DailyQualityForm() {
           />
         </Field>
 
-        <Field label="Sieve Distribution %" required>
+        <Field label={t("forms.dailyQuality.sieveDistribution")} required>
           <input
             type="number"
             step="0.01"
@@ -112,14 +125,14 @@ export default function DailyQualityForm() {
           />
         </Field>
 
-        <Field label="Foaming Behavior" required>
+        <Field label={t("forms.dailyQuality.foamingBehavior")} required>
           <select
             name="foaming_behavior"
             value={form.foaming_behavior}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.dropdowns?.foaming_behavior || []).map((item) => (
               <option key={item.id} value={item.value}>
                 {item.value}
@@ -128,7 +141,7 @@ export default function DailyQualityForm() {
           </select>
         </Field>
 
-        <Field label="Comment">
+        <Field label={t("common.comment")}>
           <textarea
             name="comment"
             value={form.comment}
@@ -144,7 +157,7 @@ export default function DailyQualityForm() {
             disabled={submitting}
             className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white"
           >
-            {submitting ? "Saving..." : "Save Quality Data"}
+            {submitting ? t("common.saving") : t("forms.dailyQuality.submit")}
           </button>
         </div>
       </form>

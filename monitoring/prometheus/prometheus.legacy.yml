@@ -1,0 +1,27 @@
+# Legacy config (job per server) — still works with the dashboard via $server variable.
+# Migrate to prometheus.yml when convenient.
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - localhost:9090
+
+  - job_name: edge-s01
+    scrape_interval: 15s
+    scrape_timeout: 30s
+    static_configs:
+      - targets:
+          - 100.75.166.124:9100
+          - 100.75.166.124:8080
+
+  - job_name: edge-s02
+    scrape_interval: 15s
+    scrape_timeout: 30s
+    static_configs:
+      - targets:
+          - 100.93.158.60:9100
+          - 100.93.158.60:8080

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import TopSection from "./topSection";
 import LatestSignalValues from "./LatestSignalValues";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { DashboardSkeleton } from "../../LoadingSkeleton/dashboardSkeleton";
 
 export default function Dashboard({ backendStatus }) {
+  const { t } = useTranslation();
   const [summary, setSummary] = useState({
     signalCount: 0,
     productionRunCount: 0,
@@ -46,17 +48,17 @@ export default function Dashboard({ backendStatus }) {
       <TopSection summary={summary} />
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="text-sm text-slate-500">Active Signals</div>
+          <div className="text-sm text-slate-500">{t("dashboard.activeSignals")}</div>
           <div className="mt-2 text-4xl font-bold text-violet-700">{summary.signalCount}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="text-sm text-slate-500">Production Runs</div>
+          <div className="text-sm text-slate-500">{t("dashboard.productionRuns")}</div>
           <div className="mt-2 text-4xl font-bold text-violet-700">{summary.productionRunCount}</div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="text-sm text-slate-500">Backend Status</div>
+          <div className="text-sm text-slate-500">{t("dashboard.backendStatus")}</div>
           <div className="mt-2 text-2xl font-bold text-emerald-600 capitalize">
-            {summary.backendStatus}
+            {t(`login.status.${summary.backendStatus}`, { defaultValue: summary.backendStatus })}
           </div>
         </div>
       </div>

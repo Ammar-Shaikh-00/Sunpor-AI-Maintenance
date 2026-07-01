@@ -1,0 +1,23 @@
+
+>>>>>>>>>>>>Command to check the cronjobs.
+edge@edge-node-s01:~$ sudo crontab -u root -l
+0 2 */2 * * /opt/sunpor/scripts/timescaledb_backup.sh >> /var/log/timescaledb_backup.log 2>&1
+
+
+
+
+Backup Script:>>>>>>>>>>>>>>>>>>
+edge@edge-node-s01:~$ cat /opt/sunpor/scripts/timescaledb_backup.sh
+#!/bin/bash
+
+BACKUP_DIR="/opt/sunpor/backups/timescaledb"
+DATE=$(date +%F_%H-%M)
+
+mkdir -p "$BACKUP_DIR"
+
+docker exec sunpor-timescaledb \
+pg_dump -U sunpor_user -Fc sunpor_db \
+> "${BACKUP_DIR}/sunpor_${DATE}.dump"
+
+# Delete backups older than 7 days
+find "$BACKUP_DIR" -name "*.dump" -type f -mtime +7 -delete

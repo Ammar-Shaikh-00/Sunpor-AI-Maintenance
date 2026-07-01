@@ -25,6 +25,11 @@ export const safeApi = {
     return { fallback: false, data: response.data };
   },
 
+  patch: async (url, data = {}, config = {}) => {
+    const response = await api.patch(url, data, config);
+    return { fallback: false, data: response.data };
+  },
+
   delete: async (url, config = {}) => {
     const response = await api.delete(url, config);
     return { fallback: false, data: response.data };

@@ -8,6 +8,7 @@ from fastapi.openapi.utils import get_openapi
 from app.api.public import router as public_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.form_options import router as form_options_router
+from app.api.v1.data_export import router as data_export_router
 from app.api.v1.dropdowns import router as dropdowns_router
 from app.api.v1.master_data import router as master_data_router
 from app.api.v1.ml import router as ml_router
@@ -97,6 +98,11 @@ app.include_router(
 app.include_router(
     form_options_router,
     tags=["Form Options"]
+)
+
+app.include_router(
+    data_export_router,
+    tags=["Data Export"]
 )
 
 app.include_router(

@@ -7,6 +7,27 @@ from app.seeders.utils import link_if_missing
 
 
 ROLE_PERMISSION_MAP: dict[str, list[str]] = {
+    "Admin": [
+        "user.create",
+        "user.view",
+        "user.update",
+        "user.delete",
+        "role.create",
+        "role.view",
+        "role.update",
+        "role.delete",
+        "role.assign",
+        "production.view",
+        "production.create",
+        "production.update",
+        "event.view",
+        "event.create",
+        "quality.view",
+        "quality.create",
+        "material_block.view",
+        "material_block.create",
+        "signal.view",
+    ],
     "Operator": [
         "production.view",
         "production.create",

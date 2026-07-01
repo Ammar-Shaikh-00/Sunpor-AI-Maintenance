@@ -1,12 +1,14 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
-import { Field, FormCard, inputClass, toLocalInputValue } from "./formUi";
+import { Field, FormCard, FormLoadState, inputClass, toLocalInputValue } from "./formUi";
 
 export default function MaterialBehaviorForm() {
-  const { options, loading } = useFormOptions();
-  const { runs } = useProductionRuns();
+  const { t } = useTranslation();
+  const { options, loading, error } = useFormOptions();
+  const { runs, loading: runsLoading, error: runsError } = useProductionRuns();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     production_run_id: "",
@@ -34,39 +36,50 @@ export default function MaterialBehaviorForm() {
         comment: form.comment || null,
         operator_id: options?.current_user_id,
       });
-      toast.success("Material behavior saved");
+      toast.success(t("forms.materialBehavior.success"));
     } catch (error) {
-      toast.error(error?.response?.data?.detail || "Failed to save material behavior");
+      toast.error(error?.response?.data?.detail || t("forms.materialBehavior.error"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (loading) return <div className="text-slate-500">Loading...</div>;
+  if (loading || runsLoading) {
+    return (
+      <FormLoadState
+        loading
+        loadingLabel={t("forms.common.loading")}
+      />
+    );
+  }
+
+  if (error || runsError) {
+    return <FormLoadState error={error || runsError} />;
+  }
 
   return (
     <FormCard
-      title="Material Behavior"
-      description="Record early quality observations from production."
+      title={t("forms.materialBehavior.title")}
+      description={t("forms.materialBehavior.description")}
     >
       <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
-        <Field label="Production Run" required>
+        <Field label={t("forms.common.productionRun")} required>
           <select
             name="production_run_id"
             value={form.production_run_id}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select run...</option>
+            <option value="">{t("forms.common.selectRun")}</option>
             {runs.map((run) => (
               <option key={run.id} value={run.id}>
-                Run #{run.id}
+                {t("forms.common.runOption", { id: run.id })}
               </option>
             ))}
           </select>
         </Field>
 
-        <Field label="Event Time" required>
+        <Field label={t("forms.common.eventTime")} required>
           <input
             type="datetime-local"
             name="event_time"
@@ -76,14 +89,14 @@ export default function MaterialBehaviorForm() {
           />
         </Field>
 
-        <Field label="Behavior Type" required>
+        <Field label={t("forms.materialBehavior.behaviorType")} required>
           <select
             name="behavior_type"
             value={form.behavior_type}
             onChange={onChange}
             className={inputClass}
           >
-            <option value="">Select...</option>
+            <option value="">{t("common.select")}</option>
             {(options?.dropdowns?.material_behavior_type || []).map((item) => (
               <option key={item.id} value={item.value}>
                 {item.value}
@@ -92,7 +105,7 @@ export default function MaterialBehaviorForm() {
           </select>
         </Field>
 
-        <Field label="Severity (1-5)" required>
+        <Field label={t("forms.materialBehavior.severity")} required>
           <input
             type="number"
             min="1"
@@ -104,7 +117,7 @@ export default function MaterialBehaviorForm() {
           />
         </Field>
 
-        <Field label="Comment">
+        <Field label={t("common.comment")}>
           <textarea
             name="comment"
             value={form.comment}
@@ -120,7 +133,7 @@ export default function MaterialBehaviorForm() {
             disabled={submitting}
             className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white"
           >
-            {submitting ? "Saving..." : "Save Material Behavior"}
+            {submitting ? t("common.saving") : t("forms.materialBehavior.submit")}
           </button>
         </div>
       </form>

@@ -4,7 +4,7 @@ from ingestion.window_buffer import RollingWindowBuffer
 
 
 def test_maxlen_respected_and_latest():
-    buf = RollingWindowBuffer([1], window_size=30)
+    buf = RollingWindowBuffer([1], max_samples=30)
     for i in range(1, 36):  # push 35 entries
         buf.push(1, timestamp=f"t{i}", value_scaled=float(i), quality="GOOD")
 
@@ -20,7 +20,7 @@ def test_maxlen_respected_and_latest():
 
 
 def test_is_ready_thresholds():
-    buf = RollingWindowBuffer([1], window_size=30)
+    buf = RollingWindowBuffer([1], max_samples=30)
     for i in range(35):
         buf.push(1, timestamp=f"t{i}", value_scaled=float(i), quality="GOOD")
 
@@ -29,7 +29,7 @@ def test_is_ready_thresholds():
 
 
 def test_window_values_and_empty():
-    buf = RollingWindowBuffer([1, 2], window_size=5)
+    buf = RollingWindowBuffer([1, 2], max_samples=5)
     buf.push(1, "t0", 1.5, "GOOD")
     buf.push(1, "t1", 2.5, "STALE")
 
@@ -41,7 +41,7 @@ def test_window_values_and_empty():
 
 
 def test_snapshot_lengths():
-    buf = RollingWindowBuffer([1, 2], window_size=10)
+    buf = RollingWindowBuffer([1, 2], max_samples=10)
     buf.push(1, "t0", 1.0, "GOOD")
     buf.push(1, "t1", 1.0, "GOOD")
     buf.push(2, "t0", 5.0, "GOOD")
@@ -50,7 +50,42 @@ def test_snapshot_lengths():
 
 
 def test_unknown_signal_autoregisters():
-    buf = RollingWindowBuffer([1], window_size=3)
+    buf = RollingWindowBuffer([1], max_samples=3)
     buf.push(99, "t0", 7.0, "GOOD")
     assert buf.get_latest(99)["value_scaled"] == 7.0
     assert buf.snapshot()[99] == 1
+
+
+def test_get_last_n_returns_tail():
+    buf = RollingWindowBuffer([1], max_samples=100)
+    for i in range(50):
+        buf.push(1, f"t{i}", float(i), "GOOD")
+
+    tail = buf.get_last_n(1, 5)
+    assert len(tail) == 5
+    # Oldest-first inside the slice; last entry is the most recent push.
+    assert tail[0]["value_scaled"] == 45.0
+    assert tail[-1]["value_scaled"] == 49.0
+
+
+def test_get_last_n_capped_at_available():
+    buf = RollingWindowBuffer([1], max_samples=2880)
+    for i in range(50):
+        buf.push(1, f"t{i}", float(i), "GOOD")
+
+    # Ask for far more than we have -> return everything (50, not 100).
+    assert len(buf.get_last_n(1, 100)) == 50
+
+
+def test_get_last_n_unknown_signal_returns_empty():
+    buf = RollingWindowBuffer([1], max_samples=30)
+    assert buf.get_last_n(999, 5) == []
+
+
+def test_get_last_n_zero_or_negative():
+    buf = RollingWindowBuffer([1], max_samples=30)
+    for i in range(5):
+        buf.push(1, f"t{i}", float(i), "GOOD")
+
+    assert buf.get_last_n(1, 0) == []
+    assert buf.get_last_n(1, -3) == []

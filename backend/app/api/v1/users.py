@@ -25,7 +25,8 @@ USER_FIELDS = [
     "first_name",
     "last_name",
     "email",
-    "is_active"
+    "is_active",
+    "email_notifications_enabled",
 ]
 
 
@@ -98,7 +99,8 @@ def create_user(
         last_name=request.last_name,
         email=request.email,
         password_hash=hash_password(request.password),
-        is_active=request.is_active
+        is_active=request.is_active,
+        email_notifications_enabled=request.email_notifications_enabled,
     )
 
     db.add(user)
@@ -142,6 +144,9 @@ def update_user(
 
     if request.is_active is not None:
         user.is_active = request.is_active
+
+    if request.email_notifications_enabled is not None:
+        user.email_notifications_enabled = request.email_notifications_enabled
 
     if request.password is not None:
         validate_password_policy(request.password)
@@ -298,6 +303,54 @@ def assign_user_roles(
         "user_roles",
         user.id,
         new_value={"role_ids": request.role_ids}
+    )
+
+    db.commit()
+    db.refresh(user)
+
+    return user.roles
+
+
+@router.put("/{user_id}/roles", response_model=list[RoleResponse])
+def sync_user_roles(
+    user_id: int,
+    request: RoleAssignmentRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("role.assign")),
+):
+
+    user = get_user_or_404(db, user_id)
+
+    role_ids = list(dict.fromkeys(request.role_ids))
+    roles = db.query(Role).filter(
+        Role.id.in_(role_ids)
+    ).all() if role_ids else []
+
+    if len(roles) != len(role_ids):
+        raise HTTPException(
+            status_code=404,
+            detail="One or more roles were not found"
+        )
+
+    db.query(UserRole).filter(
+        UserRole.user_id == user.id
+    ).delete()
+
+    for role in roles:
+        db.add(
+            UserRole(
+                user_id=user.id,
+                role_id=role.id
+            )
+        )
+
+    create_audit_log(
+        db,
+        current_user,
+        "role_sync",
+        "user_roles",
+        user.id,
+        new_value={"role_ids": role_ids}
     )
 
     db.commit()

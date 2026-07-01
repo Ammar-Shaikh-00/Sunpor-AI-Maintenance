@@ -10,11 +10,18 @@ from app.models.dropdown_values import DropdownValue
 from app.models.material_type import MaterialType
 from app.models.production_line import ProductionLine
 from app.models.shift import Shift
-from app.permissions.check_permission import require_permission
+from app.permissions.check_permission import require_any_permission
 
 router = APIRouter(prefix="/form-options")
 
-form_dependency = require_permission("production.view")
+form_dependency = require_any_permission(
+    "production.view",
+    "production.create",
+    "event.create",
+    "quality.create",
+    "material_block.create",
+    "system.admin",
+)
 
 
 @router.get("")
@@ -28,9 +35,7 @@ def get_form_options(
         MaterialType.active == True,
     ).all()
 
-    shifts = db.query(Shift).filter(
-        Shift.is_deleted == False
-    ).all()
+    shifts = db.query(Shift).order_by(Shift.name).all()
 
     companies = db.query(Company).filter(
         Company.is_deleted == False

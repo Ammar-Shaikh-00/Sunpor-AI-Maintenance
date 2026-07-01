@@ -5,13 +5,13 @@ module.exports = {
   output: "./src/locales",
   options: {
     debug: false,
-    removeUnusedKeys: false,
+    removeUnusedKeys: true,
     func: {
       list: ["t"],
       extensions: [".js", ".jsx"]
     },
-    lngs: ["en"],
-    defaultLng: "en",
+    lngs: ["de"],
+    defaultLng: "de",
     resource: {
       loadPath: "src/locales/{{lng}}.json",
       savePath: "src/locales/{{lng}}.json"

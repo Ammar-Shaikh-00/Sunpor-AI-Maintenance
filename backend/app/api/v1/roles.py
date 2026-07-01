@@ -248,6 +248,53 @@ def assign_role_permissions(
     return role.permissions
 
 
+@router.put("/{role_id}/permissions", response_model=list[PermissionResponse])
+def sync_role_permissions(
+    role_id: int,
+    request: PermissionAssignmentRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("role.update")),
+):
+
+    role = get_role_or_404(db, role_id)
+    permission_ids = list(dict.fromkeys(request.permission_ids))
+    permissions = db.query(Permission).filter(
+        Permission.id.in_(permission_ids)
+    ).all() if permission_ids else []
+
+    if len(permissions) != len(permission_ids):
+        raise HTTPException(
+            status_code=404,
+            detail="One or more permissions were not found"
+        )
+
+    db.query(RolePermission).filter(
+        RolePermission.role_id == role.id
+    ).delete()
+
+    for permission in permissions:
+        db.add(
+            RolePermission(
+                role_id=role.id,
+                permission_id=permission.id
+            )
+        )
+
+    create_audit_log(
+        db,
+        current_user,
+        "permission_sync",
+        "role_permissions",
+        role.id,
+        new_value={"permission_ids": permission_ids}
+    )
+
+    db.commit()
+    db.refresh(role)
+
+    return role.permissions
+
+
 @router.delete("/{role_id}/permissions/{permission_id}")
 def remove_role_permission(
     role_id: int,

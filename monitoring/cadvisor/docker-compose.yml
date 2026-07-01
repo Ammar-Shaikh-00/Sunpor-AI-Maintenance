@@ -1,0 +1,27 @@
+# cAdvisor — MUST mount docker.sock or container metrics will be empty in Prometheus.
+# Symptom: cadvisor_version_info{dockerVersion=""} and no name/image labels on metrics.
+#
+# Deploy on each edge node:
+#   cd monitoring/cadvisor && docker compose up -d
+
+services:
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.1
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - --docker_only=true
+      - --store_container_labels=true
+      - --housekeeping_interval=30s

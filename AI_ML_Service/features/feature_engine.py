@@ -1,13 +1,14 @@
 """Feature engine.
 
-Reads CleanRecord windows from the RollingWindowBuffer, computes derived
-features per signal, and groups them per ML model using the FeatureCatalog.
-Output is a ``FeatureVector`` per model_key — the only input the ML layer
-consumes.
+Reads CleanRecord windows from the ``RollingWindowBuffer``, slices multiple
+time windows out of each signal's tail, and computes derived features per
+window per signal. Windows come from ``config.FEATURE_WINDOWS`` — never
+hardcoded. Output is a :class:`FeatureVector` per model_key, which is the
+only input the ML / anomaly / state layers consume.
 
 Stateless per call (all history lives in the buffer); the engine only caches
-the most recent vector per model for status/inspection endpoints. It never
-calls the backend API and ``on_tick`` never raises.
+the most recent vector per model for status endpoints. It never calls the
+backend API and ``on_tick`` never raises.
 """
 
 from __future__ import annotations
@@ -20,12 +21,20 @@ import numpy as np
 from core.config import get_settings
 from core.quality_rules import GOOD
 from features.feature_catalog import FeatureCatalog
-from features.models import FeatureVector, SignalFeatures
+from features.models import FeatureVector, SignalFeatures, WindowFeatures
 
 logger = logging.getLogger(__name__)
 
-# Feature names emitted into features_flat (order is stable).
-FLAT_FEATURES = ("mean", "std", "trend", "roc", "min_val", "max_val", "last_val")
+# (flat suffix, SignalFeatures attribute). Order is stable across polls.
+_FLAT_FEATURES: tuple[tuple[str, str], ...] = (
+    ("mean", "mean"),
+    ("std", "std"),
+    ("trend", "trend"),
+    ("roc", "roc"),
+    ("min_val", "min_val"),
+    ("max_val", "max_val"),
+    ("last_val", "last_val"),
+)
 
 
 def _utcnow() -> datetime:
@@ -33,7 +42,7 @@ def _utcnow() -> datetime:
 
 
 class FeatureEngine:
-    """Computes per-model FeatureVectors from buffer windows."""
+    """Computes per-model, multi-window ``FeatureVector`` s from buffer windows."""
 
     def __init__(
         self,
@@ -41,6 +50,8 @@ class FeatureEngine:
         feature_catalog: FeatureCatalog,
         min_samples: int | None = None,
         ready_ratio_threshold: float | None = None,
+        feature_windows: dict[str, int] | None = None,
+        primary_window_key: str | None = None,
     ) -> None:
         settings = get_settings()
         self._catalog_map = {
@@ -55,10 +66,20 @@ class FeatureEngine:
             if ready_ratio_threshold is not None
             else settings.READY_RATIO_THRESHOLD
         )
+        self._windows: dict[str, int] = dict(
+            feature_windows if feature_windows is not None else settings.FEATURE_WINDOWS
+        )
+        self._primary_window_key = (
+            primary_window_key
+            if primary_window_key is not None
+            else settings.PRIMARY_WINDOW_KEY
+        )
         self.last_vectors: dict[str, FeatureVector] = {}
 
+    # ── Public API ─────────────────────────────────────────────────────
+
     def on_tick(self, window_buffer) -> dict[str, FeatureVector]:
-        """Recompute all model vectors from the current buffer state."""
+        """Recompute all model vectors for every configured window."""
         try:
             for model_key in self._feature_catalog.summary():
                 signal_ids = self._feature_catalog.get_signals_for_model(model_key)
@@ -69,30 +90,76 @@ class FeatureEngine:
             logger.error("Feature engine on_tick failed: %s", exc)
             return {}
 
+    def get_vector(self, model_key: str) -> FeatureVector | None:
+        """Return the most recent FeatureVector for a model, if any."""
+        return self.last_vectors.get(model_key)
+
+    def summary(self) -> dict:
+        """Per-model, per-window readiness summary for status endpoints."""
+        result: dict[str, dict] = {}
+        for model_key, vector in self.last_vectors.items():
+            per_window = {}
+            for window_key, wf in vector.windows.items():
+                per_window[window_key] = {
+                    "is_ready": wf.is_ready,
+                    "ready_ratio": wf.ready_ratio,
+                }
+            result[model_key] = {
+                "is_ready": vector.is_ready,
+                "primary_window": self._primary_window_key,
+                "signal_count": (
+                    len(next(iter(vector.windows.values())).signal_features)
+                    if vector.windows
+                    else 0
+                ),
+                "computed_at": vector.timestamp.isoformat(),
+                "windows": per_window,
+            }
+        return result
+
+    # ── Internal helpers ───────────────────────────────────────────────
+
     def _compute_vector(
         self, model_key: str, signal_ids: list[int], window_buffer
     ) -> FeatureVector:
-        signal_features: dict[int, SignalFeatures] = {}
-        ready_count = 0
+        window_results: dict[str, WindowFeatures] = {}
 
-        for signal_id in signal_ids:
-            window = window_buffer.get_window(signal_id)
-            sf = self._compute_signal_features(signal_id, window)
-            signal_features[signal_id] = sf
-            if sf.sample_count >= self._min_samples:
-                ready_count += 1
+        for window_key, n_samples in self._windows.items():
+            signal_features: dict[int, SignalFeatures] = {}
+            ready_count = 0
+            # A window is "ready" for a signal when the tail slice reaches the
+            # window's own size, floored by MIN_SAMPLES so a signal with too few
+            # samples is never counted ready even if a window is smaller.
+            required = max(n_samples, self._min_samples)
+            for signal_id in signal_ids:
+                try:
+                    entries = window_buffer.get_last_n(signal_id, n_samples)
+                except Exception:
+                    entries = []
+                sf = self._compute_signal_features(signal_id, entries)
+                signal_features[signal_id] = sf
+                if sf.sample_count >= required:
+                    ready_count += 1
 
-        total = len(signal_ids)
-        ready_ratio = ready_count / total if total else 0.0
-        is_ready = ready_ratio >= self._ready_ratio_threshold
+            total = len(signal_ids)
+            ratio = ready_count / total if total else 0.0
+            window_results[window_key] = WindowFeatures(
+                window_key=window_key,
+                sample_count=n_samples,
+                signal_features=signal_features,
+                is_ready=ratio >= self._ready_ratio_threshold,
+                ready_ratio=round(ratio, 3),
+            )
+
+        primary = window_results.get(self._primary_window_key)
+        is_ready = bool(primary and primary.is_ready)
 
         return FeatureVector(
             model_key=model_key,
             timestamp=_utcnow(),
-            signal_features=signal_features,
+            windows=window_results,
             is_ready=is_ready,
-            ready_ratio=round(ready_ratio, 3),
-            features_flat=self._flatten(signal_features),
+            features_flat=self._flatten_multi_window(window_results),
         )
 
     def _compute_signal_features(
@@ -150,28 +217,16 @@ class FeatureEngine:
         )
 
     @staticmethod
-    def _flatten(signal_features: dict[int, SignalFeatures]) -> dict[str, float]:
-        """Flatten to {"{signal_id}__{feature}": value}, skipping None."""
+    def _flatten_multi_window(
+        window_results: dict[str, WindowFeatures],
+    ) -> dict[str, float]:
+        """Flatten to ``{signal_id}__{window_key}__{feature}``; skip None."""
         flat: dict[str, float] = {}
-        for signal_id, sf in signal_features.items():
-            for feature in FLAT_FEATURES:
-                value = getattr(sf, feature)
-                if value is not None:
-                    flat[f"{signal_id}__{feature}"] = value
+        for window_key, wf in window_results.items():
+            for signal_id, sf in wf.signal_features.items():
+                prefix = f"{signal_id}__{window_key}"
+                for suffix, attr in _FLAT_FEATURES:
+                    value = getattr(sf, attr)
+                    if value is not None:
+                        flat[f"{prefix}__{suffix}"] = value
         return flat
-
-    def get_vector(self, model_key: str) -> FeatureVector | None:
-        """Return the most recent FeatureVector for a model, if any."""
-        return self.last_vectors.get(model_key)
-
-    def summary(self) -> dict:
-        """Per-model readiness summary for status endpoints."""
-        result = {}
-        for model_key, vector in self.last_vectors.items():
-            result[model_key] = {
-                "is_ready": vector.is_ready,
-                "ready_ratio": vector.ready_ratio,
-                "signal_count": len(vector.signal_features),
-                "computed_at": vector.timestamp.isoformat(),
-            }
-        return result

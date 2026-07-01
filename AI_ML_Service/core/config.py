@@ -28,9 +28,36 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     STALE_COUNT: int = 5
-    WINDOW_SIZE: int = 30
-    MIN_SAMPLES: int = 10
+    # Roles that legitimately hold constant values — skip stale detection.
+    STALE_EXEMPT_ROLES: list[str] = [
+        "setpoint",
+        "mode",
+        "status",
+        "quantity",
+    ]
+
+    # ─── Rolling buffer + feature windows ────────────────────────────────
+    # Polling at POLL_INTERVAL_SEC=10s:
+    #   1min  =   6 samples
+    #   5min  =  30 samples
+    #   15min =  90 samples
+    #   30min = 180 samples
+    #   full_run capped at MAX_BUFFER_SAMPLES (8 h @ 10 s = 2880).
+    MAX_BUFFER_SAMPLES: int = 2880
+    MIN_SAMPLES: int = 6
     READY_RATIO_THRESHOLD: float = 0.8
+
+    # Window key -> number of samples required. ``full_run`` is capped by
+    # MAX_BUFFER_SAMPLES so it naturally represents "everything we have".
+    FEATURE_WINDOWS: dict = {
+        "1min": 6,
+        "5min": 30,
+        "15min": 90,
+        "30min": 180,
+        "full_run": 2880,
+    }
+    # is_ready on a FeatureVector reflects THIS window's readiness.
+    PRIMARY_WINDOW_KEY: str = "5min"
 
     PREDICT_EVERY_N_POLLS: int = 3
     RULES_CONFIG_PATH: str = "state/rules_config.yaml"
