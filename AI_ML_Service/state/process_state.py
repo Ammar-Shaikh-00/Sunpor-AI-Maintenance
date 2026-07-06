@@ -77,7 +77,9 @@ class ProcessStateDetector:
                     "is_confirmed_phase": result.is_confirmed_phase,
                 }
             )
-            await self._writer.write_prediction(result, vector)
+            await self._writer.write_prediction(
+                result, vector, window_key=self._window_key
+            )
             logger.info(
                 "[STATE] phase=%s conf=%s calibrated=%s fallback=%s",
                 result.phase_name,

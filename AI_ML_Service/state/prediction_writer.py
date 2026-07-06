@@ -10,6 +10,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
+from core.config import get_settings
+
 logger = logging.getLogger(__name__)
 
 MODEL_NAME = "process_state_rule_v1"
@@ -60,12 +62,24 @@ class PredictionWriter:
         self._cache_time = now
         return run_id
 
-    async def write_prediction(self, result, vector) -> bool:
+    async def write_prediction(
+        self, result, vector, window_key: str | None = None
+    ) -> bool:
         """Write one prediction; return True on success (201)."""
         run_id = await self.get_active_run_id()
         if run_id is None:
             logger.warning("No RUNNING production run; skipping prediction write")
             return False
+
+        settings = get_settings()
+        if window_key is None:
+            window_key = settings.PRIMARY_WINDOW_KEY
+
+        wf = vector.windows.get(window_key) if vector else None
+        window_start = (
+            wf.window_start if wf and wf.window_start else _utcnow()
+        )
+        window_end = wf.window_end if wf and wf.window_end else _utcnow()
 
         payload = {
             "timestamp": _iso_z(_utcnow()),
@@ -74,8 +88,8 @@ class PredictionWriter:
             "prediction_type": PREDICTION_TYPE,
             "prediction_value": float(result.phase_index),
             "confidence": result.confidence,
-            "input_window_start": _iso_z(vector.timestamp),
-            "input_window_end": _iso_z(_utcnow()),
+            "input_window_start": _iso_z(window_start),
+            "input_window_end": _iso_z(window_end),
             "explanation": result.explanation,
         }
 

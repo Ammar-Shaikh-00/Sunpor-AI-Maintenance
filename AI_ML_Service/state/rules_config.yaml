@@ -5,7 +5,13 @@
 #   {group}__mean_of_trends     : mean of all signal trends in group
 #   {group}__mean_of_stds       : mean of all signal stds in group
 #   {group}__mean_of_rocs       : mean of all signal rates of change
-#   {group}__bad_quality_ratio  : fraction of signals with bad quality
+#   {group}__bad_quality_ratio  : fraction of signals with any non-GOOD
+#                                 quality (STALE + OUT_OF_RANGE + BAD +
+#                                 MISSING). Broad; for anomaly / monitoring.
+#   {group}__hard_fault_ratio   : fraction of signals whose window contains
+#                                 OUT_OF_RANGE or BAD values only. STALE /
+#                                 MISSING are excluded. This is the signal
+#                                 fault_disturbance evaluates.
 #
 # NOTE: mean_of_lasts is averaged across ALL signals in the group
 # (actuals + setpoints + errors + modes + control_outputs combined).
@@ -22,17 +28,20 @@ phases:
   fault_disturbance:
     index: 8
     priority: 100
-    # [ESTIMATED] — triggered by bad quality signals or extreme variance
-    # Recalibrate bad_quality_ratio threshold once fault data available
+    # [ESTIMATED] — triggered by physically impossible values (OUT_OF_RANGE)
+    # or source-flagged bad values only. STALE / MISSING are data-availability
+    # issues and MUST NOT fire this phase — those use bad_quality_ratio which
+    # is now reserved for the anomaly detector.
+    # Recalibrate hard_fault_ratio thresholds once real fault data available.
     min_conditions_ratio: 0.4
     conditions:
-      - feature: heating_zones__bad_quality_ratio
+      - feature: heating_zones__hard_fault_ratio
+        operator: gte
+        threshold: 0.3      # [ESTIMATED] 30% of heating signals OOR/BAD
+      - feature: feeders__hard_fault_ratio
         operator: gte
         threshold: 0.3      # [ESTIMATED]
-      - feature: feeders__bad_quality_ratio
-        operator: gte
-        threshold: 0.3      # [ESTIMATED]
-      - feature: extruder_meltpump__bad_quality_ratio
+      - feature: extruder_meltpump__hard_fault_ratio
         operator: gte
         threshold: 0.3      # [ESTIMATED]
       - feature: melt_pressure__mean_of_stds

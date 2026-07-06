@@ -60,7 +60,7 @@ class GroupAggregator:
             return {}
 
     def _aggregate_signal_features(self, signal_features: dict) -> dict[str, float]:
-        # group -> {attr: [values]} plus bad-quality bookkeeping.
+        # group -> {attr: [values]} plus quality bookkeeping.
         buckets: dict[str, dict] = {}
 
         for signal_id, sf in signal_features.items():
@@ -69,11 +69,14 @@ class GroupAggregator:
                 continue
             bucket = buckets.setdefault(
                 group,
-                {attr: [] for _, attr in _NUMERIC_AGGS} | {"_n": 0, "_bad": 0},
+                {attr: [] for _, attr in _NUMERIC_AGGS}
+                | {"_n": 0, "_bad": 0, "_hard": 0},
             )
             bucket["_n"] += 1
             if sf.has_bad_quality:
                 bucket["_bad"] += 1
+            if getattr(sf, "has_hard_fault", False):
+                bucket["_hard"] += 1
             for _, attr in _NUMERIC_AGGS:
                 value = getattr(sf, attr)
                 if value is not None:
@@ -86,7 +89,16 @@ class GroupAggregator:
                 if values:
                     features[f"{group}__{suffix}"] = float(np.mean(values))
             n = bucket["_n"]
+            # bad_quality_ratio: STALE + OUT_OF_RANGE + BAD + MISSING.
+            # Kept for anomaly detection / general monitoring.
             features[f"{group}__bad_quality_ratio"] = (
                 bucket["_bad"] / n if n else 0.0
+            )
+            # hard_fault_ratio: OUT_OF_RANGE + BAD only. This is the signal
+            # ``fault_disturbance`` reads — STALE / MISSING never triggers a
+            # hard fault because they indicate a sensor problem, not a
+            # machine fault.
+            features[f"{group}__hard_fault_ratio"] = (
+                bucket["_hard"] / n if n else 0.0
             )
         return features

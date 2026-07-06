@@ -1,5 +1,7 @@
 """Unit tests for the multi-window feature engine."""
 
+from datetime import datetime, timedelta, timezone
+
 from features.feature_engine import FeatureEngine
 from features.models import FeatureVector, WindowFeatures
 from ingestion.window_buffer import RollingWindowBuffer
@@ -163,6 +165,42 @@ def test_has_bad_quality_flagged():
     assert sf.has_bad_quality is True
 
 
+def test_has_hard_fault_only_on_oor_bad():
+    # Mixed window: 5 GOOD + 3 STALE + 2 OUT_OF_RANGE.
+    engine = _engine()
+    buffer = RollingWindowBuffer([1], max_samples=300)
+    qualities = ["GOOD"] * 5 + ["STALE"] * 3 + ["OUT_OF_RANGE"] * 2
+    _push(buffer, 1, list(range(10)), quality=qualities)
+
+    sf = engine._compute_signal_features(1, buffer.get_window(1))
+    # STALE + OOR both count as non-GOOD.
+    assert sf.has_bad_quality is True
+    # OOR is a hard fault.
+    assert sf.has_hard_fault is True
+
+
+def test_stale_only_no_hard_fault():
+    # STALE alone must NOT be a hard fault — it's a data-availability issue.
+    engine = _engine()
+    buffer = RollingWindowBuffer([1], max_samples=300)
+    qualities = ["GOOD"] * 5 + ["STALE"] * 5
+    _push(buffer, 1, list(range(10)), quality=qualities)
+
+    sf = engine._compute_signal_features(1, buffer.get_window(1))
+    assert sf.has_bad_quality is True
+    assert sf.has_hard_fault is False
+
+
+def test_bad_source_flag_is_hard_fault():
+    engine = _engine()
+    buffer = RollingWindowBuffer([1], max_samples=300)
+    qualities = ["GOOD"] * 9 + ["BAD"]
+    _push(buffer, 1, list(range(10)), quality=qualities)
+
+    sf = engine._compute_signal_features(1, buffer.get_window(1))
+    assert sf.has_hard_fault is True
+
+
 def test_on_tick_returns_all_models():
     engine = _engine()
     buffer = RollingWindowBuffer([1, 2, 3, 4], max_samples=300)
@@ -210,3 +248,29 @@ def test_summary_reports_per_window_readiness():
     assert set(summary["model_a"]["windows"].keys()) == set(_TEST_WINDOWS.keys())
     entry = summary["model_a"]["windows"]["5min"]
     assert "is_ready" in entry and "ready_ratio" in entry
+
+
+def test_window_bounds_from_buffer_timestamps():
+    """5min window bounds reflect oldest/newest buffer samples, not compute time."""
+    engine = _engine(min_samples=6, primary="5min")
+    buffer = RollingWindowBuffer([1, 2], max_samples=300)
+
+    base = datetime(2026, 7, 2, 9, 20, 39, tzinfo=timezone.utc)
+    for i in range(30):
+        ts = (base + timedelta(seconds=10 * i)).isoformat().replace("+00:00", "Z")
+        buffer.push(1, ts, float(i), "GOOD")
+        buffer.push(2, ts, float(i), "GOOD")
+
+    vector = engine._compute_vector("model_a", [1, 2], buffer)
+    wf = vector.windows["5min"]
+
+    assert wf.window_start is not None
+    assert wf.window_end is not None
+
+    gap = (wf.window_end - wf.window_start).total_seconds()
+    assert abs(gap - 290) < 1.0  # 29 intervals x 10s
+    assert gap > 60  # not milliseconds apart
+
+    expected_end = base + timedelta(seconds=290)
+    assert abs((wf.window_start - base).total_seconds()) < 1.0
+    assert abs((wf.window_end - expected_end).total_seconds()) < 1.0

@@ -36,13 +36,31 @@ def test_stable_production_confirmed_from_real_data():
 
 
 def test_fault_highest_priority():
+    # fault_disturbance now reads hard_fault_ratio (OOR + BAD only).
     group_features = {
-        "heating_zones__bad_quality_ratio": 0.5,
-        "feeders__bad_quality_ratio": 0.4,
-        "extruder_meltpump__bad_quality_ratio": 0.4,
+        "heating_zones__hard_fault_ratio": 0.5,
+        "feeders__hard_fault_ratio": 0.4,
+        "extruder_meltpump__hard_fault_ratio": 0.4,
     }
     result = _engine().evaluate(group_features)
     assert result.phase_name == "fault_disturbance"
+
+
+def test_stale_signals_do_not_trigger_fault():
+    # All hard_fault_ratios zero -> STALE noise on bad_quality_ratio must
+    # NOT be enough to fire fault_disturbance.
+    group_features = {
+        "heating_zones__hard_fault_ratio": 0.0,
+        "feeders__hard_fault_ratio": 0.0,
+        "extruder_meltpump__hard_fault_ratio": 0.0,
+        "melt_pressure__mean_of_stds": 5.0,
+        # Legacy bad_quality_ratio is still emitted but ignored by fault rule.
+        "heating_zones__bad_quality_ratio": 0.8,
+        "feeders__bad_quality_ratio": 0.8,
+        "extruder_meltpump__bad_quality_ratio": 0.8,
+    }
+    result = _engine().evaluate(group_features)
+    assert result.phase_name != "fault_disturbance"
 
 
 def test_fallback_when_no_match():
@@ -77,7 +95,7 @@ def test_confirmed_and_estimated_lists():
     assert "stable_production" not in engine.estimated_phases
 
 
-def _sf(signal_id, group, last_val):
+def _sf(signal_id, group, last_val, has_bad_quality=False, has_hard_fault=False):
     return SignalFeatures(
         signal_id=signal_id,
         signal_group=group,
@@ -89,7 +107,8 @@ def _sf(signal_id, group, last_val):
         max_val=last_val,
         last_val=last_val,
         sample_count=10,
-        has_bad_quality=False,
+        has_bad_quality=has_bad_quality,
+        has_hard_fault=has_hard_fault,
     )
 
 
@@ -139,3 +158,26 @@ def test_group_aggregator_returns_empty_for_missing_window():
     vector = _vector_with_signals({1: _sf(1, "feeders", 100.0)})
     # No '15min' window in the fixture -> aggregator returns {} without raising.
     assert agg.aggregate(vector, window_key="15min") == {}
+
+
+def test_hard_fault_ratio_excludes_stale():
+    # 3 signals in a group:
+    #   A: STALE only     -> bad_quality yes, hard_fault no
+    #   B: OUT_OF_RANGE   -> bad_quality yes, hard_fault yes
+    #   C: fully GOOD     -> neither
+    catalog = [
+        {"id": 1, "signal_group": "grp"},
+        {"id": 2, "signal_group": "grp"},
+        {"id": 3, "signal_group": "grp"},
+    ]
+    agg = GroupAggregator(catalog)
+    vector = _vector_with_signals(
+        {
+            1: _sf(1, "grp", 10.0, has_bad_quality=True, has_hard_fault=False),
+            2: _sf(2, "grp", 20.0, has_bad_quality=True, has_hard_fault=True),
+            3: _sf(3, "grp", 30.0, has_bad_quality=False, has_hard_fault=False),
+        }
+    )
+    out = agg.aggregate(vector, window_key="5min")
+    assert abs(out["grp__bad_quality_ratio"] - (2 / 3)) < 0.01
+    assert abs(out["grp__hard_fault_ratio"] - (1 / 3)) < 0.01

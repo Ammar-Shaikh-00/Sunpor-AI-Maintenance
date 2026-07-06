@@ -25,7 +25,15 @@ class SignalFeatures:
     max_val: float | None
     last_val: float | None
     sample_count: int
-    has_bad_quality: bool  # True if any entry in window != GOOD
+    # True if any entry in the window is non-GOOD (STALE, OUT_OF_RANGE, BAD,
+    # MISSING). Broad "something is off" signal — still used by the anomaly
+    # detector and general monitoring.
+    has_bad_quality: bool
+    # True only for OUT_OF_RANGE or BAD (source-flagged) values. STALE and
+    # MISSING are data-availability issues, not machine faults, and are
+    # deliberately excluded so ``fault_disturbance`` can't be triggered by
+    # slow / static sensors.
+    has_hard_fault: bool = False
 
 
 @dataclass
@@ -37,6 +45,9 @@ class WindowFeatures:
     signal_features: dict[int, SignalFeatures]  # signal_id -> features
     is_ready: bool  # ratio of signals with >= MIN_SAMPLES meets threshold
     ready_ratio: float
+    # Oldest / newest buffer timestamp across all signals in this window slice.
+    window_start: datetime | None = None
+    window_end: datetime | None = None
 
 
 @dataclass

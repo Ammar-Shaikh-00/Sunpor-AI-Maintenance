@@ -19,11 +19,15 @@ from datetime import datetime, timezone
 import numpy as np
 
 from core.config import get_settings
-from core.quality_rules import GOOD
+from core.quality_rules import BAD, GOOD, OUT_OF_RANGE
 from features.feature_catalog import FeatureCatalog
 from features.models import FeatureVector, SignalFeatures, WindowFeatures
 
 logger = logging.getLogger(__name__)
+
+# Only physically impossible values or source-flagged bad values are treated as
+# hard faults. STALE / MISSING are data-availability issues, not machine faults.
+_HARD_FAULT_QUALITIES = frozenset({OUT_OF_RANGE, BAD})
 
 # (flat suffix, SignalFeatures attribute). Order is stable across polls.
 _FLAT_FEATURES: tuple[tuple[str, str], ...] = (
@@ -39,6 +43,34 @@ _FLAT_FEATURES: tuple[tuple[str, str], ...] = (
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _parse_timestamp(ts: str) -> datetime | None:
+    """Parse an ISO timestamp string as UTC (handles trailing Z)."""
+    if not ts:
+        return None
+    try:
+        normalized = ts.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(normalized)
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except (ValueError, TypeError):
+        return None
+
+
+def _window_bounds_from_entries(
+    entries: list[dict],
+) -> tuple[datetime | None, datetime | None]:
+    """Return (oldest, newest) timestamp from buffer entries, or (None, None)."""
+    timestamps: list[datetime] = []
+    for entry in entries:
+        ts = _parse_timestamp(entry.get("timestamp", ""))
+        if ts is not None:
+            timestamps.append(ts)
+    if not timestamps:
+        return None, None
+    return min(timestamps), max(timestamps)
 
 
 class FeatureEngine:
@@ -127,6 +159,7 @@ class FeatureEngine:
         for window_key, n_samples in self._windows.items():
             signal_features: dict[int, SignalFeatures] = {}
             ready_count = 0
+            entries_for_bounds: list[dict] = []
             # A window is "ready" for a signal when the tail slice reaches the
             # window's own size, floored by MIN_SAMPLES so a signal with too few
             # samples is never counted ready even if a window is smaller.
@@ -136,11 +169,13 @@ class FeatureEngine:
                     entries = window_buffer.get_last_n(signal_id, n_samples)
                 except Exception:
                     entries = []
+                entries_for_bounds.extend(entries)
                 sf = self._compute_signal_features(signal_id, entries)
                 signal_features[signal_id] = sf
                 if sf.sample_count >= required:
                     ready_count += 1
 
+            window_start, window_end = _window_bounds_from_entries(entries_for_bounds)
             total = len(signal_ids)
             ratio = ready_count / total if total else 0.0
             window_results[window_key] = WindowFeatures(
@@ -149,6 +184,8 @@ class FeatureEngine:
                 signal_features=signal_features,
                 is_ready=ratio >= self._ready_ratio_threshold,
                 ready_ratio=round(ratio, 3),
+                window_start=window_start,
+                window_end=window_end,
             )
 
         primary = window_results.get(self._primary_window_key)
@@ -180,6 +217,7 @@ class FeatureEngine:
                 last_val=None,
                 sample_count=0,
                 has_bad_quality=False,
+                has_hard_fault=False,
             )
 
         values = [e["value_scaled"] for e in window]
@@ -201,6 +239,7 @@ class FeatureEngine:
             slope = 0.0
 
         has_bad = any(q != GOOD for q in qualities)
+        has_hard = any(q in _HARD_FAULT_QUALITIES for q in qualities)
 
         return SignalFeatures(
             signal_id=signal_id,
@@ -214,6 +253,7 @@ class FeatureEngine:
             last_val=round(last_v, 4),
             sample_count=n,
             has_bad_quality=has_bad,
+            has_hard_fault=has_hard,
         )
 
     @staticmethod

@@ -27,7 +27,12 @@ class Settings(BaseSettings):
     POLL_INTERVAL_SEC: int = 10
     LOG_LEVEL: str = "INFO"
 
-    STALE_COUNT: int = 5
+    # 30 polls × POLL_INTERVAL_SEC (10s) = 5 minutes of identical raw values
+    # before STALE fires. In real WinCC, active sensors update every few
+    # seconds, so 5 min of no movement is a genuinely stuck sensor. In the
+    # test environment (static backend), this delay prevents floods of
+    # false-positive STALE flags on every "actual" signal.
+    STALE_COUNT: int = 30
     # Roles that legitimately hold constant values — skip stale detection.
     STALE_EXEMPT_ROLES: list[str] = [
         "setpoint",
