@@ -39,6 +39,8 @@ class IngestionPoller:
         window_buffer: RollingWindowBuffer,
         feature_engine: Optional[Any] = None,
         process_state_detector: Optional[Any] = None,
+        anomaly_detector: Optional[Any] = None,
+        low_production_analyzer: Optional[Any] = None,
     ) -> None:
         self._catalog_map = {s["id"]: s for s in catalog if s.get("id") is not None}
         self._signal_client = signal_client
@@ -46,6 +48,8 @@ class IngestionPoller:
         self._buffer = window_buffer
         self._feature_engine = feature_engine
         self._process_state_detector = process_state_detector
+        self._anomaly_detector = anomaly_detector
+        self._low_production_analyzer = low_production_analyzer
 
         self.total_polls = 0
         self.total_values = 0
@@ -79,9 +83,34 @@ class IngestionPoller:
 
         if self._feature_engine is not None:
             self.last_vectors = self._feature_engine.on_tick(self._buffer)
-            vector = self._feature_engine.get_vector("process_state")
-            if self._process_state_detector is not None and vector is not None:
-                await self._process_state_detector.on_tick(vector, self.total_polls)
+            vector_ps = self._feature_engine.get_vector("process_state")
+            phase_result = None
+            if self._process_state_detector is not None and vector_ps is not None:
+                phase_result = await self._process_state_detector.on_tick(
+                    vector_ps, self.total_polls
+                )
+
+            if (
+                self._low_production_analyzer is not None
+                and vector_ps is not None
+                and phase_result is not None
+            ):
+                state_history = self._process_state_detector.get_history()
+                await self._low_production_analyzer.on_tick(
+                    vector_ps, phase_result, self.total_polls, state_history
+                )
+
+            if self._anomaly_detector is not None:
+                anomaly_vector = self._feature_engine.get_vector("anomaly")
+                if phase_result is None and self._process_state_detector is not None:
+                    phase_result = self._process_state_detector.last_result
+                if anomaly_vector is not None and phase_result is not None:
+                    await self._anomaly_detector.on_tick(
+                        anomaly_vector,
+                        phase_result.phase_name,
+                        phase_result.is_confirmed_phase,
+                        self.total_polls,
+                    )
 
         if self.total_polls % self.LOG_EVERY == 0:
             logger.info(
@@ -111,7 +140,7 @@ class IngestionPoller:
                 logger.info("Poller loop cancelled")
                 raise
             except Exception as exc:
-                logger.error("Poll failed: %s", exc)
+                logger.error("Poll failed: %s", exc) 
             await asyncio.sleep(interval)
 
     def stats(self) -> dict:

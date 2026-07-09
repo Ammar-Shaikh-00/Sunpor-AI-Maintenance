@@ -16,6 +16,8 @@ logger = logging.getLogger(__name__)
 
 MODEL_NAME = "process_state_rule_v1"
 PREDICTION_TYPE = "process_state"
+LOW_PRODUCTION_MODEL_NAME = "low_production_analyzer_v1"
+LOW_PRODUCTION_PREDICTION_TYPE = "low_production_detail"
 RUN_CACHE_TTL_SEC = 60
 RUNNING_STATUS = "RUNNING"
 
@@ -102,4 +104,51 @@ class PredictionWriter:
         if resp.status_code in (200, 201):
             return True
         logger.warning("ml-prediction write returned %s", resp.status_code)
+        return False
+
+    async def write_low_production(
+        self, result, vector, run_id, window_key: str | None = None
+    ) -> bool:
+        """Write a low_production_detail prediction; return True on success."""
+        settings = get_settings()
+        if window_key is None:
+            window_key = settings.PRIMARY_WINDOW_KEY
+
+        wf = vector.windows.get(window_key) if vector else None
+        window_start = (
+            wf.window_start if wf and wf.window_start else _utcnow()
+        )
+        window_end = wf.window_end if wf and wf.window_end else _utcnow()
+
+        explanation = (
+            f"low_production | severity={result.severity:.2f} "
+            f"| duration_ticks={result.duration_ticks} "
+            f"| duration_sec={result.duration_sec:.0f} "
+            f"| cause={result.cause_name} "
+            f"| is_planned={result.is_planned} "
+            f"| evidence={result.evidence}"
+        )
+        payload = {
+            "timestamp": _iso_z(_utcnow()),
+            "production_run_id": run_id,
+            "model_name": LOW_PRODUCTION_MODEL_NAME,
+            "prediction_type": LOW_PRODUCTION_PREDICTION_TYPE,
+            "prediction_value": float(result.severity),
+            "confidence": float(result.confidence),
+            "input_window_start": _iso_z(window_start),
+            "input_window_end": _iso_z(window_end),
+            "explanation": explanation,
+        }
+
+        try:
+            resp = await self._signal_client.post_ml_prediction(payload)
+        except Exception as exc:
+            logger.error("Failed to write low_production ml-prediction: %s", exc)
+            return False
+
+        if resp.status_code in (200, 201):
+            return True
+        logger.warning(
+            "low_production ml-prediction write returned %s", resp.status_code
+        )
         return False

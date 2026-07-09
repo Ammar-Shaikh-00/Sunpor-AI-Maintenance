@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 import httpx
 from fastapi import FastAPI
 
+from anomaly.detector import AnomalyDetector
 from api.routes import router
 from cleaning.cleaner import DataCleaner
 from core.auth_client import AuthClient
@@ -24,6 +25,7 @@ from features.feature_engine import FeatureEngine
 from ingestion.poller import IngestionPoller
 from ingestion.signal_client import SignalClient
 from ingestion.window_buffer import RollingWindowBuffer
+from state.low_production_analyzer import LowProductionAnalyzer
 from state.process_state import ProcessStateDetector
 
 settings = get_settings()
@@ -47,6 +49,8 @@ async def lifespan(app: FastAPI):
     app.state.window_buffer = None
     app.state.feature_engine = None
     app.state.process_state_detector = None
+    app.state.anomaly_detector = None
+    app.state.low_production_analyzer = None
     app.state.poller = None
 
     http_client = httpx.AsyncClient(timeout=30.0)
@@ -85,6 +89,18 @@ async def lifespan(app: FastAPI):
             signals,
             auth,
         )
+        anomaly_detector = AnomalyDetector(
+            catalog,
+            settings.ANOMALY_CONFIG_PATH,
+            signals,
+            auth,
+        )
+        low_production_analyzer = LowProductionAnalyzer(
+            catalog,
+            settings.LOW_PRODUCTION_CONFIG_PATH,
+            signals,
+            process_state_detector.writer,
+        )
         poller = IngestionPoller(
             catalog,
             signals,
@@ -92,10 +108,14 @@ async def lifespan(app: FastAPI):
             window_buffer,
             feature_engine,
             process_state_detector,
+            anomaly_detector,
+            low_production_analyzer,
         )
         app.state.window_buffer = window_buffer
         app.state.feature_engine = feature_engine
         app.state.process_state_detector = process_state_detector
+        app.state.anomaly_detector = anomaly_detector
+        app.state.low_production_analyzer = low_production_analyzer
         app.state.poller = poller
 
         poller_task = asyncio.create_task(poller.run_loop())
@@ -114,6 +134,14 @@ async def lifespan(app: FastAPI):
             "Estimated phases need recalibration: %s",
             engine.confirmed_phases,
             engine.estimated_phases,
+        )
+        logger.info(
+            "Anomaly detector ready | prediction_type=%s | config=%s",
+            anomaly_detector.prediction_type,
+            settings.ANOMALY_CONFIG_PATH,
+        )
+        logger.info(
+            "Low-production sub-analysis ready (extension of Process State)"
         )
     except Exception as exc:  # keep the service up even if backend is unreachable
         logger.error("Startup data load failed: %s", exc)

@@ -160,3 +160,89 @@ def test_feature_engine_on_tick_called():
 
     asyncio.run(poller.poll_once())
     assert engine.ticks == 1
+
+
+def test_anomaly_detector_on_tick_called_when_phase_known():
+    catalog = _catalog(5)
+    client = FakeSignalClient(_snapshot(5))
+    evaluator = QualityEvaluator(catalog, stale_count=5)
+    cleaner = DataCleaner(catalog, evaluator)
+    buffer = RollingWindowBuffer([s["id"] for s in catalog], max_samples=30)
+
+    class FakeVector:
+        is_ready = True
+
+    class FakeEngine:
+        def on_tick(self, buf):
+            return {}
+
+        def get_vector(self, model_key):
+            return FakeVector()
+
+    class FakeResult:
+        phase_name = "stable_production"
+        is_confirmed_phase = True
+
+    class FakeProcessStateDetector:
+        last_result = FakeResult()
+
+        async def on_tick(self, vector, poll_count):
+            pass
+
+    class FakeAnomalyDetector:
+        def __init__(self):
+            self.calls = []
+
+        async def on_tick(self, vector, phase_name, is_confirmed_phase, poll_count):
+            self.calls.append((phase_name, is_confirmed_phase, poll_count))
+
+    anomaly_detector = FakeAnomalyDetector()
+    poller = IngestionPoller(
+        catalog,
+        client,
+        cleaner,
+        buffer,
+        feature_engine=FakeEngine(),
+        process_state_detector=FakeProcessStateDetector(),
+        anomaly_detector=anomaly_detector,
+    )
+
+    asyncio.run(poller.poll_once())
+
+    assert anomaly_detector.calls == [("stable_production", True, 1)]
+
+
+def test_anomaly_detector_skipped_when_phase_unknown():
+    catalog = _catalog(5)
+    client = FakeSignalClient(_snapshot(5))
+    evaluator = QualityEvaluator(catalog, stale_count=5)
+    cleaner = DataCleaner(catalog, evaluator)
+    buffer = RollingWindowBuffer([s["id"] for s in catalog], max_samples=30)
+
+    class FakeEngine:
+        def on_tick(self, buf):
+            return {}
+
+        def get_vector(self, model_key):
+            return None
+
+    class FakeAnomalyDetector:
+        def __init__(self):
+            self.calls = []
+
+        async def on_tick(self, *args, **kwargs):
+            self.calls.append((args, kwargs))
+
+    anomaly_detector = FakeAnomalyDetector()
+    poller = IngestionPoller(
+        catalog,
+        client,
+        cleaner,
+        buffer,
+        feature_engine=FakeEngine(),
+        anomaly_detector=anomaly_detector,
+    )
+
+    asyncio.run(poller.poll_once())
+
+    assert anomaly_detector.calls == []

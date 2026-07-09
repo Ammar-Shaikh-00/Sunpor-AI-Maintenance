@@ -9,6 +9,7 @@ paths are defined here as constants and tunables come from config.
 from __future__ import annotations
 
 import logging
+from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 import httpx
@@ -16,6 +17,20 @@ import httpx
 from core.auth_client import AuthClient
 
 logger = logging.getLogger(__name__)
+
+
+def _parse_event_time(value: Any) -> datetime | None:
+    """Parse an event timestamp string as UTC, or return None."""
+    if not value or not isinstance(value, str):
+        return None
+    try:
+        normalized = value.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(normalized)
+        if dt.tzinfo is None:
+            return dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except (ValueError, TypeError):
+        return None
 
 
 class SignalClient:
@@ -26,6 +41,8 @@ class SignalClient:
     TIMESERIES_PATH = "/signal-timeseries"
     BATCH_PATH = "/signal-timeseries/batch"
     PRODUCTION_RUNS_PATH = "/production-runs"
+    PRODUCTION_EVENTS_PATH = "/production-events"
+    MATERIAL_BEHAVIOR_EVENTS_PATH = "/material-behavior-events"
     ML_PREDICTIONS_PATH = "/ml-predictions"
 
     def __init__(self, auth_client: AuthClient, client: httpx.AsyncClient) -> None:
@@ -84,6 +101,59 @@ class SignalClient:
     async def post_ml_prediction(self, payload: dict) -> httpx.Response:
         """POST /ml-predictions — write a model output (refresh+retry on 401)."""
         return await self._request("POST", self.ML_PREDICTIONS_PATH, json=payload)
+
+    async def get_production_events(
+        self, run_id, lookback_minutes: int
+    ) -> list[dict]:
+        """GET /production-events filtered by run + lookback. Never raises."""
+        try:
+            resp = await self._request(
+                "GET", self.PRODUCTION_EVENTS_PATH, params={"limit": 100}
+            )
+            events = self._as_list(resp.json())
+            return self._filter_events_for_run(events, run_id, lookback_minutes)
+        except Exception as exc:
+            logger.debug("production-events unavailable — skipping: %s", exc)
+            return []
+
+    async def get_material_behavior_events(
+        self, run_id, lookback_minutes: int
+    ) -> list[dict]:
+        """GET /material-behavior-events filtered by run + lookback. Never raises."""
+        try:
+            resp = await self._request(
+                "GET",
+                self.MATERIAL_BEHAVIOR_EVENTS_PATH,
+                params={"limit": 100},
+            )
+            events = self._as_list(resp.json())
+            return self._filter_events_for_run(events, run_id, lookback_minutes)
+        except Exception as exc:
+            logger.debug(
+                "material-behavior-events unavailable — skipping: %s", exc
+            )
+            return []
+
+    @staticmethod
+    def _filter_events_for_run(
+        events: list[dict], run_id, lookback_minutes: int
+    ) -> list[dict]:
+        """Keep events for ``run_id`` within the lookback window, newest first."""
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=lookback_minutes)
+        matched: list[tuple[datetime, dict]] = []
+        for event in events:
+            if event.get("production_run_id") != run_id:
+                continue
+            event_time = _parse_event_time(
+                event.get("event_time")
+                or event.get("timestamp")
+                or event.get("created_at")
+            )
+            if event_time is None or event_time < cutoff:
+                continue
+            matched.append((event_time, event))
+        matched.sort(key=lambda item: item[0], reverse=True)
+        return [event for _, event in matched]
 
     @staticmethod
     def _as_list(payload: Any) -> list[dict]:

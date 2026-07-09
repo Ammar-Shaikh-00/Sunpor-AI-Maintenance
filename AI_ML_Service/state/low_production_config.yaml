@@ -1,0 +1,84 @@
+# Low-Production sub-analysis config.
+# Aligned with SUNPOR_Requirements_Document.docx Section 7.1.
+# This is NOT a separate model — Process State already detects the
+# "low_production" phase; this file only configures how we compute
+# severity and cause once that phase is active.
+
+severity:
+  # [AWAITING CLIENT] — "total throughput setpoint or per-feeder
+  # actual vs setpoint (or both)?" — Section 13. Default to total
+  # throughput until confirmed; change here only, no code change.
+  reference: "total_throughput"
+  throughput_signal_group: "feeders"
+  actual_role: "actual"
+  setpoint_role: "setpoint"
+  clamp_min: 0.0
+  clamp_max: 1.0
+
+duration:
+  # [AWAITING CLIENT] — "does a 5-minute dip count, or only a
+  # sustained 15-minute drop?" — Section 13. Set to 1 for now so
+  # nothing is silently suppressed while we wait for the answer.
+  min_duration_ticks_for_alert: 1
+
+cause_resolution:
+  # First resolver in this order that returns a confident match wins.
+  # Planned slowdown checked first — per requirements doc, planned
+  # slowdowns must never generate a "problem" alert.
+  priority_order:
+    - planned_slowdown
+    - phase_transition
+    - material_problem
+    - feeder_fault
+    - pressure_instability
+    - screen_nozzle_restriction
+    - material_change
+
+  phase_transition:
+    lookback_state_history: 3
+    transition_from_phases:
+      ["heating_up", "startup", "cooling_down", "shutdown"]
+
+  planned_slowdown:
+    enabled: true
+    # This event type does not exist in the operator form yet —
+    # requirements doc Section 9 lists adding a "Low Production"
+    # entry with planned/unplanned flag as pending (Person 1
+    # territory). Resolver returns no match gracefully until it
+    # exists in the backend — never errors.
+    level_2_marker: "Low Production"
+    planned_reason_keyword: "planned"   # [AWAITING CLIENT] exact field TBD
+    lookback_minutes: 20
+
+  material_problem:
+    enabled: true
+    lookback_minutes: 15
+
+  feeder_fault:
+    signal_group: "feeders"
+    signal_role: "error"
+    window_key: "5min"
+    threshold: 0.0
+    operator: gt
+
+  pressure_instability:
+    groups: ["melt_pressure", "extruder_meltpump"]
+    window_key: "15min"
+    feature: "std"
+    threshold: 10.0    # [ESTIMATED] — recalibrate once low-production
+                       # data is actually collected
+
+  screen_nozzle_restriction:
+    enabled: false   # mirrors anomaly/anomaly_config.yaml
+                     # screen_pressure_diff — enable together once
+                     # inlet/outlet tags are confirmed
+
+  material_change:
+    enabled: true
+    lookback_minutes: 30
+
+calibration_status:
+  severity_formula:    "CONFIRMED — requirements doc Section 7.1"
+  reference_metric:    "AWAITING CLIENT — Section 13"
+  min_duration:         "AWAITING CLIENT — Section 13"
+  cause_resolvers:      "ESTIMATED — needs validation against real data"

@@ -66,6 +66,12 @@ class Settings(BaseSettings):
 
     PREDICT_EVERY_N_POLLS: int = 3
     RULES_CONFIG_PATH: str = "state/rules_config.yaml"
+    # Early Anomaly Detection (Section 7.2) — statistical baseline + drift
+    # thresholds live in this file, never hardcoded in anomaly/detector.py.
+    ANOMALY_CONFIG_PATH: str = "anomaly/anomaly_config.yaml"
+    # Low-Production Cause & Severity (Section 7.1 sub-analysis) — extension
+    # of Process State, not a separate capability. Thresholds live here only.
+    LOW_PRODUCTION_CONFIG_PATH: str = "state/low_production_config.yaml"
 
     @property
     def backend_base(self) -> str:

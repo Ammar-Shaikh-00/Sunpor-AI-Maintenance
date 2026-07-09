@@ -50,17 +50,27 @@ class ProcessStateDetector:
     def rule_engine(self) -> RuleEngine:
         return self._rule_engine
 
-    async def on_tick(self, vector, poll_count: int) -> None:
-        """Evaluate the current vector and write a prediction (cadence-gated)."""
+    @property
+    def writer(self) -> PredictionWriter:
+        """Expose the shared PredictionWriter for Process State extensions."""
+        return self._writer
+
+    async def on_tick(self, vector, poll_count: int):
+        """Evaluate the current vector and write a prediction (cadence-gated).
+
+        Returns the ``StateResult`` on a successful evaluation, otherwise
+        ``None`` (not ready / cadence skip / error). The poller passes this
+        straight into LowProductionAnalyzer.
+        """
         if not vector.is_ready:
-            return
+            return None
         primary = vector.windows.get(self._window_key)
         if primary is None:
-            return
+            return None
         if primary.ready_ratio < self._rule_engine.min_vector_ready_ratio:
-            return
+            return None
         if self._predict_every <= 0 or poll_count % self._predict_every != 0:
-            return
+            return None
 
         try:
             group_features = self._aggregator.aggregate(
@@ -87,8 +97,10 @@ class ProcessStateDetector:
                 result.is_confirmed_phase,
                 result.is_fallback,
             )
+            return result
         except Exception as exc:  # on_tick must never raise
             logger.error("ProcessStateDetector.on_tick failed: %s", exc)
+            return None
 
     def get_status(self) -> dict:
         if self.last_result is None:

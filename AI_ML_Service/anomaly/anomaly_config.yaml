@@ -1,0 +1,117 @@
+# Early Anomaly Detection (SUNPOR_Requirements_Document.docx v2.0,
+# Section 7.2 — Phase-1 priority). All thresholds live here so the
+# detector can be recalibrated as live baseline data accumulates,
+# with no code changes (Section 3.3 non-functional requirement).
+#
+# Every finding this capability produces — whether a group-level
+# statistical deviation or a derived-feature / drift-detector flag — is
+# written with ONE prediction_type. Early Anomaly (7.2) is a separate,
+# earlier capability from the specific risk detections in Section 7.3
+# (Material Behavior), 7.5 (Granulator/Knife) and 7.6 (Nozzle/Screen) —
+# those are Phase 3 and not built yet, and must never be impersonated by
+# this capability's output.
+anomaly_prediction_type: "anomaly_score"
+
+model_name: "anomaly_baseline_zscore_v1"
+
+# How often (in polls) the detector scores + writes findings. Baselines
+# still only *update* on ticks where this cadence fires — matches the
+# cadence used by Process State (settings.PREDICT_EVERY_N_POLLS) by
+# default, kept independently configurable here.
+predict_every_n_polls: 3
+
+# ─── Stage 1 — phase-aware statistical baseline (robust z-score) ─────────
+# Windows scanned for group-level anomaly scoring. Per Section 7.2: 15min
+# and 30min are primary (they see slow drift), 1min catches sudden spikes.
+scoring_windows: ["1min", "15min", "30min"]
+
+# Group-level aggregate features (from GroupAggregator, Section 6.4) that
+# are compared against their phase-specific rolling baseline.
+scored_features: ["mean_of_means", "mean_of_stds", "mean_of_trends", "mean_of_rocs"]
+
+# Robust z-score thresholds (median + MAD, MAD scaled by 1.4826 to
+# approximate a normal std-dev so thresholds read like familiar sigmas).
+z_score_warning: 3.0
+z_score_critical: 5.0
+
+# A (phase, group, window, feature) baseline only starts producing
+# findings once it has this many observations — prevents a thin/cold-start
+# baseline from firing false alarms on day one (Section 7.2: "On day one,
+# with sparse baseline data, only clear anomalies fire").
+min_baseline_samples: 20
+
+# Baselines accumulate for whichever phase is currently active, every
+# tick — "what is normal during startup is not normal during stable
+# production" (Section 7.2), so Process State (7.1) is a hard dependency.
+# Scoring/prediction-writing is gated to phases the RuleEngine has marked
+# CONFIRMED (today: stable_production only) — this mirrors Section 8's
+# dashboard rule ("quality and maintenance warnings apply only during
+# stable production ... still may be computed internally for learning
+# purposes") without hardcoding a phase name; it generalizes automatically
+# as more phases are calibrated.
+score_only_confirmed_phases: true
+
+# Stage-1b — signal-specific derived features (Section 7.2: "Unstable
+# dosing (setpoint vs actual mismatch growing...)"). Each entry compares
+# the mean of one role against another within the same group. This is a
+# coarse proxy until per-doser pairing signals are added to the catalog
+# (Section 13 open item: doser vibration, feed-in/conveying time).
+derived_features:
+  - name: "feeders_setpoint_actual_gap"
+    group: "feeders"
+    role_a: "actual"
+    role_b: "setpoint"
+    description: >
+      Dosing mismatch: mean(actual) minus mean(setpoint) across feeders.
+      Growing gap = "unstable dosing" per Section 7.2.
+  - name: "extruder_actual_setpoint_gap"
+    group: "extruder_meltpump"
+    role_a: "actual"
+    role_b: "setpoint"
+    description: >
+      Extruder screw actual vs setpoint drift — proxy for "extruder torque
+      drifting up relative to its baseline" (Section 7.2) until dedicated
+      torque signals are confirmed available.
+  - name: "screen_pressure_diff"
+    group: "screen_changer"
+    role_a: "actual"
+    role_b: "setpoint"
+    description: >
+      Placeholder screen pressure differential proxy (actual vs setpoint)
+      until dedicated inlet/outlet melt-pressure signals are added
+      (Section 13 open item) — will be superseded by Nozzle/Screen (7.6)
+      once that Phase-3 capability is built.
+
+# ─── Stage 2 — short-vs-long window drift comparison ─────────────────────
+# Section 7.2: "signal-specific drift detectors ... use short-vs-long-
+# window comparisons to flag creeping changes long before any threshold
+# alarm." This is a direct, stateless comparison — no baseline history
+# needed — of the same feature's short-window value against its own
+# long-window value.
+drift_detectors:
+  - group: "feeders"
+    feature: "mean_of_lasts"
+    short_window: "1min"
+    long_window: "30min"
+    description: "Feeder throughput creeping away from its own 30min average."
+  - group: "extruder_meltpump"
+    feature: "mean_of_lasts"
+    short_window: "1min"
+    long_window: "30min"
+    description: >
+      Extruder actual creeping away from its own 30min average
+      (torque/speed proxy per Section 7.2).
+  - group: "melt_pressure"
+    feature: "mean_of_stds"
+    short_window: "1min"
+    long_window: "15min"
+    description: >
+      Melt pressure standard deviation rising faster than its 15min norm
+      (Section 7.2: "Melt pressure standard deviation increasing beyond
+      the phase norm").
+
+# Relative drift ratio = (short - long) / |long|. Thresholds are fractions
+# (0.15 = 15% relative drift), not absolute units, so one config works
+# across signals of very different scale.
+drift_ratio_warning: 0.15
+drift_ratio_critical: 0.30

@@ -119,7 +119,28 @@ async def state_history(request: Request) -> list:
     return detector.get_history()
 
 
-@router.get("/ml/anomalies")
-async def anomalies_placeholder() -> dict:
-    """Placeholder — anomaly scores (not implemented yet)."""
-    return {"detail": "anomaly detection not implemented yet"}
+@router.get("/state/low-production")
+async def state_low_production(request: Request) -> dict:
+    """Low-Production Cause & Severity sub-analysis (Section 7.1)."""
+    analyzer = getattr(request.app.state, "low_production_analyzer", None)
+    if analyzer is None:
+        return {"status": "not_in_low_production"}
+    return analyzer.get_status()
+
+
+@router.get("/anomaly/current")
+async def anomaly_current(request: Request) -> dict:
+    """Most recent Early Anomaly Detection findings (Section 7.2)."""
+    detector = getattr(request.app.state, "anomaly_detector", None)
+    if detector is None:
+        return {"status": "not_ready"}
+    return detector.get_status()
+
+
+@router.get("/anomaly/history")
+async def anomaly_history(request: Request) -> list:
+    """Last 100 anomaly-detection tick summaries."""
+    detector = getattr(request.app.state, "anomaly_detector", None)
+    if detector is None:
+        return []
+    return detector.get_history()

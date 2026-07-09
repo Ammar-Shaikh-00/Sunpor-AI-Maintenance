@@ -1,3 +1,8 @@
+# Phase definitions aligned with SUNPOR_Requirements_Document.docx
+# v2.0, Section 7.1. Low Production remains a PHASE here (not a
+# separate model) — cause/severity sub-analysis will read this
+# phase's output, not duplicate it.
+#
 # SUNPOR Process State Rules
 # Feature naming convention (from GroupAggregator):
 #   {group}__mean_of_means      : mean of all signal means in group
