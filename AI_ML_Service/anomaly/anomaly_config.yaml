@@ -20,6 +20,67 @@ model_name: "anomaly_baseline_zscore_v1"
 # default, kept independently configurable here.
 predict_every_n_polls: 3
 
+# Minimum polls between repeat writes of the SAME finding name.
+# A finding that clears and reappears later is treated as new
+# (tracker only prevents back-to-back duplicate writes while a
+# condition persists). Detection / status / history stay live every
+# scoring tick — only the POST /ml-predictions write is throttled.
+write_cooldown_polls: 18   # ~3 min at predict_every_n_polls=3, 10s poll
+
+# ─── Stage 0 — absolute safety thresholds ─────────────────────────
+# Client-confirmed physical limits (SUNPOR_SIGNALS_ML_GUIDE.docx /
+# client questionnaire). These are NOT statistical — they fire the
+# moment a value crosses a known danger line, independent of
+# baseline or phase. Unlike Stages 1/2, these do not require
+# min_baseline_samples and are not gated by score_only_confirmed_phases,
+# because a physical safety limit is a safety limit in every phase.
+#
+# match_contains: list of case-insensitive substrings OR-matched against
+# wincc_tag. Required within process_water because the group mixes
+# temperature (°C), pressure (bar), pump speed (%), and flow — without
+# tag filtering, Drehzahl (~90%) falsely trips the 64°C temp alarm.
+absolute_thresholds:
+  - name: "process_water_temp_alarm"
+    group: "process_water"
+    role: "actual"
+    match_contains: ["Temperatur", "_temp"]   # catches both sensors
+    aggregate: "max"
+    window_key: "1min"
+    operator: "gt"
+    threshold: 64.0           # [CONFIRMED] client doc — alarm level
+    severity: "WARNING"
+    description: >
+      Process water above 64°C alarm threshold (normal 58-61°C).
+      Two temperature sensors exist on this line (Temperatur, _temp
+      REAL variant) — checked together, alarms if either exceeds
+      the limit.
+
+  - name: "process_water_temp_critical"
+    group: "process_water"
+    role: "actual"
+    match_contains: ["Temperatur", "_temp"]
+    aggregate: "max"
+    window_key: "1min"
+    operator: "gt"
+    threshold: 65.0           # [CONFIRMED] client doc — critical level
+    severity: "CRITICAL"
+    description: >
+      Process water above 65°C critical threshold — granulate
+      foaming/plugging risk per client. Both temperature sensors
+      (Temperatur, _temp) are checked together.
+
+  - name: "process_water_pressure_low"
+    group: "process_water"
+    role: "actual"
+    match_contains: ["Druck"]   # catches both P1 and P2 sensors
+    aggregate: "min"
+    window_key: "1min"
+    operator: "lt"
+    threshold: 10.1           # [CONFIRMED] client doc — normal pressure
+    severity: "WARNING"
+    description: >
+      Process water pressure below 10.1 bar on either sensor (P1/P2).
+
 # ─── Stage 1 — phase-aware statistical baseline (robust z-score) ─────────
 # Windows scanned for group-level anomaly scoring. Per Section 7.2: 15min
 # and 30min are primary (they see slow drift), 1min catches sudden spikes.

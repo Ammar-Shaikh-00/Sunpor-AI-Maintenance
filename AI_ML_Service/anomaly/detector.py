@@ -6,8 +6,12 @@ early signs are missed. This module catches abnormal behavior at the
 source, even where no explicit rule exists, so operators can react before
 an actual fault or scrap event (Section 1, Section 2.1).
 
-Two stages, both implemented here:
+Three stages, all implemented here:
 
+0. Absolute safety thresholds — client-confirmed physical limits that
+   fire the moment a value crosses a known danger line. Independent of
+   baseline history and of ``score_only_confirmed_phases`` (a safety
+   limit applies in every phase).
 1. Statistical baselines per phase — a rolling robust baseline (median +
    MAD) is kept per (phase, group, window, feature) key (see
    ``baseline_tracker.py``). Any group whose current value falls too far
@@ -48,6 +52,7 @@ TIER_CRITICAL = "CRITICAL"
 
 METHOD_ZSCORE = "zscore"
 METHOD_DRIFT_RATIO = "drift_ratio"
+METHOD_ABSOLUTE_THRESHOLD = "absolute_threshold"
 
 
 def _utcnow() -> datetime:
@@ -103,6 +108,9 @@ class AnomalyDetector:
         self._prediction_type = self._config.get("anomaly_prediction_type", "anomaly_score")
         model_name = self._config.get("model_name", "anomaly_baseline_zscore_v1")
         self._predict_every = int(self._config.get("predict_every_n_polls", 3))
+        self._write_cooldown_polls = int(self._config.get("write_cooldown_polls", 18))
+        # finding_name (group_name / absolute_threshold name) -> last poll written
+        self.cooldown_tracker: dict[str, int] = {}
 
         self._scoring_windows: list[str] = self._config.get("scoring_windows", ["15min"])
         self._scored_features: list[str] = self._config.get(
@@ -116,6 +124,7 @@ class AnomalyDetector:
         )
         self._derived_features: list[dict] = self._config.get("derived_features", [])
         self._drift_detectors: list[dict] = self._config.get("drift_detectors", [])
+        self._absolute_thresholds: list[dict] = self._config.get("absolute_thresholds", [])
         self._drift_warning = float(self._config.get("drift_ratio_warning", 0.15))
         self._drift_critical = float(self._config.get("drift_ratio_critical", 0.30))
 
@@ -126,15 +135,35 @@ class AnomalyDetector:
         self._group_of: dict[int, str] = {
             s["id"]: s.get("signal_group", "") for s in catalog if s.get("id") is not None
         }
+        self._wincc_tag_of: dict[int, str] = {
+            s["id"]: s.get("wincc_tag", "") or ""
+            for s in catalog
+            if s.get("id") is not None
+        }
         self._baselines = baseline_tracker or BaselineTracker()
         self._writer = AnomalyWriter(signal_client, auth_client, model_name=model_name)
 
         self.last_findings: list[GroupAnomaly] = []
         self.history: deque = deque(maxlen=100)
+        # One-time warn when a Stage-0 threshold matches zero signals
+        # (misconfigured match_contains / missing catalog tags).
+        self._empty_match_warned: set[str] = set()
 
     @property
     def prediction_type(self) -> str:
         return self._prediction_type
+
+    def should_write(self, finding_name: str, poll_count: int) -> bool:
+        """Return True and record poll if this finding is past its write cooldown.
+
+        Throttles POST /ml-predictions only. Detection, get_status(), and
+        get_history() are never gated by this tracker.
+        """
+        last = self.cooldown_tracker.get(finding_name, -999999)
+        if poll_count - last >= self._write_cooldown_polls:
+            self.cooldown_tracker[finding_name] = poll_count
+            return True
+        return False
 
     # ── Pipeline entry point ──────────────────────────────────────────
 
@@ -145,7 +174,8 @@ class AnomalyDetector:
 
         Mirrors ``ProcessStateDetector.on_tick`` — never raises, gated by
         readiness and a poll cadence, and records a rolling history for
-        the status endpoints.
+        the status endpoints. Persisting findings are still scored every
+        tick; ``write_cooldown_polls`` only throttles repeat writes.
         """
         if vector is None or not phase_name:
             return
@@ -158,6 +188,8 @@ class AnomalyDetector:
 
             written = 0
             for finding in findings:
+                if not self.should_write(finding.group_name, poll_count):
+                    continue
                 ok = await self._writer.write_finding(finding, vector)
                 if ok:
                     written += 1
@@ -192,16 +224,23 @@ class AnomalyDetector:
     ) -> list[GroupAnomaly]:
         """Update baselines and return anomaly findings for this tick.
 
-        Baselines are updated for the current phase on every call (so
-        every phase accrues its own "normal" over time, Section 7.2);
-        findings are only produced when ``is_confirmed_phase`` is True (or
-        gating is disabled in config) — matching Section 8's dashboard
-        rule that these are "still... computed internally for learning
-        purposes" even when suppressed from the dashboard.
+        Stage 0 (absolute safety thresholds) always runs first and is
+        never gated by confirmed-phase or min_baseline_samples.
+
+        Stages 1/2: baselines are updated for the current phase on every
+        call (so every phase accrues its own "normal" over time,
+        Section 7.2); findings are only produced when
+        ``is_confirmed_phase`` is True (or gating is disabled in config)
+        — matching Section 8's dashboard rule that these are "still...
+        computed internally for learning purposes" even when suppressed
+        from the dashboard.
         """
         findings: list[GroupAnomaly] = []
         if vector is None or not phase_name:
             return findings
+
+        # Stage 0 — absolute safety limits (not phase-/baseline-gated).
+        findings.extend(self._check_absolute_thresholds(vector, phase_name))
 
         try:
             group_feats_by_window: dict[str, dict[str, dict[str, float]]] = {}
@@ -233,7 +272,7 @@ class AnomalyDetector:
             )
         except Exception as exc:  # scoring must never raise
             logger.error("AnomalyDetector.score failed: %s", exc)
-            return []
+            return findings
 
         return findings
 
@@ -249,6 +288,104 @@ class AnomalyDetector:
         return list(self.history)
 
     # ── Internal helpers ───────────────────────────────────────────────
+
+    @staticmethod
+    def _apply_op(value: float, operator: str, threshold: float) -> bool:
+        if operator == "gt":
+            return value > threshold
+        if operator == "lt":
+            return value < threshold
+        if operator == "gte":
+            return value >= threshold
+        if operator == "lte":
+            return value <= threshold
+        return False
+
+    def _check_absolute_thresholds(
+        self, vector, phase_name: str
+    ) -> list[GroupAnomaly]:
+        """Stage 0 — client-confirmed physical safety limits.
+
+        Runs every scoring tick regardless of ``score_only_confirmed_phases``
+        and ``min_baseline_samples``. Group+role+optional wincc_tag
+        substring filter — no hardcoded signal IDs.
+        """
+        results: list[GroupAnomaly] = []
+        for conf in self._absolute_thresholds:
+            name = conf.get("name")
+            group = conf.get("group")
+            role = conf.get("role")
+            window_key = conf.get("window_key")
+            operator = conf.get("operator")
+            threshold = conf.get("threshold")
+            severity = conf.get("severity")
+            aggregate = conf.get("aggregate", "max")
+            if not (name and group and role and window_key and operator and severity):
+                continue
+            if threshold is None:
+                continue
+
+            wf = vector.windows.get(window_key)
+            if wf is None:
+                continue
+
+            match_terms = conf.get("match_contains")  # list[str] | None
+            if isinstance(match_terms, str):
+                match_terms = [match_terms]
+
+            def _tag_matches(wincc_tag: str) -> bool:
+                if not match_terms:
+                    return True
+                tag_lower = (wincc_tag or "").lower()
+                return any(term.lower() in tag_lower for term in match_terms)
+
+            vals = [
+                sf.last_val
+                for sid, sf in wf.signal_features.items()
+                if self._group_of.get(sid) == group
+                and self._role_of.get(sid) == role
+                and _tag_matches(self._wincc_tag_of.get(sid, ""))
+                and sf.last_val is not None
+            ]
+            if not vals:
+                if name not in self._empty_match_warned:
+                    logger.warning(
+                        "absolute_threshold=%s: no signals matched "
+                        "group=%s role=%s match_contains=%s",
+                        name,
+                        group,
+                        role,
+                        match_terms,
+                    )
+                    self._empty_match_warned.add(name)
+                continue
+
+            value = max(vals) if aggregate == "max" else min(vals)
+            if not self._apply_op(value, operator, float(threshold)):
+                continue
+
+            description = (conf.get("description") or "").strip()
+            explanation = (
+                f"absolute_threshold={name} value={value:.2f} "
+                f"threshold={threshold} | {description}"
+            )
+            results.append(
+                GroupAnomaly(
+                    prediction_type=self._prediction_type,
+                    group_name=name,
+                    window_key=window_key,
+                    feature_name=name,
+                    value=round(float(value), 4),
+                    score=0.0,
+                    method=METHOD_ABSOLUTE_THRESHOLD,
+                    confidence=1.0,
+                    tier=severity,
+                    phase_name=phase_name,
+                    is_derived=False,
+                    explanation=explanation,
+                )
+            )
+        return results
 
     @staticmethod
     def _group_by_prefix(group_features: dict[str, float]) -> dict[str, dict[str, float]]:

@@ -12,6 +12,7 @@ import os
 from datetime import datetime, timezone
 
 from anomaly.detector import (
+    METHOD_ABSOLUTE_THRESHOLD,
     METHOD_DRIFT_RATIO,
     METHOD_ZSCORE,
     TIER_CRITICAL,
@@ -231,3 +232,264 @@ def test_score_never_raises_on_empty_vector():
     assert detector.score(empty_vector, "stable_production", True) == []
     assert detector.score(None, "stable_production", True) == []
     assert detector.score(empty_vector, "", True) == []
+
+
+# ─── Stage 0 — absolute safety thresholds ─────────────────────────────
+
+
+def _catalog_with_process_water() -> list[dict]:
+    return _catalog() + [
+        {
+            "id": 9,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Temperatur",
+        },
+    ]
+
+
+def _detector_with_process_water() -> AnomalyDetector:
+    return AnomalyDetector(
+        _catalog_with_process_water(), CONFIG_PATH, signal_client=None, auth_client=None
+    )
+
+
+def _process_water_vector(last_val: float) -> FeatureVector:
+    """1min window with a single process_water/actual temperature reading."""
+    signal_map = {9: _sf(9, "process_water", last_val)}
+    return FeatureVector(
+        model_key="anomaly",
+        timestamp=datetime.now(timezone.utc),
+        windows={"1min": _wf(signal_map, "1min")},
+        is_ready=True,
+    )
+
+
+def test_process_water_alarm_fires_above_64():
+    detector = _detector_with_process_water()
+    findings = detector.score(_process_water_vector(66.0), "startup", False)
+
+    alarm = [f for f in findings if f.group_name == "process_water_temp_alarm"]
+    assert len(alarm) == 1
+    assert alarm[0].tier == TIER_WARNING
+    assert alarm[0].method == METHOD_ABSOLUTE_THRESHOLD
+    assert alarm[0].prediction_type == "anomaly_score"
+    assert alarm[0].confidence == 1.0
+
+
+def test_process_water_critical_fires_above_65():
+    detector = _detector_with_process_water()
+    findings = detector.score(_process_water_vector(66.0), "stable_production", True)
+
+    names = {f.group_name for f in findings if f.method == METHOD_ABSOLUTE_THRESHOLD}
+    assert "process_water_temp_alarm" in names
+    assert "process_water_temp_critical" in names
+    critical = [f for f in findings if f.group_name == "process_water_temp_critical"]
+    assert critical[0].tier == TIER_CRITICAL
+
+
+def test_absolute_threshold_ignores_confirmed_phase_gate():
+    detector = _detector_with_process_water()
+    assert detector._score_only_confirmed is True
+
+    findings = detector.score(_process_water_vector(66.0), "startup", False)
+
+    absolute = [f for f in findings if f.method == METHOD_ABSOLUTE_THRESHOLD]
+    assert any(f.group_name == "process_water_temp_alarm" for f in absolute)
+    # Stage 1/2 must stay silent without a confirmed phase / baseline.
+    assert all(f.method == METHOD_ABSOLUTE_THRESHOLD for f in findings)
+
+
+def test_absolute_threshold_below_normal_no_fire():
+    detector = _detector_with_process_water()
+    findings = detector.score(_process_water_vector(59.0), "stable_production", True)
+
+    absolute = [f for f in findings if f.method == METHOD_ABSOLUTE_THRESHOLD]
+    assert absolute == []
+
+
+def test_temp_alarm_checks_both_temperature_sensors():
+    catalog = _catalog() + [
+        {
+            "id": 9,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Temperatur",
+        },
+        {
+            "id": 10,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10I203_temp",
+        },
+        {
+            "id": 11,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Drehzahl",
+        },
+    ]
+    detector = AnomalyDetector(catalog, CONFIG_PATH, signal_client=None, auth_client=None)
+    signal_map = {
+        9: _sf(9, "process_water", 59.7),
+        10: _sf(10, "process_water", 66.0),
+        11: _sf(11, "process_water", 90.0),  # pump speed — must be excluded
+    }
+    vector = FeatureVector(
+        model_key="anomaly",
+        timestamp=datetime.now(timezone.utc),
+        windows={"1min": _wf(signal_map, "1min")},
+        is_ready=True,
+    )
+    findings = detector.score(vector, "startup", False)
+
+    alarm = [f for f in findings if f.group_name == "process_water_temp_alarm"]
+    assert len(alarm) == 1
+    assert alarm[0].value == 66.0  # max of temps, not pump 90.0
+    assert alarm[0].tier == TIER_WARNING
+
+
+def test_pressure_low_checks_both_pressure_sensors():
+    catalog = _catalog() + [
+        {
+            "id": 12,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Druck1",
+        },
+        {
+            "id": 13,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Druck2",
+        },
+    ]
+    detector = AnomalyDetector(catalog, CONFIG_PATH, signal_client=None, auth_client=None)
+    signal_map = {
+        12: _sf(12, "process_water", 10.5),
+        13: _sf(13, "process_water", 9.8),
+    }
+    vector = FeatureVector(
+        model_key="anomaly",
+        timestamp=datetime.now(timezone.utc),
+        windows={"1min": _wf(signal_map, "1min")},
+        is_ready=True,
+    )
+    findings = detector.score(vector, "stable_production", True)
+
+    pressure = [f for f in findings if f.group_name == "process_water_pressure_low"]
+    assert len(pressure) == 1
+    assert pressure[0].value == 9.8
+    assert pressure[0].tier == TIER_WARNING
+
+
+def test_pump_speed_never_included_in_temp_check():
+    catalog = _catalog() + [
+        {
+            "id": 11,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Drehzahl",
+        },
+    ]
+    detector = AnomalyDetector(catalog, CONFIG_PATH, signal_client=None, auth_client=None)
+    signal_map = {11: _sf(11, "process_water", 90.0)}
+    vector = FeatureVector(
+        model_key="anomaly",
+        timestamp=datetime.now(timezone.utc),
+        windows={"1min": _wf(signal_map, "1min")},
+        is_ready=True,
+    )
+    findings = detector.score(vector, "startup", False)
+
+    absolute = [f for f in findings if f.method == METHOD_ABSOLUTE_THRESHOLD]
+    assert absolute == []
+
+
+def test_empty_match_warns_once_not_every_poll(caplog):
+    import logging
+
+    catalog = _catalog() + [
+        {
+            "id": 11,
+            "signal_group": "process_water",
+            "signal_role": "actual",
+            "wincc_tag": "EX10_Prozesswasser_Drehzahl",
+        },
+    ]
+    detector = AnomalyDetector(catalog, CONFIG_PATH, signal_client=None, auth_client=None)
+    signal_map = {11: _sf(11, "process_water", 90.0)}
+    vector = FeatureVector(
+        model_key="anomaly",
+        timestamp=datetime.now(timezone.utc),
+        windows={"1min": _wf(signal_map, "1min")},
+        is_ready=True,
+    )
+
+    with caplog.at_level(logging.WARNING, logger="anomaly.detector"):
+        for _ in range(3):
+            detector._check_absolute_thresholds(vector, "startup")
+
+    warn_msgs = [
+        r.message
+        for r in caplog.records
+        if r.levelno == logging.WARNING and "absolute_threshold=" in r.message
+    ]
+    # One warning per threshold name that had an empty match (temp alarm,
+    # temp critical, pressure) — not repeated across the 3 polls.
+    assert len(warn_msgs) == 3
+    assert len(set(warn_msgs)) == 3
+    assert "process_water_temp_alarm" in detector._empty_match_warned
+    assert "process_water_temp_critical" in detector._empty_match_warned
+    assert "process_water_pressure_low" in detector._empty_match_warned
+
+
+# ─── Write cooldown (throttles /ml-predictions only) ──────────────────
+
+
+def test_cooldown_blocks_repeat_write_within_window():
+    detector = _detector()
+    assert detector._write_cooldown_polls == 18
+
+    assert detector.should_write("process_water_temp_alarm", 10) is True
+    assert detector.should_write("process_water_temp_alarm", 15) is False
+    assert detector.should_write("process_water_temp_alarm", 28) is True  # 18+ later
+
+
+def test_cooldown_independent_per_finding_name():
+    detector = _detector()
+
+    assert detector.should_write("process_water_temp_alarm", 10) is True
+    assert detector.should_write("melt_pressure", 10) is True  # different key, own timer
+    assert detector.should_write("process_water_temp_alarm", 12) is False
+    assert detector.should_write("melt_pressure", 12) is False
+
+
+def test_status_and_history_unaffected_by_cooldown():
+    """Persisting findings stay in status/history even when writes are skipped."""
+    import asyncio
+    from unittest.mock import AsyncMock
+
+    detector = _detector_with_process_water()
+    detector._writer.write_finding = AsyncMock(return_value=True)
+    vector = _process_water_vector(66.0)
+
+    async def _run() -> None:
+        # Scoring ticks at predict_every_n_polls=3; cooldown=18 so only the
+        # first tick writes, later ticks still update status/history.
+        for poll in (3, 6, 9, 12):
+            await detector.on_tick(vector, "startup", False, poll)
+            status = detector.get_status()
+            assert status["findings_count"] > 0
+            names = {f["group_name"] for f in status["findings"]}
+            assert "process_water_temp_alarm" in names
+
+    asyncio.run(_run())
+
+    history = detector.get_history()
+    assert len(history) == 4
+    assert all(h["findings_count"] > 0 for h in history)
+    # First scoring tick writes both alarm + critical; later ticks skip writes.
+    assert history[0]["written_count"] == 2
+    assert all(h["written_count"] == 0 for h in history[1:])
+    assert detector._writer.write_finding.await_count == 2
