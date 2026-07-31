@@ -13,6 +13,11 @@ services:
     environment:
       LOG_DIR: /app/logs
       TOPIC: EX10/#
+      METRICS_PORT: "9101"
+      METRICS_ENABLED: "true"
+
+    ports:
+      - "9101:9101"
 
     volumes:
       - ${HOST_LOG_DIR:-./logs}:/app/logs

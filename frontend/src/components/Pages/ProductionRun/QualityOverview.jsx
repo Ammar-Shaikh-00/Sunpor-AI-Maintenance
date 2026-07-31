@@ -43,7 +43,7 @@ const EditInput = ({ field, value, onChange, t }) => (
       name={field.name}
       value={value || ""}
       onChange={onChange}
-      className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+      className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
     />
   </div>
 );
@@ -55,7 +55,7 @@ const EditCheckbox = ({ field, checked, onChange, t }) => (
       name={field.name}
       checked={Boolean(checked)}
       onChange={onChange}
-      className="h-4 w-4 accent-violet-600"
+      className="h-4 w-4 accent-blue-600"
     />
     {t(field.labelKey)}
   </label>
@@ -103,7 +103,7 @@ export default function QualityOverview({
   };
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-6 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-slate-950">{t("productionRun.quality.title")}</h2>
         <div className="flex items-center gap-2">
@@ -114,7 +114,7 @@ export default function QualityOverview({
           {editable && !editing && (
             <button
               onClick={startEdit}
-              className="inline-flex items-center gap-2 rounded-lg border border-violet-200 px-3 py-2 text-sm font-semibold text-violet-700 transition hover:bg-violet-50"
+              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 px-3 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
             >
               <Edit3 size={15} />
               {t("productionRun.actions.edit")}
@@ -163,7 +163,7 @@ export default function QualityOverview({
               name="notes"
               value={form.notes || ""}
               onChange={handleChange}
-              className="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+              className="min-h-24 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
             />
           </div>
 
@@ -178,7 +178,7 @@ export default function QualityOverview({
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <Save size={15} />
               {saving ? t("productionRun.actions.saving") : t("productionRun.quality.actions.save")}

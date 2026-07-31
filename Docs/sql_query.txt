@@ -34,6 +34,10 @@ docker exec -i sunpor-timescaledb psql -U sunpor_user -d sunpor_db -c "\copy (SE
 
 
 
+backup command:
+docker exec purchase_dashboard_postgres pg_dump -U postgres -Fc purchase_dashboard > purchase_dashboard_$(date +%F).dump
+
+
 Restore command:
 docker cp sunpor_2026-06-24_08-04.dump sunpor-timescaledb:/tmp/backup.dump (copy backup file into database)
 docker exec -it sunpor-timescaledb pg_restore -U sunpor_user -d sunpor_db -c /tmp/backup.dump

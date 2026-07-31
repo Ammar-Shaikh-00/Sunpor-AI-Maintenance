@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
+import { formatApiDateTime } from "../../../utils/datetime";
 
 export default function LatestSignalValues() {
   const { t } = useTranslation();
@@ -75,7 +76,7 @@ export default function LatestSignalValues() {
   }
 
   const formattedDate = snapshotTime
-    ? new Date(snapshotTime).toLocaleString("de-DE")
+    ? formatApiDateTime(snapshotTime)
     : "—";
 
   const sortedSignals = [...signals].sort((a, b) => {
@@ -97,7 +98,7 @@ export default function LatestSignalValues() {
         className={`rounded-2xl border p-4 transition-all duration-500 ${
           isChanged
             ? "scale-105 border-green-400 bg-green-100"
-            : "border-gray-200 bg-white"
+            : "border-gray-200 bg-[#C5C8CF]"
         }`}
       >
         <p className="text-xs text-gray-500">{meta.display_name || row.wincc_tag}</p>
@@ -139,7 +140,7 @@ export default function LatestSignalValues() {
         <div className="text-center">
           <button
             onClick={() => setShowMore(!showMore)}
-            className="rounded-lg bg-violet-600 px-4 py-2 text-sm text-white hover:bg-violet-700"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
           >
             {showMore
               ? t("dashboard.latestSignals.hideValues")

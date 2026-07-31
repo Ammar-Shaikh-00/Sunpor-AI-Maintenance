@@ -28,7 +28,7 @@ export default function SidebarFilters() {
           </select>
         </div>
 
-        <button className="w-full bg-violet-600 hover:bg-violet-700 transition-all rounded-xl py-3 font-semibold">
+        <button className="w-full bg-blue-600 hover:bg-blue-700 transition-all rounded-xl py-3 font-semibold">
           Apply Filters
         </button>
 

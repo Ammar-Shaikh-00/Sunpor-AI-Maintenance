@@ -125,7 +125,7 @@ const SimpleLiveChart = ({
   }, [chartData, yDomainProp]);
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow min-w-0 overflow-hidden">
+    <div className="bg-[#C5C8CF] rounded-2xl p-4 shadow min-w-0 overflow-hidden">
       <div className="mb-4">
         <h3 className="text-lg font-bold">{title}</h3>
         {legend && <p className="text-xs text-gray-500">{legend}</p>}

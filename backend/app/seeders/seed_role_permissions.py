@@ -31,10 +31,13 @@ ROLE_PERMISSION_MAP: dict[str, list[str]] = {
     "Operator": [
         "production.view",
         "production.create",
+        "production.update",
         "event.view",
         "event.create",
+        "event.update",
         "quality.view",
         "quality.create",
+        "quality.update",
         "material_block.view",
         "material_block.create",
     ],

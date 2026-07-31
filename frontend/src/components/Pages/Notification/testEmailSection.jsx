@@ -24,7 +24,7 @@ const testEmailSection = ({testEmail, setTestEmail, handleTestEmail ,testEmailMu
                     placeholder="test@example.com"
                     value={testEmail}
                     onChange={(e) => setTestEmail(e.target.value)}
-                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 mt-2 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                    className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                 />
                 <p className="text-xs text-slate-500 mt-1">
                     {t("emptySendAll")}
@@ -33,7 +33,7 @@ const testEmailSection = ({testEmail, setTestEmail, handleTestEmail ,testEmailMu
             <button
                 onClick={handleTestEmail}
                 disabled={testEmailMutation.isPending}
-                className="px-6 py-3 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                className="px-6 py-3 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
             >
                 {testEmailMutation.isPending ? t("sending") : t("sendTestEmail")}
             </button>

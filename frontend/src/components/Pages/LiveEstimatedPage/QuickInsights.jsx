@@ -97,22 +97,22 @@ export default function QuickInsights({
       description: (
         <>
           {t("liveEstimated.insights.performance.description")}{" "}
-          <span className="font-bold text-violet-600">
+          <span className="font-bold text-blue-600">
             {performanceIndex.toFixed(1)}%
           </span>
         </>
       ),
 
       icon: TrendingUp,
-      color: "text-violet-600",
-      bg: "bg-violet-50 border-violet-100",
+      color: "text-blue-600",
+      bg: "bg-blue-50 border-blue-100",
     },
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 shadow-sm p-6">
       <div className="mb-6">
-        <h2 className="text-xl font-bold text-violet-700">
+        <h2 className="text-xl font-bold text-blue-700">
           {t("liveEstimated.insights.title")}
         </h2>
       </div>

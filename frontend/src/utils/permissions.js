@@ -35,6 +35,15 @@ export const PERMISSION_GROUPS = [
     permissions: ["material_block.create", "material_block.view"],
   },
   {
+    labelKey: "admin.permissions.groups.dropdowns",
+    permissions: [
+      "dropdown.create",
+      "dropdown.view",
+      "dropdown.update",
+      "dropdown.delete",
+    ],
+  },
+  {
     labelKey: "admin.permissions.groups.signals",
     permissions: ["signal.view"],
   },
@@ -76,13 +85,45 @@ export function groupPermissions(allPermissions = [], t = (key) => key) {
   return grouped;
 }
 
-export function filterMenuByPermissions(menuData, hasPermission) {
+export function filterMenuByPermissions(
+  menuData,
+  hasPermission,
+  hasAnyPermission = () => false,
+  user = null
+) {
   return menuData
     .map((section) => ({
       ...section,
-      items: section.items.filter(
-        (item) => !item.permission || hasPermission(item.permission)
-      ),
+      items: section.items.filter((item) => {
+        if (item.operatorOnly && !isOperatorOnlyUser(user)) {
+          return false;
+        }
+        if (item.anyOf?.length) {
+          return hasAnyPermission(item.anyOf);
+        }
+        return !item.permission || hasPermission(item.permission);
+      }),
     }))
     .filter((section) => section.items.length > 0);
+}
+
+export function getHomePath(user) {
+  if (isOperatorOnlyUser(user)) {
+    return "/operator";
+  }
+
+  return "/";
+}
+
+export function isOperatorOnlyUser(user) {
+  const roles = user?.roles?.map((role) => role.name) ?? [];
+  return (
+    roles.includes("Operator") &&
+    !roles.some((name) => name === "SuperAdmin" || name === "Admin")
+  );
+}
+
+export function isSuperAdminUser(user) {
+  const roles = user?.roles?.map((role) => role.name) ?? [];
+  return roles.includes("SuperAdmin");
 }

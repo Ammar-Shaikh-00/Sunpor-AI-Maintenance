@@ -2,7 +2,12 @@
 .env
 .env.local
 *.env.local
+Docs/ServerInfo/
 Docs/ServerInfo/serverAccess.txt
+
+# Word lock / temp files
+~$*.docx
+~$*.xlsx
 
 # Python
 __pycache__/
@@ -16,6 +21,7 @@ venv/
 my-env/
 backend/my-env/
 AI_ML_Service/.venv/
+operator_assist_service/my-env/
 
 # Node / frontend build
 node_modules/
@@ -29,3 +35,6 @@ build/
 *.swp
 .DS_Store
 Thumbs.db
+
+# Local analysis
+DataAnalysis

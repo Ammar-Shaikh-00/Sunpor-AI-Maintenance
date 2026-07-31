@@ -3,18 +3,23 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useDataExportCatalog, useDataExportQuery } from "../../../hooks/useDataExport";
 import { downloadCsv } from "../../../utils/csvExport";
+import {
+  displayDateEndToUtcIso,
+  displayDateStartToUtcIso,
+  formatApiDateTime,
+} from "../../../utils/datetime";
 
 const PAGE_SIZE = 100;
 const EXPORT_LIMIT = 10000;
 
 function toIsoDateStart(value) {
   if (!value) return undefined;
-  return new Date(`${value}T00:00:00`).toISOString();
+  return displayDateStartToUtcIso(value);
 }
 
 function toIsoDateEnd(value) {
   if (!value) return undefined;
-  return new Date(`${value}T23:59:59.999`).toISOString();
+  return displayDateEndToUtcIso(value);
 }
 
 function formatCell(value) {
@@ -23,6 +28,9 @@ function formatCell(value) {
   }
   if (typeof value === "boolean") {
     return value ? "true" : "false";
+  }
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    return formatApiDateTime(value);
   }
   return String(value);
 }
@@ -244,14 +252,14 @@ export default function DataExportPage() {
         <p className="mt-1 text-sm text-slate-500">{t("dataExport.description")}</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <div className="rounded-2xl border border-slate-200 bg-[#C5C8CF] p-4 shadow-sm sm:p-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium text-slate-700">{t("dataExport.dataset")}</span>
             <select
               value={datasetKey}
               onChange={(event) => setDatasetKey(event.target.value)}
-              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
             >
               {catalog.map((item) => (
                 <option key={item.key} value={item.key}>
@@ -267,7 +275,7 @@ export default function DataExportPage() {
               type="date"
               value={fromDate}
               onChange={(event) => setFromDate(event.target.value)}
-              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
             />
           </label>
 
@@ -277,7 +285,7 @@ export default function DataExportPage() {
               type="date"
               value={toDate}
               onChange={(event) => setToDate(event.target.value)}
-              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+              className="rounded-xl border border-slate-200 px-3 py-2.5 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
             />
           </label>
 
@@ -286,7 +294,7 @@ export default function DataExportPage() {
               type="button"
               onClick={() => handlePreview(0)}
               disabled={loading}
-              className="flex-1 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60"
+              className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
             >
               {loading ? t("dataExport.loading") : t("dataExport.preview")}
             </button>
@@ -294,7 +302,7 @@ export default function DataExportPage() {
               type="button"
               onClick={handleExport}
               disabled={loading}
-              className="flex-1 rounded-xl border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-semibold text-violet-700 hover:bg-violet-100 disabled:opacity-60"
+              className="flex-1 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
             >
               {t("dataExport.exportCsv")}
             </button>
@@ -331,14 +339,14 @@ export default function DataExportPage() {
                     <button
                       type="button"
                       onClick={() => toggleGroupColumns(group, true)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg border border-slate-200 bg-[#C5C8CF] px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
                     >
                       {t("dataExport.selectGroup")}
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleGroupColumns(group, false)}
-                      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                      className="rounded-lg border border-slate-200 bg-[#C5C8CF] px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50"
                     >
                       {t("dataExport.clearGroup")}
                     </button>
@@ -358,7 +366,7 @@ export default function DataExportPage() {
                   {group.columns.map((column) => (
                     <label
                       key={column.key}
-                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+                      className="flex items-center gap-2 rounded-lg border border-slate-200 bg-[#C5C8CF] px-3 py-2 text-sm text-slate-700"
                     >
                       <input
                         type="checkbox"
@@ -381,7 +389,7 @@ export default function DataExportPage() {
         </div>
       ) : null}
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-2xl border border-slate-200 bg-[#C5C8CF] shadow-sm">
         <div className="flex flex-col gap-2 border-b border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="text-sm text-slate-600">
             {data

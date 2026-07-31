@@ -1,7 +1,12 @@
 from fastapi import Depends
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from typing import Callable, Any
 
+from app.core.datetime_utils import (
+    normalize_datetimes_in_mapping,
+    normalize_datetime_fields_on_instance,
+)
 from app.db.database import get_db
 
 
@@ -41,6 +46,8 @@ def apply_updates(
     ).items():
         setattr(item, field, value)
 
+    normalize_datetime_fields_on_instance(item)
+
 
 def delete_object(
     db: Session,
@@ -60,8 +67,14 @@ def register_crud_routes(
     update_schema,
     response_schema,
     dependency,
-    object_name: str
+    object_name: str,
+    before_create: Callable[[Session, Any, Any], None] | None = None,
+    before_update: Callable[[Session, Any, Any, Any], None] | None = None,
+    before_delete: Callable[[Session, Any, Any], None] | None = None,
+    delete_dependency=None
 ):
+
+    delete_dependency = delete_dependency or dependency
 
     @router.get("", response_model=list[response_schema])
     def list_items(
@@ -77,6 +90,17 @@ def register_crud_routes(
             query = query.filter(
                 model.is_deleted == False
             )
+
+        if hasattr(model, "created_at"):
+            query = query.order_by(model.created_at.desc())
+        elif hasattr(model, "event_time"):
+            query = query.order_by(model.event_time.desc())
+        elif hasattr(model, "input_time"):
+            query = query.order_by(model.input_time.desc())
+        elif hasattr(model, "start_time"):
+            query = query.order_by(model.start_time.desc())
+        elif hasattr(model, "from_time"):
+            query = query.order_by(model.from_time.desc())
 
         return query.offset(skip).limit(limit).all()
 
@@ -99,12 +123,15 @@ def register_crud_routes(
         db: Session = Depends(get_db),
         current_user=Depends(dependency)
     ):
+        if before_create:
+            before_create(db, request, current_user)
 
-        item = model(
-            **request.model_dump(
-                exclude_none=True
-            )
+        payload = normalize_datetimes_in_mapping(
+            request.model_dump(exclude_none=True),
+            model,
         )
+        item = model(**payload)
+        normalize_datetime_fields_on_instance(item)
         db.add(item)
         db.commit()
         db.refresh(item)
@@ -124,6 +151,8 @@ def register_crud_routes(
             model,
             object_id
         )
+        if before_update:
+            before_update(db, item, request, current_user)
         apply_updates(
             item,
             request
@@ -137,7 +166,7 @@ def register_crud_routes(
     def delete_item(
         object_id: int,
         db: Session = Depends(get_db),
-        current_user=Depends(dependency)
+        current_user=Depends(delete_dependency)
     ):
 
         item = get_object_or_404(
@@ -145,6 +174,8 @@ def register_crud_routes(
             model,
             object_id
         )
+        if before_delete:
+            before_delete(db, item, current_user)
         delete_object(
             db,
             item

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import BrandLogo from "../Pages/OperatorAssist/BrandLogo";
 
 /* ---------------- Status Chip ---------------- */
 function StatusChip({ status, label }) {
@@ -58,7 +59,7 @@ function AlertToggle({ status, onToggle, loading }) {
           }`}
         >
           <div
-            className={`bg-white w-3 h-3 rounded-full shadow transform transition ${
+            className={`bg-[#C5C8CF] w-3 h-3 rounded-full shadow transform transition ${
               status ? "translate-x-3" : ""
             }`}
           />
@@ -83,15 +84,15 @@ function UserMenu({ user, role, onLogout }) {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 rounded-full shadow-md px-3 py-1.5 bg-white hover:bg-gray-50"
+        className="flex items-center gap-2 rounded-full border border-slate-400/40 px-3 py-1.5 bg-[#C5C8CF] transition hover:bg-white"
       >
-        <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-          <span className="text-sm font-medium text-purple-700">
+        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+          <span className="text-sm font-medium text-blue-700">
             {name.charAt(0).toUpperCase()}
           </span>
         </div>
 
-        <span className="hidden sm:inline text-sm">{role}</span>
+        <span className="hidden sm:inline text-sm text-slate-900">{role}</span>
 
         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <path d="M6 9l6 6 6-6" />
@@ -99,12 +100,12 @@ function UserMenu({ user, role, onLogout }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-48 bg-white  rounded-lg shadow z-50">
-          <div className="px-4 py-3 border-b">
-            <div className="text-sm font-medium">
+        <div className="absolute right-0 mt-2 w-48 bg-[#C5C8CF] border border-slate-400/30 rounded-lg shadow z-50">
+          <div className="px-4 py-3 border-b border-slate-400/30">
+            <div className="text-sm font-medium text-slate-900">
               {t("header.role")}: {role}
             </div>
-            <div className="text-xs text-gray-500 truncate">{user?.email}</div>
+            <div className="text-xs text-slate-500 truncate">{user?.email}</div>
           </div>
 
           <button
@@ -112,7 +113,7 @@ function UserMenu({ user, role, onLogout }) {
               onLogout();
               setOpen(false);
             }}
-            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50"
+            className="w-full px-4 py-2 text-left text-sm text-slate-900 transition hover:bg-white"
           >
             {t("header.logout")}
           </button>
@@ -159,17 +160,19 @@ export default function Header({
 
   return (
     <header className="mb-6">
-      <div className="flex flex-col lg:flex-row lg:justify-between gap-4 p-6 m-2 mt-6 rounded-xl bg-white shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:justify-between gap-4 p-6 m-2 mt-6 rounded-xl bg-[#C5C8CF] shadow-sm">
 
         {/* Left */}
-        <div>
-          <h1 className="text-2xl font-semibold bg-gradient-to-r from-purple-700 to-purple-500 bg-clip-text text-transparent">
-            {appName}
-          </h1>
-
-          <div className="text-xs uppercase text-gray-500 mt-1">
-            {tagline}
-          </div>
+        <div className="min-w-0">
+          <BrandLogo
+            className="h-9 w-auto max-w-[11rem] sm:h-10 sm:max-w-[13rem] lg:h-11 lg:max-w-[14rem]"
+            alt={appName}
+          />
+          {tagline ? (
+            <div className="mt-1 text-xs uppercase tracking-wide text-slate-500">
+              {tagline}
+            </div>
+          ) : null}
         </div>
 
         {/* Right */}

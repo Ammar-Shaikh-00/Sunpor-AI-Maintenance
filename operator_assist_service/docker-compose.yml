@@ -1,0 +1,13 @@
+networks:
+  sunporNet:
+    external: true
+
+services:
+  operator-assist:
+    build: .
+    container_name: sunpor-operator-assist
+    restart: unless-stopped
+    ports:
+      - "8010:8010"
+    networks:
+      - sunporNet

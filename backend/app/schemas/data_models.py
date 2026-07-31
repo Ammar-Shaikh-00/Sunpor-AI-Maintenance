@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import datetime, time
 from uuid import UUID
 
 from pydantic import BaseModel
 from pydantic import ConfigDict
+from pydantic import Field
 
 from app.models.enums import ProductionRunStatus
 
@@ -128,6 +129,8 @@ class MaterialTypeResponse(MaterialTypeBase):
 class ShiftBase(BaseModel):
 
     name: str
+    start_time: time | None = None
+    end_time: time | None = None
 
 
 class ShiftCreate(ShiftBase):
@@ -138,6 +141,8 @@ class ShiftCreate(ShiftBase):
 class ShiftUpdate(BaseModel):
 
     name: str | None = None
+    start_time: time | None = None
+    end_time: time | None = None
 
 
 class ShiftResponse(ShiftBase):
@@ -259,6 +264,21 @@ class SignalTimeSeriesLatestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class SignalChartPoint(BaseModel):
+
+    timestamp: datetime
+    value: float
+
+
+class SignalChartResponse(BaseModel):
+
+    signal_id: int
+    start_time: datetime
+    end_time: datetime
+    point_count: int
+    points: list[SignalChartPoint]
+
+
 class ProductionRunBase(BaseModel):
 
     company_id: int
@@ -269,8 +289,10 @@ class ProductionRunBase(BaseModel):
     is_trial: bool = False
     shift_id: int
     operator_id: int
-    status: ProductionRunStatus = ProductionRunStatus.CREATED
+    status: ProductionRunStatus = ProductionRunStatus.RUNNING
     comment: str | None = None
+    recipe_number: str | None = None
+    production_order: str | None = None
 
 
 class ProductionRunCreate(ProductionRunBase):
@@ -290,6 +312,8 @@ class ProductionRunUpdate(BaseModel):
     operator_id: int | None = None
     status: ProductionRunStatus | None = None
     comment: str | None = None
+    recipe_number: str | None = None
+    production_order: str | None = None
 
 
 class ProductionRunResponse(ProductionRunBase):
@@ -316,7 +340,9 @@ class ProductionEventBase(BaseModel):
 
 class ProductionEventCreate(ProductionEventBase):
 
-    pass
+    level_1: str = Field(min_length=1)
+    level_2: str = Field(min_length=1)
+    level_3: str = Field(min_length=1)
 
 
 class ProductionEventUpdate(BaseModel):
@@ -351,7 +377,8 @@ class MaterialBehaviorEventBase(BaseModel):
 
 class MaterialBehaviorEventCreate(MaterialBehaviorEventBase):
 
-    pass
+    behavior_type: str = Field(min_length=1)
+    severity: int = Field(ge=1, le=5)
 
 
 class MaterialBehaviorEventUpdate(BaseModel):
@@ -384,7 +411,8 @@ class MaterialBlockBase(BaseModel):
 
 class MaterialBlockCreate(MaterialBlockBase):
 
-    pass
+    reason: str = Field(min_length=1)
+    affected_material: str = Field(min_length=1)
 
 
 class MaterialBlockUpdate(BaseModel):
@@ -417,11 +445,15 @@ class DailyQualityInputBase(BaseModel):
     sieve_distribution_percent: float
     foaming_behavior: str
     comment: str | None = None
+    operator_id: int | None = None
 
 
 class DailyQualityInputCreate(DailyQualityInputBase):
 
-    pass
+    shift: str = Field(min_length=1)
+    foaming_behavior: str = Field(min_length=1)
+    open_holes_percent: float = Field(ge=0, le=100)
+    sieve_distribution_percent: float = Field(ge=0, le=100)
 
 
 class DailyQualityInputUpdate(BaseModel):
@@ -433,6 +465,7 @@ class DailyQualityInputUpdate(BaseModel):
     sieve_distribution_percent: float | None = None
     foaming_behavior: str | None = None
     comment: str | None = None
+    operator_id: int | None = None
 
 
 class DailyQualityInputResponse(DailyQualityInputBase):

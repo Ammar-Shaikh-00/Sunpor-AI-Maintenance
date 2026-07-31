@@ -86,7 +86,7 @@ export default function SectionCard({
               rounded-full
               border
               border-slate-200
-              bg-white
+              bg-[#C5C8CF]
               shadow-sm
               hover:shadow-md
               hover:border-blue-300

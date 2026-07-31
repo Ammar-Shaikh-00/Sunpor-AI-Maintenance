@@ -33,6 +33,12 @@ PERMISSIONS = [
     "material_block.create",
     "material_block.view",
 
+    # Dropdown Management
+    "dropdown.create",
+    "dropdown.view",
+    "dropdown.update",
+    "dropdown.delete",
+
     # Signals
     "signal.view",
 

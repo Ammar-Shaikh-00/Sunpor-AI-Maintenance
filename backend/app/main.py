@@ -12,6 +12,7 @@ from app.api.v1.data_export import router as data_export_router
 from app.api.v1.dropdowns import router as dropdowns_router
 from app.api.v1.master_data import router as master_data_router
 from app.api.v1.ml import router as ml_router
+from app.api.v1.operator import router as operator_router
 from app.api.v1.permissions import router as permissions_router
 from app.api.v1.profile import router as profile_router
 from app.api.v1.production_data import router as production_data_router
@@ -21,6 +22,7 @@ from app.api.v1.system_data import router as system_data_router
 from app.api.v1.users import router as users_router
 from app.core.config import settings
 from app.core.logging_config import setup_logging
+from app.core.display_timezone_middleware import DisplayTimezoneMiddleware
 from app.core.middleware import RequestLoggingMiddleware
 
 os.environ.setdefault("LOG_DIR", settings.LOG_DIR)
@@ -51,6 +53,7 @@ app.add_middleware(
 )
 
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(DisplayTimezoneMiddleware)
 
 app.include_router(
     public_router,
@@ -98,6 +101,10 @@ app.include_router(
 app.include_router(
     form_options_router,
     tags=["Form Options"]
+)
+
+app.include_router(
+    operator_router,
 )
 
 app.include_router(

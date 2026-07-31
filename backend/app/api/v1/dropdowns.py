@@ -21,7 +21,11 @@ from app.schemas.data_models import DropdownValueUpdate
 
 router = APIRouter()
 
-dropdown_dependency = require_permission("system.admin")
+view_dependency = require_permission("dropdown.view")
+create_dependency = require_permission("dropdown.create")
+update_dependency = require_permission("dropdown.update")
+delete_dependency = require_permission("dropdown.delete")
+
 categories_router = APIRouter(prefix="/dropdown-categories")
 values_router = APIRouter(prefix="/dropdown-values")
 
@@ -58,14 +62,14 @@ def get_uuid_object_or_404(
 )
 def list_dropdown_categories(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 500,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(view_dependency)
 ):
 
     return db.query(DropdownCategory).filter(
         DropdownCategory.is_deleted == False
-    ).offset(skip).limit(limit).all()
+    ).order_by(DropdownCategory.name).offset(skip).limit(limit).all()
 
 
 @categories_router.get(
@@ -75,7 +79,7 @@ def list_dropdown_categories(
 def get_dropdown_category(
     category_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(view_dependency)
 ):
 
     return get_uuid_object_or_404(
@@ -93,8 +97,19 @@ def get_dropdown_category(
 def create_dropdown_category(
     request: DropdownCategoryCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(create_dependency)
 ):
+
+    existing = db.query(DropdownCategory).filter(
+        DropdownCategory.code == request.code,
+        DropdownCategory.is_deleted == False,
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="Dropdown category code already exists",
+        )
 
     item = DropdownCategory(**request.model_dump())
     db.add(item)
@@ -112,7 +127,7 @@ def update_dropdown_category(
     category_id: UUID,
     request: DropdownCategoryUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(update_dependency)
 ):
 
     item = get_uuid_object_or_404(
@@ -120,6 +135,20 @@ def update_dropdown_category(
         DropdownCategory,
         category_id
     )
+
+    if request.code and request.code != item.code:
+        existing = db.query(DropdownCategory).filter(
+            DropdownCategory.code == request.code,
+            DropdownCategory.is_deleted == False,
+            DropdownCategory.id != category_id,
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Dropdown category code already exists",
+            )
+
     apply_updates(
         item,
         request
@@ -134,7 +163,7 @@ def update_dropdown_category(
 def delete_dropdown_category(
     category_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(delete_dependency)
 ):
 
     item = get_uuid_object_or_404(
@@ -161,9 +190,9 @@ def list_dropdown_values(
     category_id: UUID | None = None,
     active: bool | None = None,
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 500,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(view_dependency)
 ):
 
     query = db.query(DropdownValue).filter(
@@ -192,7 +221,7 @@ def list_dropdown_values(
 def get_dropdown_value(
     value_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(view_dependency)
 ):
 
     return get_uuid_object_or_404(
@@ -210,7 +239,7 @@ def get_dropdown_value(
 def create_dropdown_value(
     request: DropdownValueCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(create_dependency)
 ):
 
     get_uuid_object_or_404(
@@ -218,6 +247,18 @@ def create_dropdown_value(
         DropdownCategory,
         request.category_id
     )
+
+    existing = db.query(DropdownValue).filter(
+        DropdownValue.category_id == request.category_id,
+        DropdownValue.value == request.value,
+        DropdownValue.is_deleted == False,
+    ).first()
+
+    if existing:
+        raise HTTPException(
+            status_code=409,
+            detail="Dropdown value already exists in this category",
+        )
 
     item = DropdownValue(**request.model_dump())
     db.add(item)
@@ -235,7 +276,7 @@ def update_dropdown_value(
     value_id: UUID,
     request: DropdownValueUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(update_dependency)
 ):
 
     item = get_uuid_object_or_404(
@@ -243,6 +284,31 @@ def update_dropdown_value(
         DropdownValue,
         value_id
     )
+
+    next_category_id = request.category_id or item.category_id
+    next_value = request.value if request.value is not None else item.value
+
+    if request.category_id or request.value:
+        existing = db.query(DropdownValue).filter(
+            DropdownValue.category_id == next_category_id,
+            DropdownValue.value == next_value,
+            DropdownValue.is_deleted == False,
+            DropdownValue.id != value_id,
+        ).first()
+
+        if existing:
+            raise HTTPException(
+                status_code=409,
+                detail="Dropdown value already exists in this category",
+            )
+
+    if request.category_id:
+        get_uuid_object_or_404(
+            db,
+            DropdownCategory,
+            request.category_id
+        )
+
     apply_updates(
         item,
         request
@@ -257,7 +323,7 @@ def update_dropdown_value(
 def delete_dropdown_value(
     value_id: UUID,
     db: Session = Depends(get_db),
-    current_user=Depends(dropdown_dependency)
+    current_user=Depends(delete_dependency)
 ):
 
     item = get_uuid_object_or_404(

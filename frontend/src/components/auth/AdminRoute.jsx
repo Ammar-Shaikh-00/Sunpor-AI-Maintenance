@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/authContext";
+import { isOperatorOnlyUser } from "../../utils/permissions";
 
 export default function PermissionGate({
   permission,
@@ -31,7 +32,7 @@ export function AdminRoute({ permission, anyOf = [], children }) {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-slate-500">
+      <div className="rounded-2xl border border-slate-200 bg-[#C5C8CF] p-8 text-slate-500">
         {t("common.loading")}
       </div>
     );
@@ -51,6 +52,30 @@ export function AdminRoute({ permission, anyOf = [], children }) {
         {t("admin.accessDenied")}
       </div>
     );
+  }
+
+  return children;
+}
+
+/** Operator home shell — only users with the Operator role (not Admin/SuperAdmin). */
+export function OperatorRoute({ children }) {
+  const { t } = useTranslation();
+  const { user, isLoading, isAuthenticated } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-slate-200 bg-[#C5C8CF] p-8 text-slate-500">
+        {t("common.loading")}
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isOperatorOnlyUser(user)) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

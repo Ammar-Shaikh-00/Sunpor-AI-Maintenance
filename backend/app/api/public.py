@@ -2,6 +2,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.core.datetime_utils import (
+    DISPLAY_TIMEZONE_REGIONS,
+    get_display_timezone_label,
+    get_display_timezone_region,
+)
 from app.db.database import get_db
 from app.models.company import Company
 
@@ -25,4 +30,7 @@ def get_app_info(db: Session = Depends(get_db)):
         "company_name": company_name,
         "display_title": display_title,
         "tagline": settings.APP_TAGLINE,
+        "display_timezone_region": get_display_timezone_region(),
+        "display_timezone": get_display_timezone_label(),
+        "display_timezone_options": list(DISPLAY_TIMEZONE_REGIONS.keys()),
     }

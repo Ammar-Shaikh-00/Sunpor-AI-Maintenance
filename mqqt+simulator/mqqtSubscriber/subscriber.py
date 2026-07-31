@@ -1,24 +1,17 @@
 import json
-
 import os
-
 import signal
-
 import sys
-
 import threading
-
 from datetime import datetime
-
 from pathlib import Path
-
-
+from typing import Callable, TypeVar
 
 import paho.mqtt.client as mqtt
-
 import requests
-
 from dotenv import load_dotenv
+
+import metrics
 
 
 
@@ -53,6 +46,11 @@ PASSWORD = os.getenv("PASSWORD")
 TOPIC = os.getenv("TOPIC")
 
 SNAPSHOT_INTERVAL_SECONDS = float(os.getenv("SNAPSHOT_INTERVAL_SECONDS", "2"))
+BACKEND_RETRY_INTERVAL_SECONDS = float(
+    os.getenv("BACKEND_RETRY_INTERVAL_SECONDS", "5")
+)
+
+T = TypeVar("T")
 
 
 
@@ -120,58 +118,69 @@ def get_headers() -> dict[str, str]:
 
 
 
-def refresh_headers() -> None:
-
+def refresh_headers() -> bool:
     global HEADERS
-
-
 
     logger.info("Refreshing backend authentication token")
 
-
-
-    response = requests.post(
-
-        f"{BASE_URL}/auth/login",
-
-        json={
-
-            "email": EMAIL,
-
-            "password": PASSWORD,
-
-        },
-
-        timeout=30,
-
-    )
-
-    response.raise_for_status()
-
-
+    try:
+        response = requests.post(
+            f"{BASE_URL}/auth/login",
+            json={
+                "email": EMAIL,
+                "password": PASSWORD,
+            },
+            timeout=30,
+        )
+        response.raise_for_status()
+    except requests.RequestException as exc:
+        logger.error("Backend authentication failed: %s", exc)
+        return False
 
     with HEADERS_LOCK:
-
         HEADERS = {
-
             "Authorization": f"Bearer {response.json()['access_token']}",
-
         }
 
-
-
     logger.info("Authentication token refreshed")
+    return True
+
+
+def retry_backend_operation(
+    operation: Callable[[], T],
+    description: str,
+) -> T:
+    attempt = 0
+
+    while not _stop_event.is_set():
+        attempt += 1
+        try:
+            return operation()
+        except requests.RequestException as exc:
+            logger.warning(
+                "%s failed (attempt=%d) — backend unavailable, retrying in %ss: %s",
+                description,
+                attempt,
+                BACKEND_RETRY_INTERVAL_SECONDS,
+                exc,
+            )
+            if _stop_event.wait(BACKEND_RETRY_INTERVAL_SECONDS):
+                break
+
+    raise RuntimeError(f"{description} interrupted during shutdown")
 
 
 
 
 
-def login():
-
+def login() -> None:
     logger.info("Authenticating with backend at %s", BASE_URL)
 
-    refresh_headers()
+    def authenticate() -> None:
+        if not refresh_headers():
+            raise requests.ConnectionError("Backend authentication failed")
 
+    retry_backend_operation(authenticate, "Backend authentication")
     logger.info("Authentication successful")
 
 
@@ -334,6 +343,8 @@ def parse_message_timestamp(raw_timestamp) -> datetime:
 
 def on_message(client, userdata, msg):
 
+    metrics.record_message(msg.topic)
+
     try:
 
         payload = json.loads(msg.payload.decode())
@@ -476,6 +487,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
 
         logger.info("Connected to MQTT broker (rc=%s)", rc)
 
+        metrics.set_connected(True)
+
         client.subscribe(TOPIC, qos=1)
 
         logger.info("Subscribed to topic=%s qos=1", TOPIC)
@@ -489,6 +502,8 @@ def on_connect(client, userdata, flags, rc, properties=None):
 
 
 def on_disconnect(client, userdata, rc, properties=None):
+
+    metrics.set_connected(False)
 
     logger.warning("Disconnected from MQTT broker (rc=%s)", rc)
 
@@ -526,25 +541,25 @@ def snapshot_poster_loop() -> None:
 
 
 
-        success = post_snapshot(
-
-            cache=signal_cache,
-
-            tag_map=tag_map,
-
-            base_url=BASE_URL,
-
-            get_headers=get_headers,
-
-            refresh_headers=refresh_headers,
-
-        )
-
-
+        try:
+            success = post_snapshot(
+                cache=signal_cache,
+                tag_map=tag_map,
+                base_url=BASE_URL,
+                get_headers=get_headers,
+                refresh_headers=refresh_headers,
+            )
+        except Exception:
+            logger.exception("Unexpected snapshot poster error")
+            success = False
 
         if success:
-
             signal_cache.clear_dirty()
+        else:
+            logger.warning(
+                "Snapshot not posted — cache remains dirty and will retry every %ss",
+                SNAPSHOT_INTERVAL_SECONDS,
+            )
 
 
 
@@ -591,6 +606,8 @@ def shutdown(mqtt_client: mqtt.Client | None = None) -> None:
 
 
     if mqtt_client is not None:
+
+        metrics.set_connected(False)
 
         try:
 
@@ -644,13 +661,19 @@ def main():
 
         login()
 
-        tag_map = load_signal_catalog()
+        tag_map = retry_backend_operation(
+            load_signal_catalog,
+            "Signal catalog load",
+        )
 
-        load_cache_from_latest_timeseries(tag_map)
+        retry_backend_operation(
+            lambda: load_cache_from_latest_timeseries(tag_map),
+            "Latest signal cache load",
+        )
 
         start_snapshot_poster()
 
-
+        metrics.start_metrics_server()
 
         mqtt_client = mqtt.Client()
 

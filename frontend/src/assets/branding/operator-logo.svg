@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Operator brand logo">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#g)"/>
+  <path d="M18 20h12.5c7.2 0 11.5 3.8 11.5 9.5S37.7 39 30.5 39H24v9H18V20zm6 5.2v8.6h5.8c3.2 0 5.1-1.5 5.1-4.3s-1.9-4.3-5.1-4.3H24z" fill="#fff"/>
+</svg>

@@ -1,11 +1,9 @@
-from sqlalchemy import String
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, DateTime
+from sqlalchemy import ForeignKey, DateTime, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.orm import relationship
-
+from app.core.datetime_utils import utc_now_naive
 from app.db.base import Base
 
 class ProductionEvent(Base):
@@ -52,7 +50,7 @@ class ProductionEvent(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow
+        default=utc_now_naive
     )
 
     production_run = relationship(

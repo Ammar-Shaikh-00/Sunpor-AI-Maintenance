@@ -192,7 +192,7 @@ export default function ProductionRunPage({ runId }) {
       digits: 1,
       rangeDigits: 1,
       icon: <Thermometer size={16} />,
-      color: "text-violet-600",
+      color: "text-blue-600",
     },
     {
       featureName: "load_mean",
@@ -284,7 +284,7 @@ export default function ProductionRunPage({ runId }) {
 
   if (!runId) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+      <div className="rounded-xl border border-dashed border-slate-300 bg-[#C5C8CF] p-10 text-center text-slate-500">
         {t("productionRun.empty")}
       </div>
     );
@@ -292,7 +292,7 @@ export default function ProductionRunPage({ runId }) {
 
   if (loading && !runData) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+      <div className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-10 text-center text-slate-500">
         {t("productionRun.loading")}
       </div>
     );
@@ -309,7 +309,7 @@ export default function ProductionRunPage({ runId }) {
         onComplete={handleCompleteRun}
       />
 
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="rounded-xl border border-slate-200 bg-[#C5C8CF] shadow-sm">
         <div className="flex overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -317,7 +317,7 @@ export default function ProductionRunPage({ runId }) {
               onClick={() => setActiveTab(tab.id)}
               className={`min-w-36 border-b-2 px-6 py-4 text-sm font-semibold uppercase tracking-wide transition ${
                 activeTab === tab.id
-                  ? "border-violet-600 text-violet-700"
+                  ? "border-blue-600 text-blue-700"
                   : "border-transparent text-slate-500 hover:bg-slate-50 hover:text-slate-800"
               }`}
             >
@@ -365,7 +365,7 @@ export default function ProductionRunPage({ runId }) {
       )}
       {activeTab === "ai" && <AiDecisionPanel aiSummary={aiSummary} />}
       {activeTab === "material" && (
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-6 shadow-sm">
           <MaterialProfileTab runId={runId} />
         </section>
       )}

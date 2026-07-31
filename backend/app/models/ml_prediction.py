@@ -8,6 +8,7 @@ from sqlalchemy import ForeignKey, DateTime, Text
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import Mapped, relationship
 
+from app.core.datetime_utils import utc_now_naive
 from app.db.base import Base
 
 class MLPrediction(Base):
@@ -55,7 +56,7 @@ class MLPrediction(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow
+        default=utc_now_naive
     )
 
     production_run = relationship(

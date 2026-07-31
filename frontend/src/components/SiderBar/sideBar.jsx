@@ -27,17 +27,34 @@ const getRunStatusClass = (status = "") => {
   return "text-slate-400";
 };
 
-export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
+function isPathActive(pathname, itemPath) {
+  if (itemPath === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
+}
+
+export default function Sidebar({
+  menuData,
+  mobileSideBar,
+  setMobileSideBar,
+  showProductionRuns = true,
+}) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(true);
   const [openMenus, setOpenMenus] = useState({});
-  const [menuState, setMenuState] = useState(menuData);
   const [productionRuns, setProductionRuns] = useState([]);
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const activeRunId = searchParams.get("runId");
 
   useEffect(() => {
+    if (!showProductionRuns) {
+      setProductionRuns([]);
+      return undefined;
+    }
+
     const fetchProductionRuns = async () => {
       const res = await safeApi.get(`${ENDPOINTS.productionRuns}?limit=5`);
       setProductionRuns(res.data || []);
@@ -48,26 +65,7 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
     const interval = setInterval(fetchProductionRuns, 5000);
 
     return () => clearInterval(interval);
-  }, []);
-
-
-    const handleSetActive = (clickedKey) => {
-        const updatedMenu = menuState.map((section) => ({
-            ...section,
-            items: section.items.map((item) => ({
-            ...item,
-            active: item.labelKey === clickedKey,
-            children: item.children
-                ? item.children.map((child) => ({
-                    ...child,
-                    active: child.labelKey === clickedKey,
-                }))
-                : undefined,
-            })),
-    }));
-
-    setMenuState(updatedMenu);
-    };
+  }, [showProductionRuns]);
 
   const toggleSubmenu = (key) => {
     setOpenMenus((prev) => ({
@@ -78,7 +76,7 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
 
   return (
     <aside
-        className={`fixed lg:sticky left-0 top-0 h-full z-40 py-6 bg-white
+        className={`fixed lg:sticky left-0 top-0 h-full z-40 py-6 bg-[#B1B8C2]
         transform transition-transform duration-300
         ${open ? "w-64" : "w-20"}
         ${mobileSideBar ? "translate-x-0" : "-translate-x-full"}
@@ -86,12 +84,12 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
     >
         <div className="h-full overflow-y-auto">
         
-            <div className="min-h-full rounded-[28px] bg-white/80 border border-purple-100 shadow-[0_12px_40px_rgba(139,92,246,0.12)] backdrop-blur px-4 py-5 flex flex-col">
+            <div className="min-h-full rounded-[28px] bg-[#C5C8CF] border border-slate-400/30 px-4 py-5 flex flex-col">
                 {/* Collapse Button for large Screen */}
                 <div className="hidden lg:flex justify-center mb-4">
                 <button
                     onClick={() => setOpen(!open)}
-                    className="p-2 border rounded-lg hover:bg-purple-50"
+                    className="p-2 border border-slate-400/40 rounded-lg bg-[#C5C8CF] transition hover:bg-white"
                 >
                     <ChevronLeft
                     className={`transition-transform ${!open && "rotate-180"}`}
@@ -110,8 +108,8 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
 
                 {/* Menu */}
                 <nav className="space-y-4">
-                {menuState.map((section, i) => (
-                    <div key={i}>
+                {menuData.map((section, i) => (
+                    <div key={section.titleKey || i}>
 
                     {/* Section Title */}
                     { open && section.titleKey && (
@@ -121,25 +119,27 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                     )}
 
                     {/* Items */}
-                    {section.items.map((item, idx) => (
-                        <div key={idx}>
+                    {section.items.map((item) => {
+                        const isActive = isPathActive(location.pathname, item.path);
+
+                        return (
+                        <div key={item.labelKey}>
 
                         {/* Main Item */}
                         <Link to={item.path}>
                             <div
-                                onClick={() =>{
+                                onClick={() => {
                                         if (item.children) {
                                             toggleSubmenu(item.labelKey);
                                         }
-                                            handleSetActive(item.labelKey);
                                     }
                                 }
                                 className={`flex items-center gap-3 px-4 py-2 rounded-xl cursor-pointer
-                                hover:bg-purple-50 transition
-                                ${item.active ? "bg-purple-100 text-purple-800" : ""}
+                                transition hover:bg-white
+                                ${isActive ? "bg-[#C5C8CF] text-blue-800" : "text-slate-800"}
                                 `}
                             >
-                                <NavIcon name={item.icon} active={item.active} />
+                                <NavIcon name={item.icon} active={isActive} />
                                 {open && <span>{t(item.labelKey)}</span>}
                             </div>
                         </Link>
@@ -147,25 +147,32 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                         {/* Submenu */}
                         {item.children && openMenus[item.labelKey] && (
                             <div className="ml-8 mt-1 space-y-1">
-                            {item.children.map((sub, subIdx) => (
-                                <Link key={subIdx} to={sub.path}>
+                            {item.children.map((sub) => {
+                                const isSubActive = isPathActive(location.pathname, sub.path);
+
+                                return (
+                                <Link key={sub.labelKey} to={sub.path}>
                                     <div
-                                    className="flex px-3 py-1 rounded-lg hover:bg-purple-50 cursor-pointer text-sm"
+                                    className={`flex px-3 py-1 rounded-lg cursor-pointer text-sm transition hover:bg-white ${
+                                      isSubActive ? "bg-[#C5C8CF] text-blue-800" : ""
+                                    }`}
                                     >
-                                    <NavIcon name={sub.icon} active={sub.active} />
+                                    <NavIcon name={sub.icon} active={isSubActive} />
                                     { open && t(sub.labelKey)}
                                     </div>
                                 </Link>
-                            ))}
+                            )})}
                             </div>
                         )}
                         </div>
-                    ))}
+                    )})}
                     </div>
                 ))}
                 </nav>
 
                 <div className="mt-auto pt-6">
+                    {showProductionRuns ? (
+                      <>
                     {open && (
                         <div className="px-3 pb-2 text-xs uppercase tracking-wide text-gray-400">
                             {t("sidebar.productionRuns")}
@@ -187,8 +194,8 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                                     <div
                                         className={`rounded-xl border p-3 my-1 transition ${
                                             isActive
-                                                ? "border-purple-500 bg-purple-600 text-white"
-                                                : "border-slate-200 bg-slate-950 text-white hover:bg-slate-900"
+                                                ? "border-blue-500 bg-blue-600 text-white"
+                                                : "border-slate-400/40 bg-[#B1B8C2] text-slate-900 hover:bg-white"
                                         } ${open ? "" : "px-2"}`}
                                     >
                                         <div className="flex items-start justify-between gap-2">
@@ -204,13 +211,13 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
 
                                         {open && (
                                             <>
-                                                <div className="mt-2 text-sm text-white/90">
+                                                <div className={`mt-2 text-sm ${isActive ? "text-white/90" : "text-slate-700"}`}>
                                                     {t("sidebar.runLine", {
                                                       id: run.id,
                                                       line: run.production_line_id || "—",
                                                     })}
                                                 </div>
-                                                <div className="mt-2 text-right text-xs text-white/70">
+                                                <div className={`mt-2 text-right text-xs ${isActive ? "text-white/70" : "text-slate-500"}`}>
                                                     {formatRunTime(run.start_time)}
                                                 </div>
                                             </>
@@ -224,12 +231,14 @@ export default function Sidebar({ menuData, mobileSideBar, setMobileSideBar}) {
                             to="/forms/production-start"
                             onClick={() => setMobileSideBar(false)}
                         >
-                            <div className={`flex items-center justify-center gap-2 rounded-lg border border-purple-500 px-3 py-2 text-sm font-semibold text-purple-600 transition hover:bg-purple-50 ${open ? "" : "px-2"}`}>
+                            <div className={`flex items-center justify-center gap-2 rounded-lg border border-blue-500 px-3 py-2 text-sm font-semibold text-blue-600 transition hover:bg-blue-50 ${open ? "" : "px-2"}`}>
                                 <Plus size={16} />
                                 {open && <span>{t("sidebar.newProductionRun")}</span>}
                             </div>
                         </Link>
                     </div>
+                      </>
+                    ) : null}
                 </div>
             </div>
         </div>

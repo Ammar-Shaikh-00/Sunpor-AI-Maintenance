@@ -99,7 +99,7 @@ export default function LiveEstimatedPage() {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-purple-500">
+          <h2 className="text-2xl font-bold text-blue-500">
             {t("liveEstimated.title")}
           </h2>
 
@@ -123,7 +123,7 @@ export default function LiveEstimatedPage() {
         window={data.window}
       />
 
-      <h3 className="text-xl font-bold text-purple-500">
+      <h3 className="text-xl font-bold text-blue-500">
         {t("liveEstimated.processParameters")}
       </h3>
 

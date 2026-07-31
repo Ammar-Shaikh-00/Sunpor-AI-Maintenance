@@ -8,11 +8,12 @@
     "delete": "Löschen",
     "actions": "Aktionen",
     "loading": "Laden...",
+    "close": "Schließen",
     "select": "Auswählen...",
     "yes": "Ja",
     "no": "Nein",
-    "active": "Aktiv",
-    "inactive": "Inaktiv",
+  "active": "Aktiv",
+  "inactive": "Inaktiv",
     "allowed": "Erlaubt",
     "blocked": "Gesperrt",
     "status": "Status",
@@ -27,12 +28,12 @@
     "saveChanges": "Änderungen speichern"
   },
   "header": {
-    "role": "Rolle",
-    "logout": "Abmelden",
-    "user": "Benutzer",
-    "loading": "Laden...",
-    "kiStatus": "KI: {{status}}",
-    "unknown": "Unbekannt",
+  "role": "Rolle",
+  "logout": "Abmelden",
+  "user": "Benutzer",
+  "loading": "Laden...",
+  "kiStatus": "KI: {{status}}",
+  "unknown": "Unbekannt",
     "alertService": "Alarmdienst"
   },
   "login": {
@@ -58,7 +59,8 @@
       "offline": "offline"
     },
     "roles": {
-      "admin": "Administrator"
+      "admin": "Administrator",
+      "operator": "Operator"
     }
   },
   "menu": {
@@ -70,6 +72,9 @@
     "dashboard": "Dashboard",
     "productionRuns": "Produktionsläufe",
     "dataExport": "Datenexport",
+    "signalsCharts": "Signalscharts",
+    "allForms": "Alle Formulare",
+    "operatorAssist": "Assistent",
     "productionStart": "Produktionsstart",
     "extruderEvents": "Extruder-Ereignisse",
     "granulatorEvents": "Granulator / Messer",
@@ -79,7 +84,8 @@
     "materialBlocking": "Materialsperre",
     "dailyQuality": "Tägliche Qualität",
     "users": "Benutzer",
-    "roles": "Rollen & Berechtigungen"
+    "roles": "Rollen & Berechtigungen",
+    "dropdowns": "Dropdown-Werte"
   },
   "sidebar": {
     "productionRuns": "Produktionsläufe",
@@ -143,15 +149,85 @@
       "shift": "Schicht",
       "startTime": "Startzeit",
       "affectedMaterial": "Betroffenes Material",
+      "operator": "Operator",
+      "user": "Benutzer",
       "runOption": "Lauf #{{id}}",
       "runStatusOption": "Lauf #{{id}} - {{status}}",
       "loadOptionsFailed": "Formularoptionen konnten nicht geladen werden",
       "loadRunsFailed": "Produktionsläufe konnten nicht geladen werden",
-      "noOptions": "Keine Auswahlwerte verfügbar. Bitte Backend-Seeder ausführen."
+      "noOptions": "Keine Auswahlwerte verfügbar. Bitte Backend-Seeder ausführen.",
+      "productionRunRequired": "Bitte Produktionslauf auswählen.",
+      "noRunningRuns": "Kein aktiver Produktionslauf vorhanden. Bitte zuerst unter Produktionsstart einen Lauf starten.",
+      "level2Required": "Bitte Ebene 2 auswählen.",
+      "level3Required": "Bitte Ebene 3 auswählen.",
+      "requiredField": "Pflichtfeld",
+      "fixErrors": "Bitte füllen Sie alle Pflichtfelder korrekt aus.",
+      "eventTimeRequired": "Bitte Ereigniszeit angeben.",
+      "behaviorTypeRequired": "Bitte Verhaltenstyp auswählen.",
+      "severityRequired": "Bitte Schweregrad angeben.",
+      "severityRange": "Schweregrad muss zwischen 1 und 5 liegen.",
+      "reasonRequired": "Bitte Grund auswählen.",
+      "fromRequired": "Bitte Startzeit angeben.",
+      "toRequired": "Bitte Endzeit angeben.",
+      "toAfterFrom": "Endzeit muss nach der Startzeit liegen.",
+      "affectedMaterialRequired": "Bitte betroffenes Material angeben.",
+      "percentRange": "Wert muss zwischen 0 und 100 liegen.",
+      "detailsSection": "Angaben",
+      "recentEntries": "Letzte Einträge",
+      "recentEntriesHint": "Die 10 zuletzt erfassten Einträge. Bearbeiten ist nur bei aktiven Produktionsläufen möglich.",
+      "noRecentEntries": "Noch keine Einträge vorhanden.",
+      "loadingRecent": "Letzte Einträge werden geladen...",
+      "edit": "Bearbeiten",
+      "complete": "Abschließen",
+      "completing": "Wird abgeschlossen…",
+      "completeSuccess": "Produktionslauf abgeschlossen",
+      "completeError": "Produktionslauf konnte nicht abgeschlossen werden",
+      "completeConfirm": "Produktionslauf #{{id}} wirklich abschließen?",
+      "cannotCompleteInactive": "Nur laufende Produktionsläufe können abgeschlossen werden",
+      "actions": "Aktionen",
+      "cancelEdit": "Bearbeitung abbrechen",
+      "updateEntry": "Eintrag aktualisieren",
+      "updateSuccess": "Eintrag aktualisiert",
+      "updateError": "Eintrag konnte nicht aktualisiert werden",
+      "editingEntry": "Eintrag #{{id}} wird bearbeitet",
+      "cannotEditCompleted": "Bearbeitung nicht möglich – Produktionslauf ist abgeschlossen",
+      "delete": "Löschen",
+      "deleting": "Wird gelöscht…",
+      "deleteConfirm": "Eintrag #{{id}} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteSuccess": "Eintrag gelöscht",
+      "deleteError": "Eintrag konnte nicht gelöscht werden",
+      "cannotDeleteCompleted": "Löschen nicht möglich – Produktionslauf ist abgeschlossen"
     },
     "productionStart": {
-      "title": "Produktionsstart / Produkt",
+      "title": "Produktion starten",
       "description": "Start eines Produktionslaufs mit Materialtyp und Schicht erfassen.",
+      "subtitle": "Neuen Produktionslauf in wenigen Sekunden starten",
+      "help": "Hilfe",
+      "helpText": "Operator, Linie und Schicht werden automatisch erkannt. Wählen Sie das Material, ergänzen Sie optional Angaben und starten Sie den Lauf.",
+      "autoDetected": "Automatisch erkannt",
+      "ok": "OK",
+      "changeShift": "Schicht wechseln",
+      "shiftChanged": "Schicht gesetzt: {{shift}}",
+      "nowTime": "Jetzt, {{time}} ({{zone}})",
+      "stepMaterialTitle": "Material wählen",
+      "stepMaterialHint": "Welcher Materialtyp wird verarbeitet?",
+      "otherMaterial": "Anderes Material",
+      "stepOptionalTitle": "Zusätzliche Angaben (optional)",
+      "stepOptionalHint": "Können auch später ergänzt werden",
+      "showOptional": "Einblenden",
+      "hideOptional": "Ausblenden",
+      "recipeNumber": "Rezeptnummer",
+      "recipePlaceholder": "Rezeptnummer",
+      "recipeShort": "Rezept",
+      "productionOrder": "Produktionsauftrag",
+      "productionOrderPlaceholder": "Optional eingeben...",
+      "commentOptional": "Kommentar (optional)",
+      "commentPlaceholder": "z. B. Besonderheiten, Hinweise...",
+      "stepReviewTitle": "Prüfen & starten",
+      "stepReviewHint": "Alles richtig? Dann Start drücken.",
+      "tip": "Tipp: Sie können zusätzliche Angaben jederzeit nach dem Start im laufenden Produktionslauf erfassen.",
+      "materialRequired": "Bitte ein Material auswählen.",
+      "contextRequired": "Linie oder Schicht fehlt. Bitte Formularoptionen prüfen.",
       "submit": "Produktionslauf starten",
       "success": "Produktionslauf gestartet",
       "error": "Produktionslauf konnte nicht gespeichert werden"
@@ -191,9 +267,24 @@
     "dailyQuality": {
       "title": "Tägliche Qualitätsdaten",
       "description": "Offene Löcher, Siebanalyse und Schaumverhalten eingeben.",
-      "openHoles": "Offene Löcher %",
+      "openHoles": "Offene Löcher (%)",
+      "openHolesShort": "Offene Löcher %",
+      "openHolesHint": "Typischer Bereich für offene Löcher in der Tagesqualität.",
       "sieveDistribution": "Siebverteilung %",
+      "sieveAnalysis": "Siebanalyse (%)",
+      "sieveShort": "Siebanalyse %",
+      "sieveHint": "Typischer Bereich für die Siebanalyse.",
       "foamingBehavior": "Schaumverhalten",
+      "currentSelection": "Aktuelle Auswahl",
+      "typicalRange": "Typische Werte: {{min}} - {{max}} %",
+      "increase": "Erhöhen",
+      "decrease": "Verringern",
+      "commentOptional": "Kommentar (optional)",
+      "commentPlaceholder": "Kommentar eingeben...",
+      "runLabel": "Lauf #{{id}}",
+      "shiftRequired": "Bitte Schicht auswählen",
+      "foamingRequired": "Bitte Schaumverhalten auswählen",
+      "recentHint": "Zuletzt erfasste Qualitätsdaten für schnelle Kontrolle.",
       "submit": "Qualitätsdaten speichern",
       "success": "Qualitätsdaten gespeichert",
       "error": "Qualitätsdaten konnten nicht gespeichert werden"
@@ -201,6 +292,186 @@
     "events": {
       "success": "Ereignis gespeichert",
       "error": "Ereignis konnte nicht gespeichert werden"
+    }
+  },
+  "operatorAssist": {
+    "eyebrow": "Produktionsassistent",
+    "title": "Was muss ich jetzt tun?",
+    "subtitle": "Aktueller Status, schnelle Aktionen und KI-Hinweise für Extrusion E10.",
+    "fallbackForms": "Alle Formulare öffnen",
+    "captureTitle": "Was möchten Sie erfassen?",
+    "captureSubtitle": "Wählen Sie eine Aktion, um Daten schnell zu erfassen.",
+    "showAllEvents": "Alle Ereignisse anzeigen",
+    "shell": {
+      "forOperator": "Operator-Ansicht",
+      "notifications": "Benachrichtigungen",
+      "notificationsPending": "Benachrichtigungen folgen später",
+      "noNotifications": "Keine aktuellen Hinweise",
+      "backHome": "Zurück zum Assistenten"
+    },
+    "context": {
+      "title": "Lauf #{{id}}",
+      "line": "Linie",
+      "material": "Material",
+      "shift": "Schicht",
+      "operator": "Operator",
+      "runId": "Lauf #",
+      "runningTime": "Laufzeit",
+      "status": "Status",
+      "noActiveRun": "Kein aktiver Produktionslauf.",
+      "startRun": "Produktionslauf starten →"
+    },
+    "alert": {
+      "pressure": "Druck",
+      "torque": "Drehmoment",
+      "throughput": "Durchsatz",
+      "probability": "Wahrscheinlichkeit",
+      "checkScreenNow": "Sieb jetzt prüfen",
+      "blockageProbability": "Blockierungswahrscheinlichkeit",
+      "probabilityHint": "aus Assistent-Regeln",
+      "probabilityHorizon": "noch etwa {{minutes}} Minuten",
+      "deltaPending": "Veränderung folgt",
+      "deltaUnavailable": "Keine Verlaufsdaten"
+    },
+    "phases": {
+      "fault_disturbance": "Mögliche Störung erkannt",
+      "screen_blockage": "Mögliche Siebverstopfung erkannt",
+      "screen_blockage_message": "Druck und Drehmoment steigen. Empfehlung: Sieb prüfen und Materialfluss kontrollieren.",
+      "heating_up": "Aufheizen",
+      "startup": "Anfahren",
+      "stable_production": "Stabile Produktion",
+      "low_production": "Niedrige Produktion",
+      "cleaning_run": "Reinigungslauf",
+      "empty_run": "Leerlauf",
+      "cooling_down": "Abkühlen",
+      "shutdown": "Stillstand"
+    },
+    "cards": {
+      "productionStart": {
+        "title": "Produktion starten",
+        "description": "Neuen Lauf beginnen"
+      },
+      "extruderEvents": {
+        "title": "Extruder-Ereignisse",
+        "description": "Phasen & Ereignisse"
+      },
+      "granulatorEvents": {
+        "title": "Messer / Granulator",
+        "description": "Wechsel & Schärfen"
+      },
+      "cleaning": {
+        "title": "Reinigung",
+        "description": "Wasserbecken, Zentrifuge"
+      },
+      "faults": {
+        "title": "Störung melden",
+        "description": "Mechanisch / Elektrisch"
+      },
+      "materialBehavior": {
+        "title": "Materialverhalten",
+        "description": "Frühe Beobachtungen"
+      },
+      "dailyQuality": {
+        "title": "Qualitätsdaten",
+        "description": "Löcher, Siebanalyse, Schaum"
+      },
+      "materialBlocking": {
+        "title": "Materialsperre",
+        "description": "Nachträgliche Sperre"
+      }
+    },
+    "actions": {
+      "reportIssue": "Störung melden",
+      "reportIssueHint": "In 2 Schritten erfassen",
+      "startRun": "Produktion starten",
+      "startRunHint": "Neuen Lauf anlegen",
+      "allForms": "Alle Formulare",
+      "allFormsHint": "Fallback für Power-User"
+    },
+    "suggestions": {
+      "title": "KI-Empfehlungen",
+      "empty": "Aktuell keine Empfehlungen. Assistent wartet auf Sensordaten.",
+      "confidence": "{{value}}% Wahrscheinlichkeit",
+      "confirm": "Bestätigen",
+      "dismiss": "Verwerfen",
+      "confirmed": "Empfehlung bestätigt",
+      "dismissed": "Empfehlung verworfen",
+      "error": "Aktion fehlgeschlagen",
+      "needRun": "Bitte zuerst einen Produktionslauf starten"
+    },
+    "wizard": {
+      "title": "Störung melden",
+      "step": "Schritt {{step}} von 2",
+      "categories": {
+        "mechanical": "Mechanisch",
+        "electrical": "Elektrisch",
+        "temperature": "Temperatur",
+        "material": "Material"
+      },
+      "pickDetail": "Was genau bei {{category}}?",
+      "commentPlaceholder": "Optionaler Kommentar…",
+      "back": "Zurück",
+      "submit": "Speichern",
+      "saving": "Speichern…",
+      "success": "Störung gespeichert",
+      "error": "Speichern fehlgeschlagen",
+      "needRun": "Kein aktiver Lauf vorhanden",
+      "needDetail": "Bitte Detail auswählen"
+    }
+  },
+  "allForms": {
+    "title": "Alle Formulare",
+    "greeting": "Hallo! Was möchten Sie heute erfassen?",
+    "subtitle": "Wählen Sie einen Bereich aus, um schnell und einfach zu starten.",
+    "runBanner": {
+      "title": "Lauf #{{id}}",
+      "line": "Linie",
+      "shift": "Schicht",
+      "date": "Datum",
+      "time": "Uhrzeit",
+      "recipeNumber": "Rezeptnummer",
+      "productionOrder": "Produktionsauftrag",
+      "comment": "Kommentar",
+      "noActiveRun": "Kein aktiver Produktionslauf vorhanden.",
+      "startRun": "Produktionslauf starten →",
+      "status": {
+        "RUNNING": "RUNNING",
+        "COMPLETED": "COMPLETED"
+      }
+    },
+    "cards": {
+      "productionStart": {
+        "title": "Produktionsstart",
+        "description": "Neuen Produktionslauf starten"
+      },
+      "extruderEvents": {
+        "title": "Extruder-Ereignisse",
+        "description": "Pressen und Wartungsereignisse erfassen"
+      },
+      "granulatorEvents": {
+        "title": "Granulator / Messer",
+        "description": "Messereinsatz und Schneidereignisse erfassen"
+      },
+      "cleaning": {
+        "title": "Reinigung",
+        "description": "Reinigungsereignisse für Anlagen und Systeme erfassen"
+      },
+      "faults": {
+        "title": "Störungen",
+        "description": "Mechanische und elektrische Störungen melden"
+      },
+      "materialBehavior": {
+        "title": "Materialverhalten",
+        "description": "Frühe Qualitätsbeobachtungen aus der Produktion"
+      },
+      "materialBlocking": {
+        "title": "Materialsperre",
+        "description": "Identifizierte problematische Produktionsmaterialien erfassen"
+      },
+      "dailyQuality": {
+        "title": "Tägliche Qualität",
+        "description": "Offene Löcher, Siebanalyse und Schaumverhalten eingeben"
+      }
     }
   },
   "admin": {
@@ -262,6 +533,68 @@
       "saveChanges": "Änderungen speichern",
       "createRole": "Rolle anlegen"
     },
+    "dropdowns": {
+      "title": "Dropdown-Verwaltung",
+      "description": "Auswahlwerte für Operator-Formulare zentral verwalten – Kategorien anlegen und Werte pflegen.",
+      "loadFailed": "Dropdown-Kategorien konnten nicht geladen werden",
+      "valuesLoadFailed": "Dropdown-Werte konnten nicht geladen werden",
+      "loadingCategories": "Kategorien werden geladen...",
+      "loadingValues": "Werte werden geladen...",
+      "stats": {
+        "categories": "Kategorien",
+        "values": "Werte in Kategorie",
+        "activeValues": "Aktive Werte"
+      },
+      "validation": {
+        "requiredFields": "Bitte alle Pflichtfelder ausfüllen.",
+        "valueRequired": "Bitte einen Wert eingeben."
+      },
+      "category": {
+        "listTitle": "Kategorien",
+        "search": "Kategorie suchen...",
+        "empty": "Keine Kategorien vorhanden.",
+        "create": "Kategorie anlegen",
+        "edit": "Kategorie bearbeiten",
+        "delete": "Kategorie löschen",
+        "createTitle": "Neue Dropdown-Kategorie",
+        "editTitle": "Dropdown-Kategorie bearbeiten",
+        "name": "Anzeigename",
+        "namePlaceholder": "z. B. Extruder Ebene 2",
+        "code": "Technischer Code",
+        "codePlaceholder": "z. B. extruder_level_2",
+        "codeHint": "Wird von den Formularen verwendet. Nur Kleinbuchstaben, Zahlen und Unterstriche.",
+        "created": "Kategorie angelegt",
+        "updated": "Kategorie aktualisiert",
+        "deleted": "Kategorie gelöscht",
+        "saveFailed": "Kategorie konnte nicht gespeichert werden",
+        "deleteConfirm": "Kategorie \"{{name}}\" wirklich löschen?"
+      },
+      "value": {
+        "selectCategory": "Kategorie auswählen",
+        "selectCategoryHint": "Wählen Sie links eine Kategorie, um deren Werte anzuzeigen und zu bearbeiten.",
+        "search": "Wert suchen...",
+        "empty": "Keine Werte in dieser Kategorie",
+        "emptyHint": "Legen Sie den ersten Auswahlwert für diese Kategorie an.",
+        "create": "Wert hinzufügen",
+        "createTitle": "Neuer Dropdown-Wert",
+        "editTitle": "Dropdown-Wert bearbeiten",
+        "label": "Wert",
+        "placeholder": "z. B. Heating Up",
+        "displayOrder": "Reihenfolge",
+        "order": "Reihenfolge",
+        "active": "Aktiv (in Formularen sichtbar)",
+        "created": "Wert angelegt",
+        "updated": "Wert aktualisiert",
+        "deleted": "Wert gelöscht",
+        "saveFailed": "Wert konnte nicht gespeichert werden",
+        "deleteConfirm": "Wert \"{{value}}\" wirklich löschen?",
+        "activate": "Aktivieren",
+        "deactivate": "Deaktivieren",
+        "activated": "Wert aktiviert",
+        "deactivated": "Wert deaktiviert",
+        "statusFailed": "Wertstatus konnte nicht aktualisiert werden"
+      }
+    },
     "permissions": {
       "groups": {
         "userManagement": "Benutzerverwaltung",
@@ -270,6 +603,7 @@
         "events": "Ereignisse",
         "quality": "Qualität",
         "materialBlocks": "Materialsperren",
+        "dropdowns": "Dropdown-Verwaltung",
         "signals": "Signale",
         "ml": "ML",
         "system": "System",
@@ -279,6 +613,29 @@
   },
   "errors": {
     "requestFailed": "Anfrage fehlgeschlagen"
+  },
+  "signalsCharts": {
+    "title": "Signalscharts",
+    "description": "Liniencharts aller aktiven Signale. Zeitraum wählen, optional nach Name oder Gruppe filtern.",
+    "rangeLabel": "Zeitraum",
+    "ranges": {
+      "1h": "1 Std",
+      "1d": "1 Tag",
+      "1w": "1 Woche",
+      "1m": "1 Monat"
+    },
+    "searchLabel": "Signale suchen",
+    "searchPlaceholder": "Name oder Tag suchen…",
+    "groupLabel": "Signalgruppe",
+    "allGroups": "Alle Gruppen",
+    "resultSummary": "{{shown}} von {{total}} Signalen",
+    "loadingChart": "Chart wird geladen…",
+    "lastValue": "Letzter Wert",
+    "pointCount": "{{count}} Punkte",
+    "noData": "Keine Daten in diesem Zeitraum",
+    "chartError": "Chart konnte nicht geladen werden",
+    "loadError": "Signalkatalog konnte nicht geladen werden",
+    "emptyFilter": "Keine Signale für diese Filterung"
   },
   "dataExport": {
     "title": "Datenexport",

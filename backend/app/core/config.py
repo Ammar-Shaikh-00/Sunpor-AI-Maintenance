@@ -27,6 +27,12 @@ class Settings(BaseSettings):
 
     )
     APP_TAGLINE: str = "Extrusion Production Intelligence"
+    OPERATOR_ASSIST_URL: str = "http://sunpor-operator-assist:8010"
+    OPERATOR_ASSIST_TIMEOUT_SECONDS: float = 3.0
+    # Single switch for UI + shift wall-clock: austria | pakistan | usa
+    DISPLAY_TIMEZONE_REGION: str = "austria"
+    # Deprecated: use DISPLAY_TIMEZONE_REGION (kept for backward-compatible .env)
+    PLANT_TIMEZONE: str | None = None
 
     class Config:
         env_file = ".env"

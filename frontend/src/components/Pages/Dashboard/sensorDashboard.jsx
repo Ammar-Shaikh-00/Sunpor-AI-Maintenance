@@ -293,7 +293,7 @@
                     className={`px-3 py-1.5 rounded-full border transition-colors ${
                       chartTimeframe === key
                         ? "bg-slate-900 text-white border-slate-900"
-                        : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100"
+                        : "bg-[#C5C8CF] text-slate-700 border-slate-300 hover:bg-slate-100"
                     }`}
                   >
                     {key}
@@ -327,7 +327,7 @@
                       w-full
                       rounded-xl
                       px-4 py-3
-                      bg-white
+                      bg-[#C5C8CF]
                       shadow-md
                       hover:shadow-lg
                       focus:outline-none
@@ -360,7 +360,7 @@
                       w-full
                       rounded-xl
                       px-4 py-3
-                      bg-white
+                      bg-[#C5C8CF]
                       shadow-md
                       hover:shadow-lg
                       focus:outline-none
@@ -383,8 +383,8 @@
                       py-3
                       font-medium
                       text-white
-                      bg-violet-600
-                      hover:bg-violet-700
+                      bg-blue-600
+                      hover:bg-blue-700
                       transition-colors
                     "
                   >

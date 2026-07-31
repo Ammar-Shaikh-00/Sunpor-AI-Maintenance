@@ -1,3 +1,5 @@
+import { formatApiDateTime } from "../../../utils/datetime";
+
 export const tabs = [
   { id: "context", label: "Context" },
   { id: "process", label: "Process" },
@@ -8,18 +10,7 @@ export const tabs = [
 
 export const formatDateTime = (value) => {
   if (!value) return "--";
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-
-  return date.toLocaleString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  return formatApiDateTime(value, { withSeconds: true });
 };
 
 export const numberOrDash = (value, digits = 1) => {

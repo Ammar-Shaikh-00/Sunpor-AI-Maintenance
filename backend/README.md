@@ -44,6 +44,10 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
+If you run on Windows, timezone conversion uses IANA zones (for example
+`Europe/Vienna`). The backend includes `tzdata` in requirements to ensure these
+zones are available.
+
 Apply database migrations:
 
 ```powershell

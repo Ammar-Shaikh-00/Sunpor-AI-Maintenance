@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from sqlalchemy.orm import relationship
 
+from app.core.datetime_utils import utc_now_naive
 from app.db.base import Base
 
 
@@ -48,7 +49,7 @@ class SignalTimeSeries(Base):
 
     imported_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow
+        default=utc_now_naive
     )
 
     signal = relationship(

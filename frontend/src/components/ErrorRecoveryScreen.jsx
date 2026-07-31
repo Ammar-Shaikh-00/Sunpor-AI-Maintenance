@@ -25,8 +25,8 @@ export default function ErrorRecoveryScreen({ error }) {
 
   return (
     <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-[99999]">
-      <div className="bg-white rounded-2xl p-8 max-w-md text-center shadow-2xl">
-        <h1 className="text-2xl font-bold text-purple-500 mb-4">
+      <div className="bg-[#C5C8CF] rounded-2xl p-8 max-w-md text-center shadow-2xl">
+        <h1 className="text-2xl font-bold text-blue-500 mb-4">
           Entschuldigen Sie die Unannehmlichkeiten
         </h1>
 

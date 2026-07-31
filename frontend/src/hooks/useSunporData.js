@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../api/safeApi";
+import { PRODUCTION_RUN_STATUS } from "../constants/productionRun";
 
 const EMPTY_OPTIONS = {
   companies: [],
@@ -44,7 +45,7 @@ export function useFormOptions() {
   return { options, loading, error };
 }
 
-export function useProductionRuns(limit = 20) {
+export function useProductionRuns(limit = 50, { runningOnly = false } = {}) {
   const { t } = useTranslation();
   const [runs, setRuns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +62,12 @@ export function useProductionRuns(limit = 20) {
       setError(message);
       setRuns([]);
     } else {
-      setRuns(res.data || []);
+      const items = res.data || [];
+      setRuns(
+        runningOnly
+          ? items.filter((run) => run.status === PRODUCTION_RUN_STATUS.RUNNING)
+          : items
+      );
       setError(null);
     }
 

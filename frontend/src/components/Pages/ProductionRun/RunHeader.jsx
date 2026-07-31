@@ -32,9 +32,9 @@ export default function RunHeader({
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        <div className="rounded-xl border border-violet-100 bg-violet-50 px-4 py-3 text-sm text-violet-800">
+        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
           <div className="font-bold">{t("productionRun.header.storyTitle")}</div>
-          <div className="mt-1 text-violet-700">{t("productionRun.header.storySubtitle")}</div>
+          <div className="mt-1 text-blue-700">{t("productionRun.header.storySubtitle")}</div>
         </div>
 {/* 
         {!completed && (

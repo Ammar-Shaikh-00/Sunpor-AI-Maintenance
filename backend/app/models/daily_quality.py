@@ -47,6 +47,11 @@ class DailyQualityInput(Base, TimestampMixin):
         nullable=True
     )
 
+    operator_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=True,
+    )
+
     production_run = relationship(
         "ProductionRun",
         back_populates="quality_inputs"

@@ -11,9 +11,9 @@ export default function StabilityTable({ evaluations }) {
     t(`liveEstimated.status.${status}`, { defaultValue: status });
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 shadow-sm p-6">
       <div className="mb-5">
-        <h2 className="text-xl font-bold text-violet-700">
+        <h2 className="text-xl font-bold text-blue-700">
           {t("liveEstimated.stability.title")}
         </h2>
       </div>

@@ -76,7 +76,12 @@ def get_form_options(
             for item in material_types
         ],
         "shifts": [
-            {"id": item.id, "name": item.name}
+            {
+                "id": item.id,
+                "name": item.name,
+                "start_time": item.start_time.strftime("%H:%M") if item.start_time else None,
+                "end_time": item.end_time.strftime("%H:%M") if item.end_time else None,
+            }
             for item in shifts
         ],
         "companies": [
@@ -93,6 +98,10 @@ def get_form_options(
         ],
         "dropdowns": dropdowns,
         "current_user_id": current_user.id,
+        "current_user": {
+            "id": current_user.id,
+            "name": f"{current_user.first_name} {current_user.last_name}".strip(),
+        },
     }
 
 

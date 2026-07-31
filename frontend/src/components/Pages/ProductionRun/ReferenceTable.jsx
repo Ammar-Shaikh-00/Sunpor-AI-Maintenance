@@ -9,7 +9,7 @@ export default function ReferenceTable({ rows, activeRegime }) {
   // console.log(activeRegime);
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-6 shadow-sm">
       <h2 className="text-lg font-bold text-slate-950">
         {t("productionRun.reference.title", { regime: activeRegime || "--" })}
       </h2>

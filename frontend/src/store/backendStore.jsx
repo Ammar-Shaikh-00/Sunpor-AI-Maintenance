@@ -7,6 +7,8 @@ const defaultAppConfig = {
   companyName: "",
   displayTitle: "",
   tagline: "",
+  displayTimezoneRegion: "austria",
+  displayTimezone: "Europe/Vienna",
 };
 
 export const useBackendStore = create((set, get) => ({
@@ -32,6 +34,8 @@ export const useBackendStore = create((set, get) => ({
             companyName: data.company_name || "",
             displayTitle: data.display_title || data.app_name || "",
             tagline: data.tagline || "",
+            displayTimezoneRegion: data.display_timezone_region || "austria",
+            displayTimezone: data.display_timezone || "Europe/Vienna",
           },
         });
       } catch {
@@ -64,6 +68,8 @@ export function useAppBranding() {
     appName: appConfig.displayTitle || appConfig.appName || "Predictive Maintenance",
     companyName: appConfig.companyName || "",
     tagline: appConfig.tagline || "",
+    displayTimezoneRegion: appConfig.displayTimezoneRegion || "austria",
+    displayTimezone: appConfig.displayTimezone || "Europe/Vienna",
     backendOnline: status === "online",
     backendStatus: status,
   };

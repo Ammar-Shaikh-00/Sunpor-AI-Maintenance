@@ -88,7 +88,7 @@ const Card = ({
   badgeClass,
 }) => {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-all duration-300">
+    <div className="bg-[#C5C8CF] rounded-2xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-all duration-300">
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="text-xs uppercase tracking-wide text-slate-400 font-semibold">

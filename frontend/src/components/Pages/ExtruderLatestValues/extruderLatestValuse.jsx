@@ -111,7 +111,7 @@
 //                   rounded-2xl p-4 border transition-all duration-500
 //                   ${isChanged 
 //                     ? "bg-green-100 border-green-400 scale-105" 
-//                     : "bg-white border-gray-200"}
+//                     : "bg-[#C5C8CF] border-gray-200"}
 //                 `}
 //               >
 //                 <p className="text-xs text-gray-500">{key}</p>
@@ -244,7 +244,7 @@ const ExtruderLatestValues = () => {
           rounded-2xl p-4 border transition-all duration-500
           ${isChanged 
             ? "bg-green-100 border-green-400 scale-105" 
-            : "bg-white border-gray-200"}
+            : "bg-[#C5C8CF] border-gray-200"}
         `}
       >
         <p className="text-xs text-gray-500">{displayName}</p>

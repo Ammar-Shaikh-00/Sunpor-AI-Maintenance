@@ -15,7 +15,7 @@ export default function SensorTable({
   const columns = Object.keys(sensorMap);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+    <div className="bg-[#C5C8CF] border border-slate-200 rounded-2xl shadow-sm p-6">
 
       <h2 className="text-xl font-bold mb-5">
         {t("machineSensorViewer.table.title")}

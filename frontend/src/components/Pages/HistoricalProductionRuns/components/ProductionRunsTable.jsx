@@ -1,3 +1,4 @@
+import { formatApiDateTime, formatDuration } from "../../../../utils/datetime";
 import StatusBadge from "./StatusBadge";
 import { useEffect,useState } from "react";
 import safeApi from "../../../../api/safeApi";
@@ -27,20 +28,6 @@ export default function ProductionRunsTable({}) {
     fetchStats();
   }, []);
   
-
-  /* 🔥 FORMAT DURATION */
-  const formatDuration = (seconds) => {
-
-    if (!seconds || isNaN(seconds)) {
-      return "--";
-    }
-
-    const hrs = Math.floor(seconds / 3600);
-
-    const mins = Math.floor((seconds % 3600) / 60);
-
-    return `${hrs}h ${mins}m`;
-  };
 
   /* 🔥 AI STATUS */
   const getAIRating = (scrap) => {
@@ -77,7 +64,7 @@ export default function ProductionRunsTable({}) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 shadow-sm p-6">
 
       {/* HEADER */}
       <div className="flex items-center justify-between mb-6">
@@ -158,7 +145,7 @@ export default function ProductionRunsTable({}) {
                     }
                   >
 
-                    <td className="py-5 font-bold text-violet-600">
+                    <td className="py-5 font-bold text-blue-600">
                       #{run.run_id}
                     </td>
 
@@ -178,7 +165,7 @@ export default function ProductionRunsTable({}) {
 
                     <td className="text-slate-600 whitespace-nowrap">
                       {run.start_time
-                        ? new Date(run.start_time).toLocaleString()
+                        ? formatApiDateTime(run.start_time)
                         : "--"}
                     </td>
 

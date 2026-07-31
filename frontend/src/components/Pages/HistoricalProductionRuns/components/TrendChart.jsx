@@ -16,7 +16,7 @@ export default function TrendChart({ runs }) {
   }));
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 p-6 shadow-sm">
 
       <h2 className="text-xl font-bold mb-5">
         Trends

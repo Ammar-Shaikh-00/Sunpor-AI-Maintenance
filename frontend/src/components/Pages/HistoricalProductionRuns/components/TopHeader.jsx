@@ -14,7 +14,7 @@ export default function TopHeader() {
 
       <div className="flex gap-3">
 
-        {/* <div className="bg-white rounded-xl border px-5 py-3 shadow-sm">
+        {/* <div className="bg-[#C5C8CF] rounded-xl border px-5 py-3 shadow-sm">
           AI Status:
           <span className="ml-2 text-green-600 font-semibold">
             Healthy

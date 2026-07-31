@@ -39,7 +39,7 @@ export default function ScrapDistribution() {
   /* LOADING */
   if (!distribution) {
     return (
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-[420px] animate-pulse" />
+      <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 p-6 shadow-sm h-[420px] animate-pulse" />
     );
   }
 
@@ -69,7 +69,7 @@ export default function ScrapDistribution() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 p-6 shadow-sm">
 
       {/* HEADER */}
       <div className="mb-6">

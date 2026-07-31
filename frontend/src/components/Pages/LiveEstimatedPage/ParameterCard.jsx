@@ -33,7 +33,7 @@ export default function ParameterCard({
     const lower = (parameterKey || label).toLowerCase();
 
     if (lower.includes("screw")) {
-      return <Gauge size={18} className="text-violet-600" />;
+      return <Gauge size={18} className="text-blue-600" />;
     }
 
     if (lower.includes("pressure")) {
@@ -56,10 +56,10 @@ export default function ParameterCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 p-4 space-y-4">
+    <div className="bg-[#C5C8CF] rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 p-4 space-y-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-2">
-          <div className="bg-violet-50 p-2 rounded-xl">
+          <div className="bg-blue-50 p-2 rounded-xl">
             {getIcon()}
           </div>
 

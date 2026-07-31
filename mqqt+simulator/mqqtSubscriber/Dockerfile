@@ -11,6 +11,6 @@ RUN mkdir -p /app/logs
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY logging_config.py signal_cache.py snapshot.py subscriber.py ./
+COPY logging_config.py signal_cache.py snapshot.py metrics.py subscriber.py ./
 
 CMD ["python", "subscriber.py"]

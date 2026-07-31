@@ -174,7 +174,7 @@ const notification = () => {
                     </div>
                     <button
                         onClick={() => setShowAddEmailModal(true)}
-                        className="px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors text-sm"
+                        className="px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors text-sm"
                     >
                         + {t("addEmail")}
                     </button>
@@ -207,7 +207,7 @@ const notification = () => {
             {showAddEmailModal && (
                 // <AddEmailModal setShowAddEmailModal={setShowAddEmailModal} newEmail={newEmail} setNewEmail={setNewEmail} newName={newName} setNewName={setNewName} newDescription={setNewDescription} handleAddEmail={handleAddEmail} />
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
+                <div className="bg-[#C5C8CF] rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
                     <h3 className="text-xl font-semibold text-slate-900 mb-4">{t("addEmailRecipient")}</h3>
                     <div className="space-y-4">
                         <div>
@@ -219,7 +219,7 @@ const notification = () => {
                                 value={newEmail}
                                 onChange={(e) => setNewEmail(e.target.value)}
                                 placeholder="recipient@example.com"
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                                className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                             />
                         </div>
                         <div>
@@ -229,7 +229,7 @@ const notification = () => {
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
                                 placeholder="John Doe"
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                                className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                             />
                         </div>
                         <div>
@@ -239,14 +239,14 @@ const notification = () => {
                                 onChange={(e) => setNewDescription(e.target.value)}
                                 placeholder="Optional notes about this recipient"
                                 rows={3}
-                                className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                                className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                             />
                         </div>
                         <div className="flex gap-3 pt-2">
                             <button
                                 onClick={handleAddEmail}
                                 disabled={createRecipientMutation.isPending || !newEmail}
-                                className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                                className="flex-1 px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                             >
                                 {createRecipientMutation.isPending ? t("loading") : t("addEmail")}
                             </button>

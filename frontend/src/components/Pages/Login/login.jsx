@@ -117,18 +117,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-[#f7f5ff] to-[#efe9ff] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#B1B8C2] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-700 to-purple-500 mb-2">
+          <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500 mb-2">
             {appName}
           </h1>
-          <p className="text-slate-600 text-sm">
+          <p className="text-slate-700 text-sm">
             {tagline || t("login.tagline")}
           </p>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-xl border border-slate-200 rounded-2xl p-8 shadow-xl">
+        <div className="bg-[#C5C8CF] border border-slate-400/30 rounded-2xl p-8 shadow-sm">
           <h2 className="text-2xl font-semibold text-slate-900 mb-6 text-center">
             {t("login.signIn")}
           </h2>
@@ -183,7 +183,7 @@ export default function Login() {
                 passwordError ||
                 backendStatus === "checking"
               }
-              className="w-full py-3 bg-purple-600 text-white rounded-xl disabled:opacity-60"
+              className="w-full py-3 bg-blue-600 text-white rounded-xl disabled:opacity-60"
             >
               {isLoading ? t("login.signingIn") : t("login.signIn")}
             </button>

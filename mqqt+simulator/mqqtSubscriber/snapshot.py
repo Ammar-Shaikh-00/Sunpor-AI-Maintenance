@@ -43,6 +43,19 @@ def _build_payload(
     return payload_values
 
 
+def _send_snapshot_request(base_url: str, payload: dict, get_headers) -> requests.Response | None:
+    try:
+        return requests.post(
+            f"{base_url.rstrip('/')}/signal-timeseries/batch",
+            json=payload,
+            headers=get_headers(),
+            timeout=60,
+        )
+    except requests.RequestException as exc:
+        logger.error("Snapshot post failed | connection error: %s", exc)
+        return None
+
+
 def post_snapshot(
     cache: SignalValueCache,
     tag_map: dict,
@@ -71,12 +84,9 @@ def post_snapshot(
         "values": payload_values,
     }
 
-    response = requests.post(
-        f"{base_url.rstrip('/')}/signal-timeseries/batch",
-        json=payload,
-        headers=get_headers(),
-        timeout=60,
-    )
+    response = _send_snapshot_request(base_url, payload, get_headers)
+    if response is None:
+        return False
 
     if response.status_code in (200, 201):
         body = response.json()
@@ -88,10 +98,25 @@ def post_snapshot(
         )
         return True
 
-    logger.error(
-        "Snapshot save failed | status=%s | response=%s",
-        response.status_code,
-        response.text,
-    )
-    refresh_headers()
+    if response.status_code == 401:
+        logger.warning("Snapshot post unauthorized — refreshing backend token and retrying")
+        if not refresh_headers():
+            return False
+
+        response = _send_snapshot_request(base_url, payload, get_headers)
+        if response is not None and response.status_code in (200, 201):
+            body = response.json()
+            logger.info(
+                "Snapshot saved after token refresh | signals=%d",
+                body.get("saved_count", len(payload_values)),
+            )
+            return True
+
+    if response is not None:
+        logger.error(
+            "Snapshot save failed | status=%s | response=%s",
+            response.status_code,
+            response.text,
+        )
+
     return False

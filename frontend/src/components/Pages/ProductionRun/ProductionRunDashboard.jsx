@@ -26,7 +26,7 @@ const CreateProductionRun = ({ newRun, onChange, handleCreate, setNewRun }) => {
   }, [t]);
 
   return (
-    <section className="rounded-xl border border-violet-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-blue-200 bg-[#C5C8CF] p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold text-slate-950">
@@ -36,7 +36,7 @@ const CreateProductionRun = ({ newRun, onChange, handleCreate, setNewRun }) => {
             {t("productionRunDashboard.create.description")}
           </p>
         </div>
-        <div className="hidden rounded-xl bg-violet-50 p-3 text-violet-600 sm:block">
+        <div className="hidden rounded-xl bg-blue-50 p-3 text-blue-600 sm:block">
           <Plus size={22} />
         </div>
       </div>
@@ -61,7 +61,7 @@ const CreateProductionRun = ({ newRun, onChange, handleCreate, setNewRun }) => {
                 machine_id: e.target.value,
               }))
             }
-            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <option value="">{t("productionRunDashboard.fields.selectMachine")}</option>
             {machines.map((machine) => (
@@ -92,7 +92,7 @@ const CreateProductionRun = ({ newRun, onChange, handleCreate, setNewRun }) => {
                 start_time: e.target.value,
               }))
             }
-            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-400"
+            className="rounded border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
       </div>
@@ -113,7 +113,7 @@ const CreateProductionRun = ({ newRun, onChange, handleCreate, setNewRun }) => {
 
           handleCreate();
         }}
-        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700"
+        className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
       >
         <Plus size={16} />
         {t("productionRunDashboard.create.button")}
@@ -199,7 +199,7 @@ export default function ProductionRunDashboard() {
 
   return (
     <div className="space-y-5 px-2 pb-6 sm:px-0">
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <section className="rounded-2xl border border-slate-200 bg-[#C5C8CF] p-5 shadow-sm">
         <ProductionRunPage runId={currentRunId} />
       </section>
 

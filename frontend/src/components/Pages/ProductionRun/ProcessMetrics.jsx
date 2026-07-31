@@ -46,7 +46,7 @@ export default function ProcessMetrics({ metrics }) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-5 shadow-sm">
       <h2 className="text-lg font-bold text-slate-950">{t("productionRun.process.title")}</h2>
       <div className="mt-4 grid gap-y-4 md:grid-cols-2 xl:grid-cols-6">
         {metrics.map((metric) => (

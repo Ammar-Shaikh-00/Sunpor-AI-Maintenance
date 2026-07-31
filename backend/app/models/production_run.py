@@ -60,11 +60,21 @@ class ProductionRun(Base, TimestampMixin):
 
     status: Mapped[ProductionRunStatus] = mapped_column(
         Enum(ProductionRunStatus),
-        default=ProductionRunStatus.CREATED
+        default=ProductionRunStatus.RUNNING
     )
 
     comment: Mapped[str | None] = mapped_column(
         String(1000),
+        nullable=True
+    )
+
+    recipe_number: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True
+    )
+
+    production_order: Mapped[str | None] = mapped_column(
+        String(100),
         nullable=True
     )
 

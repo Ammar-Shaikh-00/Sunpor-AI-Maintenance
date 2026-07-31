@@ -13,6 +13,7 @@ from app.seeders.seed_production_lines import seed_production_lines
 from app.seeders.seed_roles import seed_roles
 from app.seeders.seed_role_permissions import seed_role_permissions
 from app.seeders.seed_shifts import seed_shifts
+from app.seeders.seed_operator import seed_operator
 from app.seeders.seed_super_admin import seed_super_admin
 
 
@@ -44,6 +45,7 @@ def run():
         results.update(assign_permissions(db))
         results.update(seed_role_permissions(db))
         results.update(seed_super_admin(db))
+        results.update(seed_operator(db))
         results.update(seed_dropdowns(db))
 
         signal_result = seed_signal_catalog(db)

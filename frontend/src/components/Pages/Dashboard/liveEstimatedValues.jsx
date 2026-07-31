@@ -32,14 +32,14 @@ const LiveEstimatedValues = () => {
 
   if (loading) {
     return (
-      <div className="p-4 mt-4 bg-white rounded-2xl shadow-sm border">
+      <div className="p-4 mt-4 bg-[#C5C8CF] rounded-2xl shadow-sm border">
         <p className="text-gray-500 text-sm">Loading live estimated values...</p>
       </div>
     );
   }
 
   if (!data) return (
-      <div className="p-4 mt-4 bg-white rounded-2xl shadow-sm ">
+      <div className="p-4 mt-4 bg-[#C5C8CF] rounded-2xl shadow-sm ">
         <p className="text-gray-500 text-sm">No live estimated values found</p>
       </div>
     );

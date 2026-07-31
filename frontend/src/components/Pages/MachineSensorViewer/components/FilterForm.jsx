@@ -39,7 +39,7 @@ export default function FilterForm({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+    <div className="bg-[#C5C8CF] border border-slate-200 rounded-2xl p-6 shadow-sm">
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
 
@@ -61,7 +61,7 @@ export default function FilterForm({
                         w-full mt-2
                         rounded-xl
                         px-4 py-3
-                        bg-white
+                        bg-[#C5C8CF]
                         shadow-md
                         hover:shadow-lg
                         focus:outline-none
@@ -105,7 +105,7 @@ export default function FilterForm({
                         w-full mt-2
                         rounded-xl
                         px-4 py-3
-                        bg-white
+                        bg-[#C5C8CF]
                         shadow-md
                         hover:shadow-lg
                         focus:outline-none
@@ -141,7 +141,7 @@ export default function FilterForm({
                         w-full mt-2
                         rounded-xl
                         px-4 py-3
-                        bg-white
+                        bg-[#C5C8CF]
                         shadow-md
                         hover:shadow-lg
                         focus:outline-none
@@ -173,7 +173,7 @@ export default function FilterForm({
                         w-full mt-2
                         rounded-xl
                         px-4 py-3
-                        bg-white
+                        bg-[#C5C8CF]
                         shadow-md
                         hover:shadow-lg
                         focus:outline-none
@@ -191,7 +191,7 @@ export default function FilterForm({
 
           <button
             onClick={handleSearch}
-            className="w-full bg-violet-600 hover:bg-violet-700 text-white rounded-xl py-2.5 font-medium"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-2.5 font-medium"
           >
             {t("machineSensorViewer.filters.loadData")}
           </button>

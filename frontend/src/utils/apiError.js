@@ -13,5 +13,9 @@ export function getApiErrorMessage(error, fallback = "Request failed") {
     return detail.map((item) => item.msg || JSON.stringify(item)).join(", ");
   }
 
+  if (typeof detail === "object") {
+    return detail.message || detail.msg || JSON.stringify(detail);
+  }
+
   return fallback;
 }

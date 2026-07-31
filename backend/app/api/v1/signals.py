@@ -1,8 +1,10 @@
 from datetime import datetime
+from datetime import timedelta
 
 from fastapi import APIRouter
 from fastapi import Depends
 from fastapi import HTTPException
+from fastapi import Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -10,6 +12,11 @@ from app.api.v1.crud_utils import apply_updates
 from app.api.v1.crud_utils import delete_object
 from app.api.v1.crud_utils import get_object_or_404
 from app.api.v1.crud_utils import register_crud_routes
+from app.core.datetime_utils import (
+    as_naive_utc,
+    normalize_datetime_fields_on_instance,
+    utc_now_naive,
+)
 from app.core.logging_config import get_logger
 from app.db.database import get_db
 from app.models.signal_catalog import SignalCatalog
@@ -18,6 +25,8 @@ from app.permissions.check_permission import require_permission
 from app.schemas.data_models import SignalCatalogCreate
 from app.schemas.data_models import SignalCatalogResponse
 from app.schemas.data_models import SignalCatalogUpdate
+from app.schemas.data_models import SignalChartPoint
+from app.schemas.data_models import SignalChartResponse
 from app.schemas.data_models import SignalTimeSeriesBatchCreate
 from app.schemas.data_models import SignalTimeSeriesBatchResponse
 from app.schemas.data_models import SignalTimeSeriesCreate
@@ -50,10 +59,11 @@ def get_timeseries_or_404(
     signal_id: int,
     timestamp: datetime
 ):
+    normalized_timestamp = as_naive_utc(timestamp)
 
     item = db.query(SignalTimeSeries).filter(
         SignalTimeSeries.signal_id == signal_id,
-        SignalTimeSeries.timestamp == timestamp
+        SignalTimeSeries.timestamp == normalized_timestamp
     ).first()
 
     if not item:
@@ -151,6 +161,72 @@ def list_latest_signal_timeseries(
     ]
 
 
+
+@signal_timeseries_router.get(
+    "/chart",
+    response_model=SignalChartResponse,
+)
+def get_signal_timeseries_chart(
+    signal_id: int = Query(..., ge=1),
+    start_time: datetime | None = None,
+    end_time: datetime | None = None,
+    max_points: int = Query(400, ge=10, le=1000),
+    db: Session = Depends(get_db),
+    current_user=Depends(signal_dependency),
+):
+    get_object_or_404(db, SignalCatalog, signal_id)
+
+    resolved_end = as_naive_utc(end_time) or utc_now_naive()
+    resolved_start = as_naive_utc(start_time) or (
+        resolved_end - timedelta(hours=1)
+    )
+
+    if resolved_start >= resolved_end:
+        raise HTTPException(
+            status_code=400,
+            detail="start_time must be earlier than end_time",
+        )
+
+    range_seconds = max((resolved_end - resolved_start).total_seconds(), 1.0)
+    bucket_seconds = max(range_seconds / max_points, 1.0)
+
+    epoch = func.extract("epoch", SignalTimeSeries.timestamp)
+    bucket = func.floor(epoch / bucket_seconds) * bucket_seconds
+
+    rows = (
+        db.query(
+            bucket.label("bucket"),
+            func.avg(SignalTimeSeries.value_scaled).label("value"),
+        )
+        .filter(
+            SignalTimeSeries.signal_id == signal_id,
+            SignalTimeSeries.timestamp >= resolved_start,
+            SignalTimeSeries.timestamp <= resolved_end,
+        )
+        .group_by(bucket)
+        .order_by(bucket)
+        .all()
+    )
+
+    half_bucket = bucket_seconds / 2.0
+    points = [
+        SignalChartPoint(
+            timestamp=datetime.utcfromtimestamp(float(row.bucket) + half_bucket),
+            value=float(row.value),
+        )
+        for row in rows
+        if row.bucket is not None and row.value is not None
+    ]
+
+    return SignalChartResponse(
+        signal_id=signal_id,
+        start_time=resolved_start,
+        end_time=resolved_end,
+        point_count=len(points),
+        points=points,
+    )
+
+
 @signal_timeseries_router.get(
     "/{signal_id}/{timestamp}",
     response_model=SignalTimeSeriesResponse
@@ -194,6 +270,7 @@ def create_signal_timeseries(
         data["value_scaled"] = request.value_raw * signal.factor
 
     item = SignalTimeSeries(**data)
+    normalize_datetime_fields_on_instance(item)
     db.add(item)
     db.commit()
     db.refresh(item)
@@ -231,7 +308,11 @@ def create_signal_timeseries_batch(
             detail=f"Unknown signal_id values: {sorted(missing_ids)}"
         )
 
-    imported_at = request.imported_at or datetime.utcnow()
+    imported_at = as_naive_utc(request.imported_at) or utc_now_naive()
+    snapshot_timestamp = as_naive_utc(request.timestamp)
+    if snapshot_timestamp is None:
+        raise HTTPException(status_code=400, detail="timestamp is required")
+
     rows = []
 
     for item in request.values:
@@ -242,7 +323,7 @@ def create_signal_timeseries_batch(
 
         rows.append(
             SignalTimeSeries(
-                timestamp=request.timestamp,
+                timestamp=snapshot_timestamp,
                 signal_id=item.signal_id,
                 value_raw=item.value_raw,
                 value_scaled=value_scaled,
@@ -257,12 +338,12 @@ def create_signal_timeseries_batch(
 
     logger.info(
         "Saved signal snapshot | timestamp=%s | signals=%d",
-        request.timestamp.isoformat(),
+        snapshot_timestamp.isoformat(),
         len(rows),
     )
 
     return SignalTimeSeriesBatchResponse(
-        timestamp=request.timestamp,
+        timestamp=snapshot_timestamp,
         saved_count=len(rows),
     )
 

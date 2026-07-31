@@ -3,7 +3,7 @@ import React from 'react'
 const addEmailModal = ({setShowAddEmailModal, newEmail, setNewEmail, newName, setNewName, newDescription, setNewDescription, handleAddEmail, createRecipientMutation } ) => {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
+        <div className="bg-[#C5C8CF] rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl">
             <h3 className="text-xl font-semibold text-slate-900 mb-4">Add Email Recipient</h3>
             <div className="space-y-4">
                 <div>
@@ -15,7 +15,7 @@ const addEmailModal = ({setShowAddEmailModal, newEmail, setNewEmail, newName, se
                         value={newEmail}
                         onChange={(e) => setNewEmail(e.target.value)}
                         placeholder="recipient@example.com"
-                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                        className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                     />
                 </div>
                 <div>
@@ -25,7 +25,7 @@ const addEmailModal = ({setShowAddEmailModal, newEmail, setNewEmail, newName, se
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
                         placeholder="John Doe"
-                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                        className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                     />
                 </div>
                 <div>
@@ -35,14 +35,14 @@ const addEmailModal = ({setShowAddEmailModal, newEmail, setNewEmail, newName, se
                         onChange={(e) => setNewDescription(e.target.value)}
                         placeholder="Optional notes about this recipient"
                         rows={3}
-                        className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-300"
+                        className="w-full px-4 py-2 bg-[#C5C8CF] border border-slate-200 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300"
                     />
                 </div>
                 <div className="flex gap-3 pt-2">
                     <button
                         onClick={handleAddEmail}
                         disabled={createRecipientMutation.isPending || !newEmail}
-                        className="flex-1 px-4 py-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                        className="flex-1 px-4 py-2 bg-blue-700 hover:bg-blue-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                     >
                         {createRecipientMutation.isPending ? "Adding..." : "Add Email"}
                     </button>

@@ -13,9 +13,9 @@ export default function AiDecisionPanel({ aiSummary }) {
   const { t } = useTranslation();
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <section className="rounded-xl border border-slate-200 bg-[#C5C8CF] p-6 shadow-sm">
       <div className="flex items-start gap-4">
-        <div className="rounded-xl bg-violet-50 p-3 text-violet-600">
+        <div className="rounded-xl bg-blue-50 p-3 text-blue-600">
           <Sparkles size={26} />
         </div>
         <div>

@@ -3,6 +3,7 @@ from datetime import datetime, time
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from app.core.datetime_utils import as_naive_utc
 from app.db.database import get_db
 from app.permissions.check_permission import require_any_permission
 from app.permissions.utils import get_user_permission_codes
@@ -38,9 +39,10 @@ export_dependency = require_any_permission(
 def _parse_bound(value: datetime | None, *, end_of_day: bool = False) -> datetime | None:
     if value is None:
         return None
-    if value.time() == time.min and end_of_day:
-        return value.replace(hour=23, minute=59, second=59, microsecond=999999)
-    return value
+    normalized = as_naive_utc(value)
+    if normalized.time() == time.min and end_of_day:
+        return normalized.replace(hour=23, minute=59, second=59, microsecond=999999)
+    return normalized
 
 
 def _user_can_access_dataset(user, dataset_key: str) -> bool:

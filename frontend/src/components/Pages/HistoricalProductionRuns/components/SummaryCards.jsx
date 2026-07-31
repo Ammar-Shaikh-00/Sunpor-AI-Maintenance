@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import safeApi from "../../../../api/safeApi";
+import { formatDuration } from "../../../../utils/datetime";
 import SummaryCard from "./SummaryCard";
 
 export default function SummaryCards() {
@@ -38,25 +39,13 @@ export default function SummaryCards() {
     );
   }
 
-  /* 🔥 FORMAT DURATION */
-  const formatDuration = (seconds) => {
-
-    if (!seconds) return "0m";
-
-    const hrs = Math.floor(seconds / 3600);
-
-    const mins = Math.floor((seconds % 3600) / 60);
-
-    return `${hrs}h ${mins}m`;
-  };
-
   return (
 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-6 gap-5">
 
   <SummaryCard
     title="Total Runs"
     value={stats.total_runs}
-    color="text-violet-600"
+    color="text-blue-600"
     strokeColor="#7c3aed"
   />
 

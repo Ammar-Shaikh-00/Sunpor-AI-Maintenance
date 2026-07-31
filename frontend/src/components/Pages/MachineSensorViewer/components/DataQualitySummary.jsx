@@ -59,7 +59,7 @@ export default function DataQualitySummary({
       value: duplicatedTimestamps,
       description: t("machineSensorViewer.quality.descriptions.duplicatedTimestamps"),
       icon: Copy,
-      color: "bg-purple-50 text-purple-700 border-purple-200",
+      color: "bg-blue-50 text-blue-700 border-blue-200",
     },
 
     {
@@ -109,7 +109,7 @@ export default function DataQualitySummary({
     }
 
     return (
-      <div className="bg-white border border-slate-200 rounded-3xl shadow-sm p-5">
+      <div className="bg-[#C5C8CF] border border-slate-200 rounded-3xl shadow-sm p-5">
 
         <div className="flex items-center justify-between mb-4">
 
@@ -213,7 +213,7 @@ export default function DataQualitySummary({
 
       {
         loading ? (
-          <div className="bg-white rounded-3xl border border-slate-200 p-10 text-center text-slate-500">
+          <div className="bg-[#C5C8CF] rounded-3xl border border-slate-200 p-10 text-center text-slate-500">
             {t("machineSensorViewer.quality.loading")}
           </div>
         ) : (
@@ -232,7 +232,7 @@ export default function DataQualitySummary({
                     return (
                       <div
                         key={card.title}
-                        className="bg-white rounded-3xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-all"
+                        className="bg-[#C5C8CF] rounded-3xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-all"
                       >
 
                         <div className="flex items-start justify-between">

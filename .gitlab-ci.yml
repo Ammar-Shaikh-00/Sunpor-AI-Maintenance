@@ -1,0 +1,100 @@
+# stages:
+#   - validate
+#   - deploy_dev
+
+# variables:
+#   PROJECT_DIR: "/home/edge/SunporPredective-AI"
+
+# # -------------------------
+# # BACKEND VALIDATION
+# # -------------------------
+# validate_backend:
+#   stage: validate
+#   image: python:3.12
+#   before_script:
+#     - cd backend
+#     - python --version
+#     - pip install --no-cache-dir -r requirements.txt
+#   script:
+#     - python -m compileall .
+#   only:
+#     - main
+
+# # -------------------------
+# # FRONTEND VALIDATION
+# # -------------------------
+# validate_frontend:
+#   stage: validate
+#   image: node:20
+#   before_script:
+#     - cd frontend
+#     - npm ci
+#   script:
+#     - npm run build
+#   only:
+#     - main
+
+# # -------------------------
+# # DEPLOY TO DEV SERVER
+# # -------------------------
+# deploy_dev_edge_s02:
+#   stage: deploy_dev
+#   image: debian:bookworm-slim
+#   before_script:
+#     # Base packages
+#     - apt-get update
+#     - apt-get install -y curl ca-certificates gnupg openssh-client git iptables
+
+#     # Install Tailscale
+#     - curl -fsSL https://tailscale.com/install.sh | sh
+
+#     # Start tailscaled in userspace mode (good for CI containers)
+#     - tailscaled --tun=userspace-networking --state=mem: --socks5-server=localhost:1055 &
+#     - sleep 5
+
+#     # Authenticate to tailnet
+#     # Optional: add --hostname and --advertise-tags if you use tags in Tailscale ACLs
+#     - tailscale up --authkey="${TAILSCALE_AUTHKEY}" --hostname="gitlab-ci-sunpor" --accept-dns=false
+
+#     # Verify Tailscale is up
+#     - tailscale status
+#     - tailscale ip -4 || true
+
+#     # SSH setup
+#     - mkdir -p ~/.ssh
+#     - echo "$DEV_SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+#     - chmod 600 ~/.ssh/id_rsa
+#     - ssh-keyscan -H "$DEV_HOST" >> ~/.ssh/known_hosts
+
+#   script:
+#     - |
+#       ssh -o StrictHostKeyChecking=yes $DEV_USER@$DEV_HOST << 'EOF'
+#         set -e
+
+#         cd /home/edge/SunporPredective-AI
+
+#         echo "==> Pull latest code"
+#         git pull origin main
+
+#         echo "==> Deploy backend"
+#         cd backend
+#         docker compose down 
+#         docker compose up -d --build
+
+#         echo "==> Deploy frontend"
+#         cd ../frontend
+#         docker compose down
+#         docker compose up -d --build
+
+#         # echo "==> Deploy MQTT subscriber"
+#         # cd ../mqqt+simulator/mqqtSubscriber
+#         # docker compose up -d --build
+
+#         echo "==> Deployment completed successfully"
+#       EOF
+
+#   after_script:
+#     - tailscale logout || true
+
+#   only:
+#     - main

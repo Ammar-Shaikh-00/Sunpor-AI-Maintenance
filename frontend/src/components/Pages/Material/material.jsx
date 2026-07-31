@@ -90,7 +90,7 @@ const MaterialProfiles = ({backendStatus}) => {
   return (
     <div className="p-6 text-white">
       <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold text-purple-400">
+        <h1 className="text-2xl font-bold text-blue-400">
           Material Profiles
         </h1>
 

@@ -163,7 +163,7 @@ function TimeRangeSummary({
 
       {
         summaryLoading ? (
-          <div className="h-[250px] flex items-center justify-center bg-white rounded-3xl border border-slate-200 shadow-sm">
+          <div className="h-[250px] flex items-center justify-center bg-[#C5C8CF] rounded-3xl border border-slate-200 shadow-sm">
 
             <div className="text-slate-500 text-sm">
               {t("machineSensorViewer.summary.loading")}
@@ -184,7 +184,7 @@ function TimeRangeSummary({
                   <div
                     key={item.title}
                     className="
-                      bg-white
+                      bg-[#C5C8CF]
                       rounded-3xl
                       border
                       border-slate-200
@@ -256,7 +256,7 @@ function TimeRangeSummary({
 
             {/* Machine States */}
             <div className="
-              bg-white
+              bg-[#C5C8CF]
               rounded-3xl
               border
               border-slate-200
@@ -506,7 +506,7 @@ function TimeRangeSummary({
                                               <div
                                                 key={index}
                                                 className="
-                                                  bg-white
+                                                  bg-[#C5C8CF]
                                                   border
                                                   border-slate-200
                                                   rounded-2xl

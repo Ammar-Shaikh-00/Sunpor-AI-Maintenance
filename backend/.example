@@ -17,3 +17,9 @@ SQLALCHEMY_LOG_LEVEL=WARNING
 
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:4173,http://localhost:3000,http://100.75.166.124:3000,http://100.93.158.60:3000
 APP_TAGLINE=Extrusion Production Intelligence
+# Local (backend on host): http://localhost:8010
+# Docker Compose: http://sunpor-operator-assist:8010
+OPERATOR_ASSIST_URL=http://sunpor-operator-assist:8010
+OPERATOR_ASSIST_TIMEOUT_SECONDS=3
+# UI + shift wall-clock region: austria | pakistan | usa
+DISPLAY_TIMEZONE_REGION=austria
