@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { displayInputToUtcIso, toDisplayInputValue } from "../../../utils/datetime";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 import { X } from "lucide-react";
 import api from "../../../api";
 import { ENDPOINTS } from "../../../api/sunpor";
@@ -156,7 +157,7 @@ export default function ReportIssueWizard({ productionRunId, onClose }) {
                         : "border-slate-200 bg-[#C5C8CF] text-slate-700"
                     }`}
                   >
-                    {option.value}
+                    {translateDropdownValue(t, option.value)}
                   </button>
                 ))}
               </div>

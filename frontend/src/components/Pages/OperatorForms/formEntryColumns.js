@@ -1,5 +1,10 @@
 import { formatEntryDateTime, formatEntryText } from "../../../utils/formEntryUtils";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 import { getLineName, getMaterialCode, getShiftName } from "./formUi";
+
+function renderDropdownValue(entry, key, { t }) {
+  return translateDropdownValue(t, entry[key]) || "—";
+}
 
 export function getProductionEventColumns(t) {
   return [
@@ -22,9 +27,21 @@ export function getProductionEventColumns(t) {
         });
       },
     },
-    { key: "level_2", label: t("forms.common.level2") },
-    { key: "level_3", label: t("forms.common.level3") },
-    { key: "reason", label: t("forms.common.reason") },
+    {
+      key: "level_2",
+      label: t("forms.common.level2"),
+      render: (entry, context) => renderDropdownValue(entry, "level_2", context),
+    },
+    {
+      key: "level_3",
+      label: t("forms.common.level3"),
+      render: (entry, context) => renderDropdownValue(entry, "level_3", context),
+    },
+    {
+      key: "reason",
+      label: t("forms.common.reason"),
+      render: (entry, context) => renderDropdownValue(entry, "reason", context),
+    },
     {
       key: "comment",
       label: t("common.comment"),
@@ -50,7 +67,12 @@ export function getMaterialBehaviorColumns(t) {
         });
       },
     },
-    { key: "behavior_type", label: t("forms.materialBehavior.behaviorType") },
+    {
+      key: "behavior_type",
+      label: t("forms.materialBehavior.behaviorType"),
+      render: (entry, context) =>
+        renderDropdownValue(entry, "behavior_type", context),
+    },
     { key: "severity", label: t("forms.materialBehavior.severity") },
     {
       key: "comment",
@@ -78,8 +100,16 @@ export function getMaterialBlockingColumns(t) {
         });
       },
     },
-    { key: "reason", label: t("forms.common.reason") },
-    { key: "affected_material", label: t("forms.common.affectedMaterial") },
+    {
+      key: "reason",
+      label: t("forms.common.reason"),
+      render: (entry, context) => renderDropdownValue(entry, "reason", context),
+    },
+    {
+      key: "affected_material",
+      label: t("forms.common.affectedMaterial"),
+      render: (entry) => formatEntryText(entry.affected_material),
+    },
     {
       key: "comment",
       label: t("common.comment"),

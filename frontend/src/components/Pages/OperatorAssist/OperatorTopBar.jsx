@@ -8,7 +8,9 @@ import {
   formatDuration,
 } from "../../../utils/datetime";
 import { useAppBranding } from "../../../store/backendStore";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 import BrandLogo from "./BrandLogo";
+import OperatorThemeToggle from "./OperatorThemeToggle";
 
 function formatRunningTimeFromStart(startTimeIso, tick) {
   if (!startTimeIso) {
@@ -47,6 +49,8 @@ export default function OperatorTopBar({
   loading,
   notifications = [],
   onLogout,
+  operatorTheme = "dark",
+  onToggleOperatorTheme,
 }) {
   const { t } = useTranslation();
   const { appName, companyName, displayTimezone } = useAppBranding();
@@ -80,7 +84,10 @@ export default function OperatorTopBar({
       />
       <Chip
         label={t("operatorAssist.context.shift")}
-        value={run.shift?.name || context?.resolved_shift?.name}
+        value={translateDropdownValue(
+          t,
+          run.shift?.name || context?.resolved_shift?.name
+        )}
         icon={Sun}
       />
       <Chip
@@ -108,10 +115,15 @@ export default function OperatorTopBar({
           <BrandLogo
             className="h-12 w-auto max-w-[12rem] sm:h-14 sm:max-w-[16rem] lg:h-[3.75rem] lg:max-w-[17rem]"
             alt={brand}
+            theme={operatorTheme}
           />
         </div>
 
         <div className="relative flex shrink-0 items-center gap-2 sm:gap-3 lg:order-last">
+          <OperatorThemeToggle
+            theme={operatorTheme}
+            onToggle={onToggleOperatorTheme}
+          />
           <button
             type="button"
             className="relative rounded-full p-2.5 text-slate-700 transition hover:bg-[#C5C8CF]"

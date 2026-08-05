@@ -173,6 +173,35 @@
       "affectedMaterialRequired": "Bitte betroffenes Material angeben.",
       "percentRange": "Wert muss zwischen 0 und 100 liegen.",
       "detailsSection": "Angaben",
+      "pleaseSelect": "Bitte auswählen",
+      "captureNow": "Jetzt erfassen",
+      "questions": {
+        "productionRun": "Welchen Produktionslauf betrifft dieser Eintrag?",
+        "eventTime": "Wann ist das Ereignis aufgetreten?",
+        "level2": "Welche Kategorie möchten Sie erfassen?",
+        "level3": "Bitte wählen Sie die genaue Ausprägung.",
+        "reason": "Gibt es einen zusätzlichen Grund oder Hinweis?",
+        "comment": "Kommentar des Operators – was ist aufgefallen?",
+        "behaviorType": "Welches Materialverhalten wurde beobachtet?",
+        "severity": "Wie schwerwiegend ist die Beobachtung (1–5)?",
+        "blockReason": "Aus welchem Grund wird Material gesperrt?",
+        "fromTime": "Ab wann gilt die problematische Periode?",
+        "toTime": "Bis wann gilt die problematische Periode?",
+        "affectedMaterial": "Welches Material ist betroffen?",
+        "openHoles": "Wie hoch ist der Anteil offener Löcher?",
+        "sieveDistribution": "Wie ist die Siebverteilung?",
+        "foamingBehavior": "Wie bewerten Sie das Schaumverhalten?",
+        "shift": "In welcher Schicht wird erfasst?",
+        "inputTime": "Wann erfolgte die Qualitätserfassung?",
+        "materialType": "Welcher Materialtyp wird gestartet?",
+        "startTime": "Wann startet der Produktionslauf?",
+        "company": "Für welches Unternehmen wird gestartet?",
+        "productionLine": "Auf welcher Produktionslinie wird gestartet?",
+        "isTrial": "Handelt es sich um einen Probe-Lauf?",
+        "recipeNumber": "Welche Rezeptnummer gilt für diesen Lauf?",
+        "productionOrder": "Welcher Produktionsauftrag gehört dazu?",
+        "runComment": "Kommentar zum Produktionslauf (optional)"
+      },
       "recentEntries": "Letzte Einträge",
       "recentEntriesHint": "Die 10 zuletzt erfassten Einträge. Bearbeiten ist nur bei aktiven Produktionsläufen möglich.",
       "noRecentEntries": "Noch keine Einträge vorhanden.",
@@ -300,14 +329,62 @@
     "subtitle": "Aktueller Status, schnelle Aktionen und KI-Hinweise für Extrusion E10.",
     "fallbackForms": "Alle Formulare öffnen",
     "captureTitle": "Was möchten Sie erfassen?",
-    "captureSubtitle": "Wählen Sie eine Aktion, um Daten schnell zu erfassen.",
+    "captureSubtitle": "Bitte wählen Sie eine Kategorie aus, um ein neues Ereignis zu erfassen.",
     "showAllEvents": "Alle Ereignisse anzeigen",
+    "hub": {
+      "captureTitle": "Was möchten Sie erfassen?",
+      "captureSubtitle": "Bitte wählen Sie eine Kategorie aus, um ein neues Ereignis zu erfassen.",
+      "whatIsRecorded": "Was wird erfasst?",
+      "whatIsShown": "Was wird angezeigt?",
+      "captureNow": "Jetzt erfassen",
+      "dosingMaterial": {
+        "title": "Dosierung / Material",
+        "body": "Dosierabweichungen, Materialauffälligkeiten, Chargenprobleme, Pentan, Stickstoff, Graphit, Rezyklat und weitere Rohstoffe."
+      },
+      "extruder": {
+        "title": "Extruder",
+        "body": "Druck, Temperatur, Drehmoment, Drehzahl und Trendabweichungen sowie durchgeführte Maßnahmen."
+      },
+      "screenChanger": {
+        "title": "Siebwechsler",
+        "body": "Siebwechsel, Sieb kontrollieren, Differenzdruck, Formabweichungen, offene Löcher, Brocken und weitere Auffälligkeiten."
+      },
+      "nozzle": {
+        "title": "Düse / Lochplatte",
+        "body": "Düse reinigen, Lochplatte prüfen, Ablagerungen, Beschädigungen, Formabweichungen und weitere Auffälligkeiten."
+      },
+      "waterBox": {
+        "title": "Wasserbox",
+        "body": "Wassertemperatur, Wasserdruck, Durchfluss, Leckagen, Verstopfungen und Alarme."
+      },
+      "granulator": {
+        "title": "Granulator / Messer",
+        "body": "Messerwechsel, Schärfen, Kontrolle, Schnittbild, Staubanteil, Zwillingsperlen, Korngröße und weitere Auffälligkeiten."
+      },
+      "quality": {
+        "title": "Qualitätsdaten",
+        "body": "Siebanalyse, Brocken, Zwillingsperlen, Zellstruktur, Kornverteilung, Aufschäumverhalten und weitere Qualitätsprobleme."
+      },
+      "generalEvent": {
+        "title": "Allgemeines Ereignis",
+        "body": "Ereignisse, die keiner der anderen Kategorien zugeordnet werden können."
+      },
+      "recentEntries": {
+        "title": "Letzte Einträge",
+        "body": "Übersicht der zuletzt erfassten Ereignisse mit der Möglichkeit zur Anzeige und Bearbeitung."
+      }
+    },
     "shell": {
       "forOperator": "Operator-Ansicht",
       "notifications": "Benachrichtigungen",
       "notificationsPending": "Benachrichtigungen folgen später",
       "noNotifications": "Keine aktuellen Hinweise",
-      "backHome": "Zurück zum Assistenten"
+      "backHome": "Zurück zum Assistenten",
+      "themeToggle": "Ansicht umschalten",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "lightMode": "Hellmodus",
+      "darkMode": "Dunkelmodus"
     },
     "context": {
       "title": "Lauf #{{id}}",
@@ -735,5 +812,56 @@
       "machine_area__type": "Maschinenbereich-Typ",
       "machine_area__production_line_id": "Linie-ID (Bereich)"
     }
+  },
+  "dropdownValues": {
+    "Extruder": "Extruder",
+    "Granulator": "Granulator",
+    "Cleaning": "Reinigung",
+    "Malfunctions": "Störungen",
+    "Heating Up": "Aufheizen",
+    "Shutting Down": "Abfahren",
+    "Screen Change": "Siebwechsel",
+    "Nozzle": "Düse",
+    "Low Production": "Niedrige Produktion",
+    "Starting Up": "Anfahren",
+    "Clean Shutdown": "Sauberes Abfahren",
+    "Running Empty": "Leerfahren",
+    "Cooling Down": "Abkühlen",
+    "Reason": "Grund",
+    "Nozzle Change": "Düsenwechsel",
+    "Nozzle Flushing": "Düsenspülung",
+    "Nozzle Grinding": "Düsenschleifen",
+    "Knife": "Messer",
+    "Knife Change": "Messerwechsel",
+    "Knife Grinding": "Messerschleifen",
+    "Water Bath": "Wasserbecken",
+    "Centrifuge": "Zentrifuge",
+    "Cleaning Work": "Reinigungsarbeiten",
+    "Mechanical Malfunction": "Mechanische Störung",
+    "Electrical Malfunction": "Elektrische Störung",
+    "Clearing Blockage": "Verstopfung beseitigen",
+    "Nozzle Clogged": "Düse verstopft",
+    "Knife Holder Clogged": "Messerhalter verstopft",
+    "Centrifuge Clogged": "Zentrifuge verstopft",
+    "Material Plate Removed": "Materialplatte entfernt",
+    "Power Outage": "Stromausfall",
+    "Lump Formation": "Klumpenbildung",
+    "Twin Beads": "Zwillingsperlen",
+    "Material Outside Sieve Tolerance": "Material außerhalb Siebtoleranz",
+    "Too Little Pentane": "Zu wenig Pentan",
+    "Too Much Pentane": "Zu viel Pentan",
+    "Poor Foaming Behavior": "Schlechtes Schaumverhalten",
+    "Cell Structure": "Zellstruktur",
+    "Wrong Recipe": "Falsches Rezept",
+    "Grain Distribution / Sieve Analysis": "Kornverteilung / Siebanalyse",
+    "Other": "Sonstiges",
+    "OK": "OK",
+    "Not OK": "Nicht OK",
+    "Bad": "Schlecht",
+    "Yes": "Ja",
+    "No": "Nein",
+    "Morning": "Frühschicht",
+    "Evening": "Spätschicht",
+    "Night": "Nachtschicht"
   }
 }

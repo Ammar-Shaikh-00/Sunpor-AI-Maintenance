@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Sidebar from "../SiderBar/sideBar";
 import { menuData } from "../../assets/Data/ConstantData";
@@ -19,6 +19,8 @@ import MaterialBehaviorForm from "../Pages/OperatorForms/MaterialBehaviorForm";
 import MaterialBlockingForm from "../Pages/OperatorForms/MaterialBlockingForm";
 import DailyQualityForm from "../Pages/OperatorForms/DailyQualityForm";
 import AllFormsPage from "../Pages/OperatorForms/AllFormsPage";
+import OperatorInputFormPage from "../Pages/OperatorForms/OperatorInputForm/OperatorInputFormPage";
+import RecentEntriesPage from "../Pages/OperatorForms/RecentEntries/RecentEntriesPage";
 import OperatorHomePage from "../Pages/OperatorAssist/OperatorHomePage";
 import OperatorNavStrip from "../Pages/OperatorAssist/OperatorNavStrip";
 import ProductionRunsPage from "../Pages/ProductionRuns/ProductionRunsPage";
@@ -29,13 +31,33 @@ import DataExportPage from "../Pages/DataExport/DataExportPage";
 import SignalsChartsPage from "../Pages/SignalsCharts/SignalsChartsPage";
 import PermissionGate, { OperatorRoute } from "../auth/AdminRoute";
 
+const OPERATOR_THEME_STORAGE_KEY = "operator-interface-theme";
+
 const MainLayout = ({ backendStatus }) => {
   const { t } = useTranslation();
   const [mobileSideBar, setMobileSideBar] = useState(false);
+  const [operatorTheme, setOperatorTheme] = useState(() => {
+    if (typeof window === "undefined") {
+      return "dark";
+    }
+    const savedTheme = window.localStorage.getItem(OPERATOR_THEME_STORAGE_KEY);
+    return savedTheme === "light" ? "light" : "dark";
+  });
   const { user, logout, hasPermission, hasAnyPermission, roleLabel, isLoading: authLoading } = useAuth();
   const { appName, tagline, companyName } = useAppBranding();
   const operatorShell = isOperatorOnlyUser(user);
   const showProductionRuns = hasPermission("signal.view");
+  const toggleOperatorTheme = () => {
+    setOperatorTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(OPERATOR_THEME_STORAGE_KEY, operatorTheme);
+  }, [operatorTheme]);
+
   const visibleMenu = useMemo(() => {
     if (authLoading) {
       return menuData
@@ -93,12 +115,49 @@ const MainLayout = ({ backendStatus }) => {
         path="operator"
         element={
           <OperatorRoute>
-            <OperatorHomePage />
+            <OperatorHomePage
+              operatorTheme={operatorTheme}
+              onToggleOperatorTheme={toggleOperatorTheme}
+            />
           </OperatorRoute>
         }
       />
       <Route path="forms/all" element={<AllFormsPage />} />
       <Route path="forms/production-start" element={<ProductionStartForm />} />
+      <Route
+        path="forms/dosing-material"
+        element={<OperatorInputFormPage categoryId="dosing_material" />}
+      />
+      <Route
+        path="forms/extruder"
+        element={<OperatorInputFormPage categoryId="extruder" />}
+      />
+      <Route
+        path="forms/screen-changer"
+        element={<OperatorInputFormPage categoryId="screen_changer" />}
+      />
+      <Route
+        path="forms/die"
+        element={<OperatorInputFormPage categoryId="die" />}
+      />
+      <Route
+        path="forms/water-box"
+        element={<OperatorInputFormPage categoryId="water_box" />}
+      />
+      <Route
+        path="forms/granulator"
+        element={<OperatorInputFormPage categoryId="granulator" />}
+      />
+      <Route
+        path="forms/quality"
+        element={<OperatorInputFormPage categoryId="quality" />}
+      />
+      <Route
+        path="forms/general-event"
+        element={<OperatorInputFormPage categoryId="general_event" />}
+      />
+      <Route path="forms/recent-entries" element={<RecentEntriesPage />} />
+      {/* Legacy form routes kept for existing bookmarks */}
       <Route path="forms/extruder-events" element={<ExtruderEventsForm />} />
       <Route path="forms/granulator-events" element={<GranulatorEventsForm />} />
       <Route path="forms/cleaning" element={<CleaningEventsForm />} />
@@ -113,7 +172,12 @@ const MainLayout = ({ backendStatus }) => {
   );
 
   return (
-    <div className="relative flex min-h-screen bg-[#B1B8C2]">
+    <div
+      data-operator-theme={operatorShell ? operatorTheme : undefined}
+      className={`relative flex min-h-screen ${
+        operatorShell ? "operator-theme-shell" : "bg-[#B1B8C2]"
+      }`}
+    >
       {!operatorShell ? (
         <Sidebar
           menuData={visibleMenu}
@@ -154,7 +218,10 @@ const MainLayout = ({ backendStatus }) => {
         >
           {operatorShell ? (
             <div className="mx-auto w-full max-w-7xl px-3 sm:px-4 lg:px-6">
-              <OperatorNavStrip />
+              <OperatorNavStrip
+                operatorTheme={operatorTheme}
+                onToggleOperatorTheme={toggleOperatorTheme}
+              />
               {operatorRoutes}
             </div>
           ) : (

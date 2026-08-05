@@ -10,6 +10,7 @@ import {
   Frown,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 
 const FOAMING_UI = {
   OK: {
@@ -178,7 +179,9 @@ export function FoamingBehaviorCard({ value, options, onChange }) {
             {t("forms.dailyQuality.currentSelection")}
           </div>
           <div className="text-lg font-semibold text-slate-900">
-            {value || t("common.select")}
+            {value
+              ? translateDropdownValue(t, value)
+              : t("common.select")}
           </div>
         </div>
       </div>
@@ -198,7 +201,9 @@ export function FoamingBehaviorCard({ value, options, onChange }) {
               }`}
             >
               <OptionIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="max-w-full truncate">{option}</span>
+              <span className="max-w-full truncate">
+                {translateDropdownValue(t, option)}
+              </span>
             </button>
           );
         })}
@@ -212,6 +217,7 @@ export function foamingBadgeClass(value) {
 }
 
 export function FoamingBadge({ value }) {
+  const { t } = useTranslation();
   const meta = FOAMING_UI[value] || FOAMING_UI["Not OK"];
   const Icon = meta.icon;
   return (
@@ -219,7 +225,7 @@ export function FoamingBadge({ value }) {
       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ${foamingBadgeClass(value)}`}
     >
       <Icon className="h-3.5 w-3.5" />
-      {value}
+      {translateDropdownValue(t, value)}
     </span>
   );
 }

@@ -393,24 +393,22 @@ export default function ProductionStartForm() {
         </button>
       </div>
 
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm sm:h-16 sm:w-16">
-            <Play className="h-7 w-7 fill-white" aria-hidden="true" />
-          </div>
-          <div className="min-w-0 pt-1">
-            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-              {t("forms.productionStart.title")}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 sm:text-base">
-              {t("forms.productionStart.subtitle")}
-            </p>
-          </div>
+      <header className="flex items-start gap-3 rounded-[10px] bg-[#1E4FD6] px-4 py-4 text-white sm:gap-4 sm:px-5 sm:py-5">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25 sm:h-14 sm:w-14">
+          <Play className="h-6 w-6 fill-white" aria-hidden="true" />
+        </div>
+        <div className="min-w-0 flex-1 pt-0.5">
+          <h1 className="text-lg font-bold uppercase tracking-wide sm:text-xl">
+            {t("forms.productionStart.title")}
+          </h1>
+          <p className="mt-1 text-xs leading-relaxed text-blue-100 sm:text-sm">
+            {t("forms.productionStart.subtitle")}
+          </p>
         </div>
         <button
           type="button"
           onClick={() => setShowHelp((prev) => !prev)}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-400/40 bg-[#C5C8CF] px-3 text-sm font-medium text-slate-900 transition hover:bg-white"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-[10px] border border-white/25 bg-white/10 px-3 text-sm font-medium text-white transition hover:bg-white/20"
           aria-expanded={showHelp}
         >
           <CircleHelp className="h-4 w-4" aria-hidden="true" />
@@ -472,7 +470,7 @@ export default function ProductionStartForm() {
         <section className="rounded-3xl border border-slate-400/30 bg-[#C5C8CF] p-4 sm:p-5">
           <StepHeader
             number={1}
-            title={t("forms.productionStart.stepMaterialTitle")}
+            title={t("forms.common.questions.materialType")}
             subtitle={t("forms.productionStart.stepMaterialHint")}
           />
           {errors.material_type_id ? (
@@ -575,7 +573,7 @@ export default function ProductionStartForm() {
         <section className="rounded-3xl border border-slate-400/30 bg-[#C5C8CF] p-4 sm:p-5">
           <StepHeader
             number={2}
-            title={t("forms.productionStart.stepOptionalTitle")}
+            title={t("forms.common.questions.runComment")}
             subtitle={t("forms.productionStart.stepOptionalHint")}
             action={
               <button
@@ -593,8 +591,8 @@ export default function ProductionStartForm() {
           {showOptional ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
-                <div className="mb-2 text-sm font-medium text-slate-700">
-                  {t("common.trial")}
+                <div className="mb-2 text-sm font-semibold text-[#1E4FD6]">
+                  {t("forms.common.questions.isTrial")}
                 </div>
                 <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
                   {["Yes", "No"].map((value) => {
@@ -620,8 +618,8 @@ export default function ProductionStartForm() {
               </div>
 
               <label className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-sm font-medium text-slate-700">
-                  {t("forms.productionStart.recipeNumber")}
+                <span className="text-sm font-semibold text-[#1E4FD6]">
+                  {t("forms.common.questions.recipeNumber")}
                 </span>
                 <input
                   type="text"
@@ -638,8 +636,8 @@ export default function ProductionStartForm() {
               </label>
 
               <label className="flex min-w-0 flex-col gap-1.5">
-                <span className="text-sm font-medium text-slate-700">
-                  {t("forms.productionStart.productionOrder")}
+                <span className="text-sm font-semibold text-[#1E4FD6]">
+                  {t("forms.common.questions.productionOrder")}
                 </span>
                 <input
                   value={form.production_order}
@@ -719,14 +717,14 @@ export default function ProductionStartForm() {
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[10px] bg-[#1E4FD6] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1A44B8] disabled:opacity-60"
             >
               <Play className="h-5 w-5 fill-white" aria-hidden="true" />
               {submitting
                 ? t("common.saving")
                 : editingId
                   ? t("forms.common.updateEntry")
-                  : t("forms.productionStart.submit")}
+                  : t("forms.common.captureNow")}
             </button>
             {editingId ? (
               <button

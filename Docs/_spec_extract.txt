@@ -1,0 +1,1723 @@
+Operator Input Forms – Specification (English Translation)
+Yes, I would even do this identically for every tile. That creates a uniform workflow and the operator immediately knows what to do.
+For example:
+---
+Overview Tiles
+Dosing / Material
+What is recorded?
+Record dosing deviations, material anomalies, and problems with raw materials or batches here.
+Examples:
+Dosing deviations
+Material anomalies
+Batch problems
+Pentane
+Nitrogen
+Graphite
+Recyclate
+Moisture
+Foreign material
+Other raw material problems
+🔵 Record now →
+---
+Extruder
+What is recorded?
+Record all events related to the extruder as well as process changes and measures taken.
+Examples:
+Pressure changes
+Temperature deviations
+Torque
+Screw speed
+Process instability
+Trend deviations
+Settings
+Operator interventions
+🔵 Record now →
+---
+Screen Changer / Die
+What is recorded?
+Record all events related to the screen changer and the die.
+Examples:
+Screen change
+Die change
+Die inspection
+High differential pressure
+Open holes
+Lumps
+Shape deviations
+Poor sieve analysis
+Quality deterioration
+🔵 Record now →
+---
+Water Box
+What is recorded?
+Record all events related to the cooling process.
+Examples:
+Water temperature
+Water pressure
+Flow rate
+Leaks
+Blockages
+Cooling problems
+Alarms
+Other anomalies
+🔵 Record now →
+---
+Knife / Granulator
+What is recorded?
+Record all events related to the granulator and the knives.
+Examples:
+Knife change
+Knife sharpening
+Knife inspection
+Poor cut quality
+Twin beads
+Poor particle size distribution
+Dust content
+Particle size
+Granulator settings
+Quality anomalies
+🔵 Record now →
+---
+Quality Data
+What is recorded?
+Record the results of quality control here.
+Examples:
+Sieve analysis
+Lumps
+Open holes
+Twin beads
+Cell structure
+Particle size distribution
+Foaming behavior
+Material outside tolerance
+Quality assessment
+Release or hold
+🔵 Record now →
+---
+Material Hold
+What is recorded?
+Record holds of material or product batches here.
+Examples:
+Material hold
+Batch hold
+Quality problems
+Lab decision
+Complaints
+Releases
+Causes of the hold
+🔵 Record now →
+---
+Report Malfunction
+What is recorded?
+Report unplanned malfunctions and equipment problems here.
+Examples:
+Mechanical malfunctions
+Electrical malfunctions
+Sensor faults
+Software problems
+Material malfunctions
+Plant downtime
+Alarms
+Other technical problems
+🔵 Record now →
+---
+Recent Entries
+What is displayed?
+Here you find the most recently recorded events. Saved entries can be viewed and – where permitted – edited.
+🔵 Show entries →
+---
+I would design the button the same everywhere (blue, full width, with a right arrow) so operation is consistent. Only for “Recent Entries” would I use “Show entries →” instead of “Record now”, because no new capture starts there – the history is opened instead.
+---
+DOSING / MATERIAL
+Description
+Record all events related to dosing, raw materials, batches, and material anomalies here. This information helps identify correlations between material, process, and later quality problems.
+---
+Production run *
+Dropdown
+---
+Event time *
+Default: Current time
+☐ Select past time
+Date
+Time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Noticed immediately
+○ < 10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ More than 2 hours
+○ Unknown
+---
+How long did resolution take?
+○ < 10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ More than 2 hours
+○ Not yet resolved
+---
+What would you like to record?
+○ Material change
+○ Batch change
+○ Dosing deviation
+○ Material anomaly
+○ Recipe change
+○ Dosing unit malfunction
+○ New material batch
+○ Other
+---
+Which dosing unit is affected?
+☐ EPS
+☐ Pentane
+☐ Nitrogen
+☐ Graphite
+☐ Recyclate
+☐ OFF-Spec
+☐ 600 series
+☐ Other dosing unit
+☐ Other
+---
+Which material is affected?
+Dropdown
+☐ Other
+---
+Which batch is affected?
+Dropdown
+☐ Unknown
+---
+What was observed?
+☐ Dosing unit not regulating properly
+☐ Dosing quantity too high
+☐ Dosing quantity too low
+☐ Material flow uneven
+☐ Trend fluctuating
+☐ Alarm
+☐ Material empty
+☐ Material bridge
+☐ Conveying problem
+☐ No anomaly
+☐ Other
+---
+Material anomalies
+☐ Material moist
+☐ Material dry
+☐ Material sticky
+☐ Dust
+☐ Foreign bodies
+☐ Different color
+☐ Different grain size
+☐ Different odor
+☐ Foams differently
+☐ Poor flowability
+☐ Other
+---
+What effects were observed?
+☐ Scrap
+☐ Pressure rising
+☐ Pressure falling
+☐ Torque rising
+☐ Torque falling
+☐ Temperature changed
+☐ Poor foaming behavior
+☐ Cell structure changed
+☐ Fire behavior changed
+☐ Poor quality
+☐ Production stop
+☐ No effects
+☐ Other
+---
+What measure was taken?
+☐ Material changed
+☐ Batch changed
+☐ Dosing adjusted
+☐ Dosing unit restarted
+☐ Material refilled
+☐ Production reduced
+☐ Production stopped
+☐ Production manager informed
+☐ Quality informed
+☐ No measure
+☐ Other
+---
+Did other areas need to be adjusted?
+☐ Extruder
+☐ Screen changer
+☐ Die
+☐ Water box
+☐ Granulator
+☐ Knives
+☐ Quality control
+☐ None
+☐ Other
+---
+Suspected cause
+☐ Poor material quality
+☐ Wrong batch
+☐ Dosing unit defective
+☐ Material moisture
+☐ Material stored incorrectly
+☐ Recipe problem
+☐ Operator error
+☐ Raw material quality
+☐ Unknown
+☐ Other
+---
+Impact on production
+☐ None
+☐ Production speed reduced
+☐ Quality deviation
+☐ Scrap
+☐ Production stop
+☐ Rework required
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Quality assurance
+☐ Maintenance
+☐ Laboratory
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+○ Other
+---
+Operator comment
+Please describe:
+What happened?
+What did you notice first?
+Why did you intervene?
+What measure was taken?
+Did the process improve afterward?
+Are there further observations or recommendations?
+---
+Button
+🔵 Record now →
+---
+I would use this structure as the standard for all subsequent forms so that every form follows the same logic:
+Timeline / chronological sequence
+What happened?
+What was observed?
+What effects did it have?
+What measure was taken?
+Result
+Comment
+This creates a consistent user experience and at the same time a high-quality dataset for your later AI.
+---
+EXTRUDER
+Description
+Record all events, observations, and measures related to the extruder here. The entries help understand pressure, temperature, and torque changes and predict future quality or production problems early.
+---
+Production run *
+Dropdown
+---
+Event time *
+☐ Now
+☐ Select past time
+Date
+Time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Immediately
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Unknown
+---
+How long did resolution take?
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Not yet resolved
+---
+What would you like to record?
+○ Pressure deviation
+○ Temperature deviation
+○ Torque deviation
+○ Screw speed changed
+○ Extruder malfunction
+○ Process instability
+○ Production start
+○ Production stop
+○ Other
+---
+Which area was affected?
+☐ Screw
+☐ Barrel
+☐ Feed zone
+☐ Compression zone
+☐ Discharge zone
+☐ Adapter
+☐ Heating zone 1
+☐ Heating zone 2
+☐ Heating zone 3
+☐ Heating zone 4
+☐ Heating zone 5
+☐ Heating zone 6
+☐ Other
+---
+Which process values were affected?
+☐ Pressure
+☐ Temperature
+☐ Melt temperature
+☐ Torque
+☐ Screw speed
+☐ Motor load
+☐ Energy consumption
+☐ Throughput
+☐ Other
+---
+What was observed?
+☐ Pressure rising slowly
+☐ Pressure rising suddenly
+☐ Pressure falling
+☐ Pressure fluctuating
+☐ Temperature rising
+☐ Temperature falling
+☐ Temperature fluctuating
+☐ Torque rising
+☐ Torque falling
+☐ Torque fluctuating
+☐ Process unstable
+☐ Material building up
+☐ Unusual noise
+☐ Unusual vibration
+☐ Alarm triggered
+☐ No anomaly
+☐ Other
+---
+What happened immediately beforehand?
+☐ Material change
+☐ Batch change
+☐ Dosing changed
+☐ Recipe changed
+☐ Production start
+☐ Restart
+☐ Cleaning
+☐ Screen change
+☐ Die changed
+☐ Knives changed
+☐ Maintenance
+☐ Nothing
+☐ Other
+---
+How was the problem detected?
+☐ Trend detected
+☐ Alarm
+☐ Quality control
+☐ Visual inspection
+☐ Experience
+☐ Shift supervisor
+☐ Production manager
+☐ Other
+---
+What effects were observed?
+☐ Lumps
+☐ Open holes
+☐ Twin beads
+☐ Poor particle size distribution
+☐ Cell structure changed
+☐ Foam changed
+☐ Scrap
+☐ Production output reduced
+☐ Production stop
+☐ No effects
+☐ Other
+---
+What measure was taken?
+☐ Temperature adjusted
+☐ Screw speed adjusted
+☐ Production speed reduced
+☐ Dosing adjusted
+☐ Material changed
+☐ Batch changed
+☐ Screen changed
+☐ Die changed
+☐ Cleaning performed
+☐ Restart
+☐ Production stopped
+☐ No measure
+☐ Other
+---
+Did other areas need to be adjusted?
+☐ Dosing
+☐ Screen changer
+☐ Die
+☐ Water box
+☐ Granulator
+☐ Knives
+☐ Quality control
+☐ Laboratory
+☐ None
+☐ Other
+---
+Suspected cause
+☐ Material problem
+☐ Dosing problem
+☐ Recipe problem
+☐ Temperature
+☐ Pressure
+☐ Torque
+☐ Technical defect
+☐ Operator error
+☐ Wear
+☐ Unknown
+☐ Other
+---
+How critical was the problem?
+○ No impact
+○ Low
+○ Medium
+○ High
+○ Production downtime
+---
+Scrap
+○ No scrap
+○ Little
+○ Medium
+○ A lot
+○ Entire batch
+---
+Impact on production
+☐ Production speed reduced
+☐ Quality deviation
+☐ Rework required
+☐ Production stop
+☐ None
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Quality assurance
+☐ Maintenance
+☐ Laboratory
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+○ Other
+---
+Would you intervene earlier next time?
+○ Yes
+○ No
+○ At the same time
+○ Not assessable
+---
+Operator comment
+Please briefly describe:
+What happened?
+What did you notice first?
+Why did you intervene?
+Which measure was successful?
+What recommendation would you give the next operator?
+---
+Button
+🔵 Record now →
+---
+My only addition for version 2
+Once you have enough data later, I would additionally display the last 30 minutes of sensor trends (pressure, torque, temperatures) automatically in this form. Then the operator can compare their observation directly with the real process curves, and your AI receives even more valuable training data.
+---
+DIE / DIE PLATE
+Production run
+Dropdown
+---
+Event time
+☐ Now
+☐ Select past time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Immediately
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Unknown
+---
+What would you like to record?
+○ Die inspected
+○ Die cleaned
+○ Die changed
+○ Die plate inspected
+○ Die plate cleaned
+○ Die plate changed
+○ Other
+---
+Which area was affected?
+☐ Die
+☐ Die plate
+☐ Die head
+☐ Die heating
+☐ Adapter
+☐ Other
+---
+What was observed at the extruder outlet?
+☐ Material exiting unevenly
+☐ Individual holes blocked
+☐ Multiple holes blocked
+☐ Material building up at the die
+☐ Material dripping afterward
+☐ Material exiting sideways
+☐ Material strands
+☐ Unusual behavior
+☐ No anomaly
+☐ Other
+---
+What was found on the die?
+☐ Contaminated
+☐ Blocked
+☐ Damaged
+☐ Worn
+☐ Cracks visible
+☐ No anomaly
+☐ Other
+---
+What happened immediately beforehand?
+☐ Material change
+☐ Batch change
+☐ Dosing changed
+☐ Extruder adjusted
+☐ Screen changed
+☐ Production start
+☐ Restart
+☐ Cleaning
+☐ Maintenance
+☐ Nothing
+☐ Other
+---
+What measure was taken?
+☐ Die cleaned
+☐ Die changed
+☐ Die plate cleaned
+☐ Die plate changed
+☐ Pressure reduced
+☐ Temperature adjusted
+☐ Production stopped
+☐ No measure
+☐ Other
+---
+Suspected cause
+☐ Material building up
+☐ Blockage
+☐ Wear
+☐ Temperature
+☐ Pressure
+☐ Material
+☐ Dosing
+☐ Technical defect
+☐ Unknown
+☐ Other
+---
+Did other areas need to be adjusted?
+☐ Dosing
+☐ Extruder
+☐ Screen changer
+☐ Water box
+☐ Granulator
+☐ Knives
+☐ None
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Maintenance
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+○ Other
+---
+Operator comment
+Please briefly describe:
+What did you see on the die?
+What was unusual?
+Why did you choose this measure?
+What changed afterward?
+Is there anything the next operator should know?
+---
+Button
+🔵 Record now →
+---
+Why this structure?
+This form focuses exclusively on things the operator can actually observe and assess:
+Condition of the die
+Material exit
+Blockages
+Wear
+Measures taken
+Result of the measure
+Actual quality characteristics such as lumps, open holes, or cell structure are subsequently recorded in your separate Quality Data form by the production manager or quality assurance, and later linked to this operator event. This ensures a clean separation between operator observations and QA assessments.
+---
+SCREEN CHANGER
+Description
+Record all events, observations, and measures related to the screen changer here.
+---
+Production run *
+Dropdown
+---
+Event time *
+☐ Now
+☐ Select past time
+Date
+Time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Immediately
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Unknown
+---
+What would you like to record?
+○ Screen inspected
+○ Screen changed
+○ Screen cleaned
+○ Screen blocked
+○ Differential pressure abnormal
+○ Other
+---
+What was observed?
+☐ Differential pressure rising
+☐ Differential pressure falling
+☐ Pressure fluctuating
+☐ Material flow uneven
+☐ Screen blocked
+☐ Material building up
+☐ Alarm triggered
+☐ No anomaly
+☐ Other
+---
+Why was intervention made?
+☐ Differential pressure too high
+☐ Alarm
+☐ Visual inspection
+☐ Experience
+☐ Regular change
+☐ Shift supervisor
+☐ Production manager
+☐ Other
+---
+What happened immediately beforehand?
+☐ Material change
+☐ Batch change
+☐ Dosing changed
+☐ Extruder adjusted
+☐ Production start
+☐ Restart
+☐ Maintenance
+☐ Cleaning
+☐ Nothing
+☐ Other
+---
+What measure was taken?
+☐ Screen changed
+☐ Screen cleaned
+☐ Differential pressure checked
+☐ Extruder adjusted
+☐ Production reduced
+☐ Production stopped
+☐ No measure
+☐ Other
+---
+Did other areas need to be adjusted?
+☐ Dosing
+☐ Extruder
+☐ Die
+☐ Water box
+☐ Granulator
+☐ Knives
+☐ None
+☐ Other
+---
+Suspected cause
+☐ Screen contaminated
+☐ Screen blocked
+☐ Material problem
+☐ Dosing problem
+☐ Pressure problem
+☐ Technical defect
+☐ Wear
+☐ Unknown
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Maintenance
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+○ Other
+---
+Operator comment
+Please briefly describe:
+What was observed at the screen changer?
+Why did you intervene?
+Why was a screen change necessary?
+What changed after the change?
+Are there further observations for the next operator?
+---
+Button
+🔵 Record now →
+---
+An addition specifically for Sunpor
+Above the form, I would automatically display the current differential pressure, the pressure before the screen, and the pressure after the screen. According to the questionnaire, differential pressure is the most important decision criterion for a screen change. This way the operator can connect their observation directly with the process data.
+---
+WATER BOX (COOLING)
+Description
+Record all observations, malfunctions, and interventions on the water box here. The water box ensures cooling and stabilization of the granules. The recorded data helps identify correlations between cooling, process behavior, and later quality deviations.
+---
+Production run *
+Dropdown
+---
+Event time *
+☐ Record now
+☐ Select past time
+Date
+Time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Immediately
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Unknown
+---
+How long did resolution take?
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Not yet resolved
+---
+What would you like to record?
+○ Water box inspected
+○ Cooling problem
+○ Water pressure problem
+○ Water temperature problem
+○ Water flow problem
+○ Leak
+○ Cleaning
+○ Maintenance
+○ Other
+---
+What was observed?
+☐ Water temperature too high
+☐ Water temperature too low
+☐ Water pressure too low
+☐ Water pressure too high
+☐ Water pressure fluctuating
+☐ Water flow reduced
+☐ No water flow
+☐ Water contaminated
+☐ Air bubbles in water
+☐ Foam formation
+☐ Leak
+☐ Unusual noises
+☐ Unusual vibrations
+☐ Cooling uneven
+☐ No anomaly
+☐ Other
+---
+Which plant values were abnormal?
+☐ Process water temperature
+☐ Process water pressure
+☐ Water flow rate
+☐ Cooling performance
+☐ No measured values abnormal
+☐ Other
+---
+What happened immediately beforehand?
+☐ Production start
+☐ Production stop
+☐ Restart
+☐ Material change
+☐ Batch change
+☐ Screen change
+☐ Die change
+☐ Extruder adjusted
+☐ Maintenance
+☐ Cleaning
+☐ Nothing special
+☐ Other
+---
+What measure was taken?
+☐ Water pressure adjusted
+☐ Water temperature adjusted
+☐ Water supply checked
+☐ Cooling circuit checked
+☐ Filter cleaned
+☐ Leak repaired
+☐ Valve checked
+☐ Pump checked
+☐ Production reduced
+☐ Production stopped
+☐ Maintenance informed
+☐ No measure
+☐ Other
+---
+Suspected cause
+☐ Cooling water too warm
+☐ Cooling water too cold
+☐ Water pressure too low
+☐ Water pressure too high
+☐ Pump
+☐ Valve
+☐ Filter contaminated
+☐ Line blocked
+☐ Leak
+☐ Technical defect
+☐ Operator error
+☐ Unknown
+☐ Other
+---
+Did other areas need to be adjusted?
+☐ Dosing
+☐ Extruder
+☐ Screen changer
+☐ Die
+☐ Granulator
+☐ Knives
+☐ Quality control informed
+☐ None
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Maintenance
+☐ Quality assurance
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+○ Other
+---
+Operator comment
+Please briefly describe:
+What was observed at the water box?
+Why was intervention made?
+What measure was taken?
+What changed after the measure?
+Are there notes for the next shift?
+---
+Automatically take over from the plant (display only)
+Process water temperature
+Process water pressure
+Water flow rate
+Production run
+Machine
+Material
+Recipe
+---
+Button
+🔵 Record now →
+---
+Note: Unlike the quality form, no laboratory or quality assessments are recorded here. The water box form documents exclusively observations and interventions by the operator on the plant. These data can later be linked with the quality data from the production manager to identify correlations between cooling and product quality.
+---
+GRANULATOR / KNIVES
+Description
+Record all observations, malfunctions, and maintenance events related to the granulator and the knives here. This information supports wear detection, maintenance prediction, and improvement of process stability.
+---
+Production run *
+Dropdown
+---
+Event time *
+☐ Now
+☐ Select past time
+---
+When did the problem first occur?
+Date
+Time
+☐ Unknown
+---
+When was the problem noticed?
+Date
+Time
+☐ Noticed immediately
+---
+When was the problem resolved?
+Date
+Time
+☐ Not yet resolved
+---
+How long did the problem exist before discovery?
+○ Immediately
+○ <10 minutes
+○ 10–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+○ Unknown
+---
+What would you like to record?
+○ Knife change
+○ Knife grinding
+○ Knife inspection
+○ Granulator inspection
+○ Granulator malfunction
+○ Cleaning
+○ Maintenance
+○ Other
+---
+Why was intervention made?
+☐ Knife alarm
+☐ Cut quality no longer meets requirements
+☐ Material looks unusual
+☐ Regular maintenance
+☐ Shift supervisor
+☐ Production manager
+☐ Maintenance
+☐ Other
+> These points come directly from the questionnaire. Knives are changed when a knife alarm occurs or the cut quality no longer fits.
+---
+What was observed?
+☐ Poor cut quality
+☐ Granules too large
+☐ Granules too small
+☐ Uneven granule size
+☐ Dust formation
+☐ Material accumulating
+☐ Granulator unusually loud
+☐ Granulator vibrating
+☐ No anomaly
+☐ Other
+---
+What happened immediately beforehand?
+☐ Production start
+☐ Material change
+☐ Batch change
+☐ Die changed
+☐ Screen changed
+☐ Water box adjusted
+☐ Maintenance
+☐ Cleaning
+☐ Nothing special
+☐ Other
+---
+What measure was taken?
+☐ Knives changed
+☐ Knives ground
+☐ Knives adjusted
+☐ Granulator cleaned
+☐ Granulator checked
+☐ Production reduced
+☐ Production stopped
+☐ No measure
+☐ Other
+---
+Suspected cause
+☐ Knives dull
+☐ Knives worn
+☐ Knives incorrectly adjusted
+☐ Granulator problem
+☐ Material problem
+☐ Water box problem
+☐ Die
+☐ Unknown
+☐ Other
+> According to Sunpor, twin beads mainly result from dull or worn knives. Problems with particle size distribution can also be caused by the granulator, the speed, or the die.
+---
+Did other areas need to be adjusted?
+☐ Water box
+☐ Die
+☐ Screen changer
+☐ Extruder
+☐ Dosing
+☐ None
+☐ Other
+---
+Was anyone informed?
+☐ Nobody
+☐ Shift supervisor
+☐ Production manager
+☐ Maintenance
+☐ Quality assurance
+☐ Other
+---
+Result
+○ Problem fully resolved
+○ Partially resolved
+○ No change
+○ Problem still exists
+○ Observation ongoing
+---
+Operator comment
+Please briefly describe:
+What was observed on the granulator or knives?
+Why was intervention made?
+What measure was taken?
+What changed afterward?
+Are there notes for the next shift?
+---
+Automatically display from WinCC (read-only)
+Granulator speed
+Granulator torque
+Knife position
+Knife contact pressure
+Production run
+Machine
+Recipe
+According to Sunpor, these signals are already available and should later be used by the AI for wear and maintenance prediction.
+---
+Button
+🔵 Record now →
+---
+I would make one further improvement: Instead of “What was observed?”, the first question could be “Why do you believe a knife change or maintenance was necessary?” This matches the actual operator workflow and the answers from the Sunpor questionnaire even better.
+---
+QUALITY DATA
+Card 1 – Production information
+Production run *
+Production line *
+Machine *
+Recipe
+Material
+Batch
+Sample number
+---
+Card 2 – Inspection period
+Production from
+Date
+Weekday
+Time
+Production to
+Date
+Weekday
+Time
+Quality inspection
+Date
+Weekday
+Time
+---
+Card 3 – Inspector
+Laboratory
+Quality assurance
+Production manager
+Shift supervisor
+Other
+Name of inspector
+---
+Card 4 – Quality characteristics
+Particle size distribution
+○ Very good
+○ Good
+○ Borderline
+○ Poor
+Particle size
+○ OK
+○ Too small
+○ Too large
+○ Fluctuating
+Particle shape
+○ Very good
+○ Good
+○ Borderline
+○ Poor
+Open holes
+○ None
+○ Few
+○ Many
+Lumps
+○ None
+○ Few
+○ Many
+Twin beads
+○ None
+○ Few
+○ Many
+Boat shapes
+○ None
+○ Few
+○ Many
+Dust formation
+○ None
+○ Few
+○ Many
+Foaming behavior
+○ Very good
+○ Good
+○ Poor
+Bulk density
+Input field
+Residual moisture
+Input field
+---
+Card 5 – Link production events
+Here I would not use a checkbox list, but cards.
+☐ Dosing
+14.07.2026 • Monday • 08:31
+Operator: Max Mustermann
+---
+☐ Extruder
+14.07.2026 • Monday • 09:05
+Operator: Peter Huber
+---
+☐ Screen changer
+14.07.2026 • Monday • 09:47
+Operator: Max Mustermann
+---
+☐ Die
+14.07.2026 • Monday • 10:11
+Operator: Peter Huber
+---
+☐ Granulator / Knives
+14.07.2026 • Monday • 11:36
+Operator: Peter Huber
+---
+Additionally at the top:
+🔍 Search event
+📅 Filter by period
+👤 Filter by operator
+---
+Card 6 – Assessment
+Overall assessment
+○ Release
+○ Release with restriction
+○ Rework
+○ Hold
+○ Scrap
+Assessment confidence
+○ Very certain
+○ Probable
+○ Assumption
+---
+Card 7 – Suspected cause
+☐ Dosing
+☐ Extruder
+☐ Screen changer
+☐ Die
+☐ Water box
+☐ Granulator / Knives
+☐ Material
+☐ Recipe
+☐ Operation
+☐ Unknown
+---
+Card 8 – Comments
+Large text field
+---
+Card 9 – Attachments
+Inspection report
+Laboratory report
+Photos
+Documents
+---
+🔵 Save quality data
+---
+I would make the event linking even more modern: Instead of simple checkboxes, I would display the operator events as small timeline cards. The inspector immediately sees in chronological order what happened during production and can tap the relevant events. This looks much clearer and fits better with a modern industrial application.
+---
+GENERAL EVENT
+Description
+Record exceptional events here that cannot be assigned to a specific process station (dosing, extruder, screen changer, die, water box, or granulator).
+---
+Production run
+Dropdown
+---
+Event time
+Date
+Weekday
+Time
+---
+Category
+○ Safety
+○ Infrastructure
+○ Energy supply
+○ Automation
+○ Production
+○ Personnel
+○ Environment
+○ Other
+---
+What happened?
+☐ Power outage
+☐ Compressed air failure
+☐ Cooling water failed
+☐ Network failed
+☐ PLC malfunction
+☐ HMI failed
+☐ SCADA / WinCC failed
+☐ Sensor failed
+☐ Communication error
+☐ Safety circuit triggered
+☐ Emergency stop actuated
+☐ Fire alarm
+☐ Fire
+☐ Water damage
+☐ Foreign body discovered
+☐ Raw material mixed up
+☐ Wrong recipe started
+☐ Wrong production order
+☐ Shift change problem
+☐ Cleaning work
+☐ Planned maintenance
+☐ Unplanned maintenance
+☐ Other
+---
+Which areas were affected?
+☑ Dosing
+☑ Extruder
+☑ Screen changer
+☑ Die
+☑ Water box
+☑ Granulator
+☑ Entire plant
+☑ Warehouse
+☑ Quality
+☑ Other
+---
+Production status
+○ Production continued
+○ Production reduced
+○ Briefly stopped
+○ Completely stopped
+---
+Duration
+○ <5 minutes
+○ 5–15 minutes
+○ 15–30 minutes
+○ 30–60 minutes
+○ 1–2 hours
+○ >2 hours
+---
+Was anyone informed?
+☑ Shift supervisor
+☑ Production manager
+☑ Maintenance
+☑ Electrical
+☑ Automation
+☑ Quality
+☑ Plant management
+☑ Other
+---
+Measures
+☐ Production stopped
+☐ Restart performed
+☐ Technician called
+☐ Electrician called
+☐ Plant reset
+☐ Sensor replaced
+☐ PLC restarted
+☐ Network restored
+☐ Cleaning performed
+☐ No measure
+☐ Other
+---
+Result
+○ Problem resolved
+○ Partially resolved
+○ Problem still exists
+○ Observation ongoing
+---
+Comments
+Large free-text field
+---
+Attachments
+Photos
+Documents
+Other files
+---
+Button
+🔵 Save event
+---
+RECENT ENTRIES
+Description
+Here you find all recorded production events and quality inspections in chronological order. You can search, filter, open, edit entries, and link them with quality data.
+---
+Overview
+Today
+Production events
+Quality inspections
+Open events
+Resolved events
+---
+Search
+🔍 Search by
+Production run
+Batch
+Material
+Recipe
+Operator
+Machine
+Event
+Comment
+---
+Filter
+Period
+From
+Date
+Weekday
+Time
+To
+Date
+Weekday
+Time
+---
+Production run
+Dropdown
+---
+Machine
+Dropdown
+---
+Product
+Dropdown
+---
+Material
+Dropdown
+---
+Recipe
+Dropdown
+---
+Shift
+○ Early
+○ Late
+○ Night
+○ All
+---
+Operator
+Dropdown
+---
+Category
+☑ Dosing / Material
+☑ Extruder
+☑ Screen changer
+☑ Die / Die plate
+☑ Water box
+☑ Granulator / Knives
+☑ Quality data
+---
+Status
+☑ Open
+☑ Resolved
+☑ All
+---
+Sorting
+○ Newest first
+○ Oldest first
+○ By production run
+○ By machine
+---
+Events
+---
+🔶 Extruder
+Temperature adjusted
+Date: Monday, 14.07.2026
+Time: 08:42
+Operator: Max Mustermann
+Machine: Extruder 2
+Production run: 2026-145
+Status: 🟢 Resolved
+▶ Open details
+---
+🔵 Screen changer
+Screen changed
+Date: Monday, 14.07.2026
+Time: 09:17
+Operator: Peter Huber
+Machine: Extruder 2
+Production run: 2026-145
+Status: 🟢 Resolved
+▶ Open details
+---
+🔷 Die
+Die plate cleaned
+Date: Monday, 14.07.2026
+Time: 09:56
+Operator: Peter Huber
+Machine: Extruder 2
+Production run: 2026-145
+Status: 🟢 Resolved
+▶ Open details
+---
+🟢 Water box
+Water pressure adjusted
+Date: Monday, 14.07.2026
+Time: 10:13
+Operator: Markus Gruber
+Machine: Extruder 2
+Production run: 2026-145
+Status: 🟢 Resolved
+▶ Open details
+---
+🟣 Granulator / Knives
+Knives changed
+Date: Monday, 14.07.2026
+Time: 10:42
+Operator: Peter Huber
+Machine: Extruder 2
+Production run: 2026-145
+Status: 🟢 Resolved
+▶ Open details
+---
+🟢 Quality data
+Quality inspection completed
+Date: Monday, 14.07.2026
+Time: 14:22
+Inspector: Laboratory
+Production run: 2026-145
+Status: Released
+Linked events:
+✔ Extruder
+✔ Screen changer
+✔ Die
+✔ Water box
+✔ Granulator / Knives
+▶ Open quality inspection
+---
+Detail view
+General information
+Production run
+Batch
+Product
+Material
+Recipe
+Machine
+Shift
+Operator
+---
+Time information
+Event date
+Weekday
+Time
+Recorded on
+Recorded by
+---
+Observation
+Display of all entered observations
+---
+Measures
+Display of all measures
+---
+Suspected cause
+Display
+---
+Result
+Display
+---
+Comment
+Display
+---
+Linked quality inspection
+If available
+Inspection date
+Inspector
+Overall assessment
+▶ Open quality data
+---
+Linked process data
+Temperature
+Pressure
+Speed
+Throughput
+Other automatically recorded process data
+▶ Open process data
+---
+Change history
+Created by
+Created on
+Last modified by
+Last modified on
+---
+Export
+☐ PDF
+☐ Excel
+☐ CSV
+---
+Actions
+🔵 Edit
+📄 Export
+📋 Duplicate
+🗑 Delete
+---
+Button
+🔵 Record new entry
+---
+New Menu
+🟤 Dosing / Material
+🟠 Extruder
+🔵 Screen changer
+🟣 Die / Die plate
+🟢 Water box
+⚙️ Granulator / Knives
+🧪 Quality data
+📋 General event
+📖 Recent entries
+These points / these colors
+---
+Final Tile Descriptions
+Dosing / Material
+What is recorded?
+Record all events related to dosing as well as raw materials and materials used.
+Examples:
+Dosing deviations, material anomalies, batch problems, pentane, nitrogen, graphite, recyclate, moisture, foreign material, raw material changes, and other material events.
+🔵 Record now →
+---
+Extruder
+What is recorded?
+Record all events, observations, and interventions on the extruder.
+Examples:
+Pressure, temperature, torque, screw speed, melt temperature, trend deviations, process instabilities, changed settings, and operator interventions.
+🔵 Record now →
+---
+Screen Changer
+What is recorded?
+Record all events related to the screen changer.
+Examples:
+Screen change, screen inspection, differential pressure, blockages, pressure rise, material deposits, maintenance work, and other anomalies.
+🔵 Record now →
+---
+Die / Die Plate
+What is recorded?
+Record all events related to the die and die plate.
+Examples:
+Die inspection, die cleaning, die change, die plate cleaning, blocked holes, material exit, deposits, and damage.
+🔵 Record now →
+---
+Water Box
+What is recorded?
+Record all events related to the water box cooling process.
+Examples:
+Water temperature, water pressure, water flow rate, cooling problems, leaks, blockages, alarms, and other anomalies.
+🔵 Record now →
+---
+Granulator / Knives
+What is recorded?
+Record all events related to the granulator and the knives.
+Examples:
+Knife change, knife sharpening, knife inspection, granulator inspection, poor cut quality, dust content, particle shape, granulator malfunctions, and other anomalies.
+🔵 Record now →
+---
+Quality Data
+What is recorded?
+Record the results of the quality inspection here and link them with the corresponding production events.
+Examples:
+Sieve analysis, lumps, open holes, twin beads, particle size distribution, particle shape, bulk density, foaming behavior, as well as releases or holds of batches.
+🔵 Record now →
+---
+General Event
+What is recorded?
+Record exceptional events here that cannot be clearly assigned to a process station.
+Examples:
+Power outages, compressed air failures, network malfunctions, PLC malfunctions, HMI malfunctions, fire alarms, safety events, and other general incidents.
+🔵 Record now →
+---
+Recent Entries
+What is displayed?
+Here you find all already recorded production events and quality inspections. Entries can be searched, filtered, opened, and – where authorized – edited.
+Examples:
+Show production events, open quality data, search by production run, batch, or operator, filter events, and edit already recorded entries.
+🔵 Show entries →

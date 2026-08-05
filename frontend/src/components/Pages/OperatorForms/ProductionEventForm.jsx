@@ -1,11 +1,4 @@
-import {
-  AlignLeft,
-  CalendarClock,
-  Layers,
-  ListChecks,
-  MessageSquareText,
-  Wrench,
-} from "lucide-react";
+import { Wrench } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -14,6 +7,7 @@ import { useRecentEntries } from "../../../hooks/useRecentEntries";
 import { useDeleteEntry } from "../../../hooks/useDeleteEntry";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
 import { getApiErrorMessage } from "../../../utils/apiError";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 import FormRecentEntries from "./FormRecentEntries";
 import { getProductionEventColumns } from "./formEntryColumns";
 import {
@@ -28,14 +22,17 @@ import {
   toLocalInputValue,
 } from "./formUi";
 import {
-  FormHero,
-  FormSection,
-  IconField,
-  OperatorFormShell,
+  QuestionnaireCard,
+  QuestionnaireContext,
+  QuestionnaireFooter,
+  QuestionnaireGrid,
+  QuestionnaireHeader,
+  QuestionnaireRunSelect,
+  QuestionnaireShell,
+  QuestionCell,
+  QuestionRow,
   RecentEntriesCard,
-  RunSelectField,
-  SubmitBar,
-} from "./operatorFormUi";
+} from "./questionnaireFormUi";
 
 function resolveLevel3OptionsKey(level3OptionsKey, level2) {
   if (typeof level3OptionsKey === "function") {
@@ -276,46 +273,68 @@ export default function ProductionEventForm({
   const shiftName = getShiftName(options, selectedRun?.shift_id);
 
   return (
-    <OperatorFormShell>
-      <FormHero
-        icon={HeroIcon}
-        title={title}
-        description={description}
-        run={selectedRun}
-        runLabel={runLabel}
-        lineName={lineName}
-        shiftName={shiftName}
-        metaItems={[
-          { label: t("forms.common.productionRun"), value: runLabel },
-          { label: t("forms.common.productionLine"), value: lineName },
-          { label: t("forms.common.shift"), value: shiftName },
-          {
-            label: t("forms.common.operator"),
-            value: options?.current_user?.name,
-          },
-        ]}
-      />
-
+    <QuestionnaireShell>
       {editingId ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {t("forms.common.editingEntry", { id: editingId })}
         </div>
       ) : null}
 
-      <form onSubmit={onSubmit} noValidate className="space-y-5">
-        <FormSection title={t("forms.common.detailsSection")}>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <RunSelectField
-              runs={runOptions}
-              value={form.production_run_id}
-              onChange={onChange}
-              error={errors.production_run_id}
-              emptyMessage={t("forms.common.noRunningRuns")}
+      <form onSubmit={onSubmit} noValidate>
+        <QuestionnaireCard
+          header={
+            <QuestionnaireHeader
+              icon={HeroIcon}
+              title={title}
+              description={description}
             />
+          }
+          footer={
+            <QuestionnaireFooter
+              submitting={submitting}
+              editing={Boolean(editingId)}
+              submitLabel={t("forms.common.captureNow")}
+              updateLabel={t("forms.common.updateEntry")}
+              savingLabel={t("common.saving")}
+              onCancel={editingId ? onCancelEdit : undefined}
+              cancelLabel={
+                editingId ? t("forms.common.cancelEdit") : t("common.cancel")
+              }
+              showCancel={Boolean(editingId)}
+            />
+          }
+        >
+          <QuestionnaireContext
+            items={[
+              { label: t("forms.common.productionRun"), value: runLabel },
+              { label: t("forms.common.productionLine"), value: lineName },
+              { label: t("forms.common.shift"), value: shiftName },
+              {
+                label: t("forms.common.operator"),
+                value: options?.current_user?.name,
+              },
+            ]}
+          />
 
-            <IconField
-              icon={CalendarClock}
-              label={t("forms.common.eventTime")}
+          <QuestionnaireGrid>
+            <QuestionCell
+              number={1}
+              question={t("forms.common.questions.productionRun")}
+              required
+              error={errors.production_run_id}
+            >
+              <QuestionnaireRunSelect
+                runs={runOptions}
+                value={form.production_run_id}
+                onChange={onChange}
+                error={errors.production_run_id}
+                emptyMessage={t("forms.common.noRunningRuns")}
+              />
+            </QuestionCell>
+
+            <QuestionCell
+              number={2}
+              question={t("forms.common.questions.eventTime")}
               required
               error={errors.event_time}
             >
@@ -327,11 +346,13 @@ export default function ProductionEventForm({
                 aria-invalid={errors.event_time ? "true" : undefined}
                 className={getInputClass(Boolean(errors.event_time))}
               />
-            </IconField>
+            </QuestionCell>
+          </QuestionnaireGrid>
 
-            <IconField
-              icon={Layers}
-              label={t("forms.common.level2")}
+          <QuestionnaireGrid>
+            <QuestionCell
+              number={3}
+              question={t("forms.common.questions.level2")}
               required
               error={errors.level_2}
             >
@@ -342,19 +363,19 @@ export default function ProductionEventForm({
                 aria-invalid={errors.level_2 ? "true" : undefined}
                 className={getInputClass(Boolean(errors.level_2))}
               >
-                <option value="">{t("common.select")}</option>
+                <option value="">{t("forms.common.pleaseSelect")}</option>
                 {level2Options.map((item) => (
                   <option key={item.id} value={item.value}>
-                    {item.value}
+                    {translateDropdownValue(t, item.value)}
                   </option>
                 ))}
               </select>
-            </IconField>
+            </QuestionCell>
 
             {level3Required ? (
-              <IconField
-                icon={ListChecks}
-                label={t("forms.common.level3")}
+              <QuestionCell
+                number={4}
+                question={t("forms.common.questions.level3")}
                 required
                 error={errors.level_3}
               >
@@ -366,50 +387,56 @@ export default function ProductionEventForm({
                   aria-invalid={errors.level_3 ? "true" : undefined}
                   className={getInputClass(Boolean(errors.level_3))}
                 >
-                  <option value="">{t("common.select")}</option>
+                  <option value="">{t("forms.common.pleaseSelect")}</option>
                   {level3Options.map((item) => (
                     <option key={item.id} value={item.value}>
-                      {item.value}
+                      {translateDropdownValue(t, item.value)}
                     </option>
                   ))}
                 </select>
-              </IconField>
-            ) : null}
+              </QuestionCell>
+            ) : (
+              <QuestionCell
+                number={4}
+                question={t("forms.common.questions.reason")}
+              >
+                <input
+                  name="reason"
+                  value={form.reason}
+                  onChange={onChange}
+                  className={getInputClass(false)}
+                  placeholder={t("forms.common.questions.reason")}
+                />
+              </QuestionCell>
+            )}
+          </QuestionnaireGrid>
 
-            <IconField icon={AlignLeft} label={t("forms.common.reason")}>
+          {level3Required ? (
+            <QuestionRow number={5} question={t("forms.common.questions.reason")}>
               <input
                 name="reason"
                 value={form.reason}
                 onChange={onChange}
                 className={getInputClass(false)}
+                placeholder={t("forms.common.questions.reason")}
               />
-            </IconField>
+            </QuestionRow>
+          ) : null}
 
-            <IconField
-              icon={MessageSquareText}
-              label={t("common.comment")}
-              className="sm:col-span-2"
-            >
-              <textarea
-                name="comment"
-                value={form.comment}
-                onChange={onChange}
-                rows={3}
-                className={getInputClass(false)}
-              />
-            </IconField>
-          </div>
-        </FormSection>
-
-        <SubmitBar
-          submitting={submitting}
-          editing={Boolean(editingId)}
-          submitLabel={t("forms.common.saveEvent")}
-          updateLabel={t("forms.common.updateEntry")}
-          savingLabel={t("common.saving")}
-          onCancel={onCancelEdit}
-          cancelLabel={t("forms.common.cancelEdit")}
-        />
+          <QuestionRow
+            number={level3Required ? 6 : 5}
+            question={t("forms.common.questions.comment")}
+          >
+            <textarea
+              name="comment"
+              value={form.comment}
+              onChange={onChange}
+              rows={3}
+              className={getInputClass(false)}
+              placeholder={t("forms.common.questions.comment")}
+            />
+          </QuestionRow>
+        </QuestionnaireCard>
       </form>
 
       <RecentEntriesCard
@@ -427,6 +454,6 @@ export default function ProductionEventForm({
           hideHeader
         />
       </RecentEntriesCard>
-    </OperatorFormShell>
+    </QuestionnaireShell>
   );
 }

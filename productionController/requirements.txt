@@ -1,0 +1,6 @@
+httpx
+pydantic-settings
+pyyaml
+python-dotenv
+pytest
+pytest-asyncio

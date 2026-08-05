@@ -1,11 +1,11 @@
-import cleaningIcon from "../../../assets/operator-form-icons-png/Cleaning.png";
-import extruderIcon from "../../../assets/operator-form-icons-png/Extruder-events.png";
-import materialBehaviorIcon from "../../../assets/operator-form-icons-png/Material-behaviour.png";
-import materialBlockIcon from "../../../assets/operator-form-icons-png/Material-block.png";
-import granulatorIcon from "../../../assets/operator-form-icons-png/Messer-Granulator.png";
+import cleaningIcon from "../../../assets/svg/cleaning.svg";
+import extruderIcon from "../../../assets/svg/extruder-events.svg";
+import materialBehaviorIcon from "../../../assets/svg/material-behavior.svg";
+import materialBlockIcon from "../../../assets/svg/material-berrier.svg";
+import granulatorIcon from "../../../assets/svg/granulator.svg";
 import productionStartIcon from "../../../assets/operator-form-icons-png/Production-start.png";
-import qualityIcon from "../../../assets/operator-form-icons-png/Quality.png";
-import reportProblemIcon from "../../../assets/operator-form-icons-png/Report-problem.png";
+import qualityIcon from "../../../assets/svg/quality.svg";
+import reportProblemIcon from "../../../assets/svg/report-problem.svg";
 
 export const OPERATOR_FORM_HUB_ITEMS = [
   {

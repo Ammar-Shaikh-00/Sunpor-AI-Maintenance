@@ -8,9 +8,9 @@ export default function FormHubCard({ path, image, titleKey, descriptionKey }) {
   return (
     <Link
       to={path}
-      className="group flex h-full min-w-0 flex-col rounded-2xl border border-slate-400/30 bg-[#C5C8CF] p-4 text-center transition hover:-translate-y-0.5 hover:border-blue-300 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:p-6"
+      className="group flex h-full min-w-0 flex-col rounded-[10px] border border-slate-400/30 bg-[#C5C8CF] p-4 text-center transition hover:-translate-y-0.5 hover:border-blue-300 hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 sm:p-6"
     >
-      <div className="mx-auto flex h-16 w-full items-center justify-center sm:h-20 lg:h-24">
+      <div className="mx-auto flex h-32 w-full items-center justify-center sm:h-36 lg:h-40">
         <img
           src={image}
           alt=""

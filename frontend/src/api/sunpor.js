@@ -75,4 +75,5 @@ export const ENDPOINTS = {
   operatorContext: "/operator/context",
   operatorSuggestions: "/operator/suggestions",
   operatorSuggestionConfirm: "/operator/suggestions/confirm",
+  operatorEntries: "/operator-entries",
 };

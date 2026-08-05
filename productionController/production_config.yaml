@@ -1,0 +1,57 @@
+# productionController — sensor-based production-run detection
+#
+# Goal: detect that Line E10 is producing from live WinCC signals in the
+# backend DB, then auto-CREATE a RUNNING production_run BEFORE the operator
+# confirms/fills the form. Complete the run when sensors show production stopped.
+#
+# Thresholds aligned with AI_ML_Service/state/rules_config.yaml confirmed /
+# low_production floors (Line E10). Tune here only — no code change.
+
+# Debounce: consecutive polling ticks required before acting
+start_debounce_ticks: 3   # N ticks active → CREATE run
+stop_debounce_ticks: 5    # N ticks inactive → COMPLETE run
+
+# Polling interval (seconds)
+poll_interval_sec: 30
+
+# Backend entity names — resolve IDs at startup
+company_name: "Sunpor"
+production_line_name: "Extrusion E10"
+
+# Auto-detected runs are never trial runs
+is_trial: false
+
+# Comment written on auto-created runs (operator can edit later)
+auto_run_comment: "Auto-detected from sensors — awaiting operator confirmation"
+
+# On startup: if a RUNNING run already exists for this line, adopt it
+adopt_existing_run_on_startup: true
+
+# ─── Production-active detection (from GET /signal-timeseries/latest) ───
+# Each condition aggregates value_scaled for matching catalog signals
+# (signal_group + optional signal_role). Aggregate = mean of matching values.
+# Production is ACTIVE when enough conditions pass (min_conditions_ratio).
+production_active:
+  min_conditions_ratio: 1.0   # all must pass
+  require_good_quality: true  # ignore non-GOOD samples when possible
+  conditions:
+    # [CONFIRMED] production status bit / flag
+    - group: status
+      role: null              # any role in group
+      operator: gte
+      threshold: 1.0
+    # [ESTIMATED low_production floor] some material flowing
+    - group: feeders
+      role: actual
+      operator: gte
+      threshold: 50.0
+    # [ESTIMATED] screw running
+    - group: extruder_meltpump
+      role: actual
+      operator: gte
+      threshold: 15.0
+    # [ESTIMATED] some melt pressure present
+    - group: melt_pressure
+      role: actual
+      operator: gte
+      threshold: 40.0

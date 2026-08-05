@@ -1,7 +1,9 @@
+import i18n from "../../../i18n";
 import {
   displayInputToUtcIso,
   toDisplayInputValue,
 } from "../../../utils/datetime";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 
 export function FormCard({ title, description, children }) {
   return (
@@ -81,7 +83,11 @@ export function FormLoadState({ loading, error, loadingLabel, children }) {
 }
 
 export function getShiftName(options, shiftId) {
-  return (options?.shifts || []).find((item) => item.id === shiftId)?.name || "—";
+  const name = (options?.shifts || []).find((item) => item.id === shiftId)?.name;
+  if (!name) {
+    return "—";
+  }
+  return translateDropdownValue(i18n.t.bind(i18n), name);
 }
 
 export function getLineName(options, lineId) {

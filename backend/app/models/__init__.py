@@ -19,6 +19,7 @@ from app.models.material_behaviour_event import MaterialBehaviorEvent
 from app.models.material_block import MaterialBlock
 
 from app.models.daily_quality import DailyQualityInput
+from app.models.operator_entry import OperatorEntry
 
 from app.models.ml_prediction import MLPrediction
 

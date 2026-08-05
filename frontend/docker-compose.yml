@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://100.93.158.60:8000}
+        VITE_API_URL: ${VITE_API_URL}
     container_name: sunpor-frontend
     ports:
       - "${FRONTEND_PORT:-3000}:80"

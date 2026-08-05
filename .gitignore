@@ -1,40 +1,17 @@
-# Secrets and local env
 .env
-.env.local
-*.env.local
-Docs/ServerInfo/
-Docs/ServerInfo/serverAccess.txt
-
-# Word lock / temp files
-~$*.docx
-~$*.xlsx
+my-env
+node_modules
+dist
+DataAnalysis
 
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 .pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.venv/
-venv/
-my-env/
-backend/my-env/
-AI_ML_Service/.venv/
-operator_assist_service/my-env/
 
-# Node / frontend build
-node_modules/
-dist/
-build/
-.next/
+# Secrets / local server notes
+Docs/ServerInfo/
 
-# IDE / OS
-.idea/
-.vscode/
-*.swp
-.DS_Store
-Thumbs.db
-
-# Local analysis
-DataAnalysis
+# Word lock / temp files
+Docs/~$*
+**/~$*

@@ -61,4 +61,5 @@ class DisplayTimezoneMiddleware(BaseHTTPMiddleware):
 def _response_headers(response: Response) -> dict[str, str]:
     headers = dict(response.headers)
     headers.pop("content-length", None)
+    # Keep CORS / security headers when rebuilding the JSON body.
     return headers

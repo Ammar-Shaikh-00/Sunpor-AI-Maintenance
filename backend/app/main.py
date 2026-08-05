@@ -13,6 +13,7 @@ from app.api.v1.dropdowns import router as dropdowns_router
 from app.api.v1.master_data import router as master_data_router
 from app.api.v1.ml import router as ml_router
 from app.api.v1.operator import router as operator_router
+from app.api.v1.operator_entries import router as operator_entries_router
 from app.api.v1.permissions import router as permissions_router
 from app.api.v1.profile import router as profile_router
 from app.api.v1.production_data import router as production_data_router
@@ -44,6 +45,10 @@ cors_origins = [
     if origin.strip()
 ]
 
+# Inner middlewares first; CORS last so it remains outermost and always
+# attaches Access-Control-* headers (including rewritten JSON responses).
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(DisplayTimezoneMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
@@ -51,9 +56,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(RequestLoggingMiddleware)
-app.add_middleware(DisplayTimezoneMiddleware)
 
 app.include_router(
     public_router,
@@ -105,6 +107,10 @@ app.include_router(
 
 app.include_router(
     operator_router,
+)
+
+app.include_router(
+    operator_entries_router,
 )
 
 app.include_router(

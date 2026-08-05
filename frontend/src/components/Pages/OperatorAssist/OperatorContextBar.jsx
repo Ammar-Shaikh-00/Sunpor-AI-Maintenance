@@ -1,6 +1,7 @@
 import { AlertTriangle, Clock3, Layers, Package, Sun, UserRound } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { translateDropdownValue } from "../../../utils/dropdownLabels";
 
 function formatRunningTime(minutes) {
   if (minutes == null) {
@@ -90,11 +91,10 @@ export default function OperatorContextBar({ context, loading }) {
         <MetaChip
           icon={Sun}
           label={t("operatorAssist.context.shift")}
-          value={
-            run.shift?.name ||
-            context?.resolved_shift?.name ||
-            "—"
-          }
+          value={translateDropdownValue(
+            t,
+            run.shift?.name || context?.resolved_shift?.name
+          ) || "—"}
         />
         <MetaChip
           icon={UserRound}

@@ -1,14 +1,10 @@
 import {
-  CalendarClock,
   ClipboardList,
-  Save,
-  Sun,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import safeApi, { ENDPOINTS } from "../../../api/safeApi";
-import { PRODUCTION_RUN_STATUS } from "../../../constants/productionRun";
 import { useRecentEntries } from "../../../hooks/useRecentEntries";
 import { useDeleteEntry } from "../../../hooks/useDeleteEntry";
 import { useFormOptions, useProductionRuns } from "../../../hooks/useSunporData";
@@ -16,6 +12,7 @@ import { getApiErrorMessage } from "../../../utils/apiError";
 import FormRecentEntries from "./FormRecentEntries";
 import {
   FormLoadState,
+  getInputClass,
   getLineName,
   getSelectedRun,
   getShiftName,
@@ -24,6 +21,18 @@ import {
   displayInputToUtcIso,
   toLocalInputValue,
 } from "./formUi";
+import {
+  QuestionnaireCard,
+  QuestionnaireContext,
+  QuestionnaireFooter,
+  QuestionnaireGrid,
+  QuestionnaireHeader,
+  QuestionnaireRunSelect,
+  QuestionnaireShell,
+  QuestionCell,
+  QuestionRow,
+  RecentEntriesCard,
+} from "./questionnaireFormUi";
 import { formatApiDate } from "../../../utils/datetime";
 import {
   CircleDot,
@@ -70,21 +79,6 @@ function mergeFoamingOptions(dropdownValues) {
     }
   }
   return merged.length ? merged : DEFAULT_FOAMING;
-}
-
-function StatusPill({ status }) {
-  const isRunning = status === PRODUCTION_RUN_STATUS.RUNNING;
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide ${
-        isRunning
-          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
-          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200"
-      }`}
-    >
-      {status || "—"}
-    </span>
-  );
 }
 
 export default function DailyQualityForm() {
@@ -330,237 +324,179 @@ export default function DailyQualityForm() {
     : formatApiDate(now);
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-5">
-      <section className="rounded-3xl border border-slate-400/30 bg-[#C5C8CF] p-4 sm:p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
-            {selectedRun ? (
-              <>
-                <span className="font-semibold text-slate-900">
-                  {t("forms.dailyQuality.runLabel", { id: selectedRun.id })}
-                </span>
-                <StatusPill status={selectedRun.status} />
-                <span className="text-slate-300">·</span>
-                <span>{lineName}</span>
-                <span className="text-slate-300">·</span>
-                <span>{form.shift || "—"}</span>
-                <span className="text-slate-300">·</span>
-                <span>{dateLabel}</span>
-                <span className="text-slate-300">·</span>
-                <span>{clockLabel}</span>
-              </>
-            ) : (
-              <span className="text-amber-700">{t("forms.common.noRunningRuns")}</span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
-              <Sun className="h-4 w-4 text-amber-500" />
-              {form.shift || t("forms.common.shift")}
-            </div>
-          </div>
+    <QuestionnaireShell>
+      {editingId ? (
+        <div className="rounded-[10px] border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {t("forms.common.editingEntry", { id: editingId })}
         </div>
+      ) : null}
 
-        <div className="mt-5 flex items-start gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
-            <ClipboardList className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
-              {t("forms.dailyQuality.title")}
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 sm:text-base">
-              {t("forms.dailyQuality.description")}
-            </p>
-          </div>
-        </div>
+      <form onSubmit={onSubmit} noValidate>
+        <QuestionnaireCard
+          header={
+            <QuestionnaireHeader
+              icon={ClipboardList}
+              title={t("forms.dailyQuality.title")}
+              description={t("forms.dailyQuality.description")}
+            />
+          }
+          footer={
+            <QuestionnaireFooter
+              submitting={submitting}
+              editing={Boolean(editingId)}
+              submitLabel={t("forms.common.captureNow")}
+              updateLabel={t("forms.common.updateEntry")}
+              savingLabel={t("common.saving")}
+              onCancel={editingId ? resetForm : undefined}
+              cancelLabel={
+                editingId ? t("forms.common.cancelEdit") : t("common.cancel")
+              }
+              showCancel={Boolean(editingId)}
+            />
+          }
+        >
+          <QuestionnaireContext
+            items={[
+              {
+                label: t("forms.common.productionRun"),
+                value: selectedRun
+                  ? t("forms.dailyQuality.runLabel", { id: selectedRun.id })
+                  : "—",
+              },
+              { label: t("forms.common.productionLine"), value: lineName },
+              { label: t("forms.common.shift"), value: form.shift || "—" },
+              { label: t("forms.common.inputTime"), value: `${dateLabel} ${clockLabel}` },
+            ]}
+          />
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("forms.common.productionRun")}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-slate-900">
-              {selectedRun
-                ? t("forms.dailyQuality.runLabel", { id: selectedRun.id })
-                : "—"}
-            </div>
-          </div>
-          <div className="rounded-2xl bg-slate-50 px-4 py-3">
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("forms.common.productionLine")}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-slate-900">{lineName}</div>
-          </div>
-          <div
-            className={`rounded-2xl bg-slate-50 px-4 py-3 ${
-              errors.shift ? "ring-1 ring-rose-400" : ""
-            }`}
-          >
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("forms.common.shift")}
-            </div>
-            <select
-              value={form.shift}
-              onChange={(event) => {
-                setForm((prev) => ({ ...prev, shift: event.target.value }));
-                clearError("shift");
-              }}
-              className="mt-1 w-full rounded-lg border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none"
+          <QuestionnaireGrid>
+            <QuestionCell
+              number={1}
+              question={t("forms.common.questions.productionRun")}
+              required
+              error={errors.production_run_id}
             >
-              <option value="">{t("common.select")}</option>
-              {(options?.shifts || []).map((item) => (
-                <option key={item.id} value={item.name}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-            {errors.shift ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.shift}
-              </div>
-            ) : null}
-          </div>
-          <div
-            className={`rounded-2xl bg-slate-50 px-4 py-3 ${
-              errors.input_time ? "ring-1 ring-rose-400" : ""
-            }`}
-          >
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("forms.common.inputTime")}
-            </div>
-            <div className="mt-1 flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-slate-400" />
-              <input
-                type="datetime-local"
-                value={form.input_time}
+              <QuestionnaireRunSelect
+                runs={runOptions}
+                value={form.production_run_id}
                 onChange={(event) => {
-                  setForm((prev) => ({ ...prev, input_time: event.target.value }));
-                  clearError("input_time");
+                  setForm((prev) => ({
+                    ...prev,
+                    production_run_id: event.target.value,
+                  }));
+                  clearError("production_run_id");
                 }}
-                className="w-full min-w-0 max-w-full rounded-lg border-0 bg-transparent p-0 text-sm font-semibold text-slate-900 outline-none"
+                error={errors.production_run_id}
+                emptyMessage={t("forms.common.noRunningRuns")}
               />
-            </div>
-            {errors.input_time ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.input_time}
-              </div>
-            ) : null}
-          </div>
-        </div>
+            </QuestionCell>
 
-        {runOptions.length > 1 ? (
-          <div className="mt-4">
-            <label className="text-xs font-medium uppercase tracking-wide text-slate-400">
-              {t("forms.common.selectRun")}
-            </label>
-            <select
-              value={form.production_run_id}
-              onChange={(event) => {
-                setForm((prev) => ({
-                  ...prev,
-                  production_run_id: event.target.value,
-                }));
-                clearError("production_run_id");
-              }}
-              className={`mt-1 w-full rounded-xl border bg-[#C5C8CF] px-3 py-2.5 text-sm font-medium text-slate-800 ${
-                errors.production_run_id
-                  ? "border-rose-400"
-                  : "border-slate-200"
-              }`}
+            <QuestionCell
+              number={2}
+              question={t("forms.common.questions.shift")}
+              required
+              error={errors.shift}
             >
-              {runOptions.map((run) => (
-                <option key={run.id} value={run.id}>
-                  {t("forms.common.runStatusOption", {
-                    id: run.id,
-                    status: run.status,
-                  })}
-                </option>
-              ))}
-            </select>
-            {errors.production_run_id ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.production_run_id}
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-      </section>
+              <select
+                value={form.shift}
+                onChange={(event) => {
+                  setForm((prev) => ({ ...prev, shift: event.target.value }));
+                  clearError("shift");
+                }}
+                className={getInputClass(Boolean(errors.shift))}
+              >
+                <option value="">{t("forms.common.pleaseSelect")}</option>
+                {(options?.shifts || []).map((item) => (
+                  <option key={item.id} value={item.name}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </QuestionCell>
+          </QuestionnaireGrid>
 
-      <form onSubmit={onSubmit} noValidate className="space-y-5">
-        {editingId ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            {t("forms.common.editingEntry", { id: editingId })}
-          </div>
-        ) : null}
+          <QuestionRow
+            number={3}
+            question={t("forms.common.questions.inputTime")}
+            required
+            error={errors.input_time}
+          >
+            <input
+              type="datetime-local"
+              value={form.input_time}
+              onChange={(event) => {
+                setForm((prev) => ({ ...prev, input_time: event.target.value }));
+                clearError("input_time");
+              }}
+              className={getInputClass(Boolean(errors.input_time))}
+            />
+          </QuestionRow>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <PercentMetricCard
-              label={t("forms.dailyQuality.openHoles")}
-              value={form.open_holes_percent}
-              onChange={(value) => {
-                setForm((prev) => ({ ...prev, open_holes_percent: value }));
-                clearError("open_holes_percent");
-              }}
-              min={0}
-              max={100}
-              typicalMax={30}
-              infoText={t("forms.dailyQuality.openHolesHint")}
-              icon={CircleDot}
-            />
-            {errors.open_holes_percent ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.open_holes_percent}
-              </div>
-            ) : null}
-          </div>
-          <div>
-            <PercentMetricCard
-              label={t("forms.dailyQuality.sieveAnalysis")}
-              value={form.sieve_distribution_percent}
-              onChange={(value) => {
-                setForm((prev) => ({
-                  ...prev,
-                  sieve_distribution_percent: value,
-                }));
-                clearError("sieve_distribution_percent");
-              }}
-              min={0}
-              max={100}
-              typicalMax={100}
-              infoText={t("forms.dailyQuality.sieveHint")}
-              icon={Grid3X3}
-            />
-            {errors.sieve_distribution_percent ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.sieve_distribution_percent}
-              </div>
-            ) : null}
-          </div>
-          <div>
-            <FoamingBehaviorCard
-              value={form.foaming_behavior}
-              options={foamingOptions}
-              onChange={(value) => {
-                setForm((prev) => ({ ...prev, foaming_behavior: value }));
-                clearError("foaming_behavior");
-              }}
-            />
-            {errors.foaming_behavior ? (
-              <div className="mt-1 text-xs font-medium text-rose-600">
-                {errors.foaming_behavior}
-              </div>
-            ) : null}
-          </div>
-        </div>
+          <QuestionnaireGrid columns={3}>
+            <QuestionCell
+              number={4}
+              question={t("forms.common.questions.openHoles")}
+              required
+              error={errors.open_holes_percent}
+            >
+              <PercentMetricCard
+                label={t("forms.dailyQuality.openHoles")}
+                value={form.open_holes_percent}
+                onChange={(value) => {
+                  setForm((prev) => ({ ...prev, open_holes_percent: value }));
+                  clearError("open_holes_percent");
+                }}
+                min={0}
+                max={100}
+                typicalMax={30}
+                infoText={t("forms.dailyQuality.openHolesHint")}
+                icon={CircleDot}
+              />
+            </QuestionCell>
 
-        <div className="rounded-3xl border border-slate-400/30 bg-[#C5C8CF] p-4 sm:p-5">
-          <label className="flex min-w-0 flex-col gap-2">
-            <span className="text-sm font-semibold text-slate-800">
-              {t("forms.dailyQuality.commentOptional")}
-            </span>
+            <QuestionCell
+              number={5}
+              question={t("forms.common.questions.sieveDistribution")}
+              required
+              error={errors.sieve_distribution_percent}
+            >
+              <PercentMetricCard
+                label={t("forms.dailyQuality.sieveAnalysis")}
+                value={form.sieve_distribution_percent}
+                onChange={(value) => {
+                  setForm((prev) => ({
+                    ...prev,
+                    sieve_distribution_percent: value,
+                  }));
+                  clearError("sieve_distribution_percent");
+                }}
+                min={0}
+                max={100}
+                typicalMax={100}
+                infoText={t("forms.dailyQuality.sieveHint")}
+                icon={Grid3X3}
+              />
+            </QuestionCell>
+
+            <QuestionCell
+              number={6}
+              question={t("forms.common.questions.foamingBehavior")}
+              required
+              error={errors.foaming_behavior}
+              className="sm:col-span-1 sm:border-r-0"
+            >
+              <FoamingBehaviorCard
+                value={form.foaming_behavior}
+                options={foamingOptions}
+                onChange={(value) => {
+                  setForm((prev) => ({ ...prev, foaming_behavior: value }));
+                  clearError("foaming_behavior");
+                }}
+              />
+            </QuestionCell>
+          </QuestionnaireGrid>
+
+          <QuestionRow number={7} question={t("forms.common.questions.comment")}>
             <textarea
               value={form.comment}
               maxLength={COMMENT_MAX}
@@ -569,59 +505,30 @@ export default function DailyQualityForm() {
               }
               rows={3}
               placeholder={t("forms.dailyQuality.commentPlaceholder")}
-              className="w-full min-w-0 rounded-2xl border border-slate-200 px-3 py-3 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 sm:px-4"
+              className={getInputClass(false)}
             />
-            <span className="self-end text-xs text-slate-400">
+            <span className="mt-1 block self-end text-right text-xs text-slate-400">
               {form.comment.length}/{COMMENT_MAX}
             </span>
-          </label>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="inline-flex min-h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-blue-700 px-5 text-base font-semibold text-white shadow-sm transition hover:bg-blue-800 disabled:opacity-60"
-          >
-            <Save className="h-5 w-5" />
-            {submitting
-              ? t("common.saving")
-              : editingId
-                ? t("forms.common.updateEntry")
-                : t("forms.dailyQuality.submit")}
-          </button>
-          {editingId ? (
-            <button
-              type="button"
-              onClick={resetForm}
-              className="min-h-14 w-full rounded-2xl border border-slate-200 bg-[#C5C8CF] px-5 text-sm font-semibold text-slate-700 hover:bg-slate-50 sm:w-auto"
-            >
-              {t("forms.common.cancelEdit")}
-            </button>
-          ) : null}
-        </div>
+          </QuestionRow>
+        </QuestionnaireCard>
       </form>
 
-      <section className="rounded-3xl border border-slate-400/30 bg-[#C5C8CF] p-4 sm:p-5">
-        <h2 className="text-lg font-semibold text-slate-900">
-          {t("forms.common.recentEntries")}
-        </h2>
-        <p className="mt-1 text-sm text-slate-500">
-          {t("forms.dailyQuality.recentHint")}
-        </p>
-        <div className="mt-2">
-          <FormRecentEntries
-            entries={entries}
-            columns={columns}
-            runsById={runsById}
-            loading={entriesLoading}
-            onEdit={onEdit}
-            onDelete={onDelete}
-            deletingId={deletingId}
-            hideHeader
-          />
-        </div>
-      </section>
-    </div>
+      <RecentEntriesCard
+        title={t("forms.common.recentEntries")}
+        hint={t("forms.dailyQuality.recentHint")}
+      >
+        <FormRecentEntries
+          entries={entries}
+          columns={columns}
+          runsById={runsById}
+          loading={entriesLoading}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          deletingId={deletingId}
+          hideHeader
+        />
+      </RecentEntriesCard>
+    </QuestionnaireShell>
   );
 }
