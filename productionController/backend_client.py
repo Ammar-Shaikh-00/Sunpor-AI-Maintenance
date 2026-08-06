@@ -1,15 +1,13 @@
 """HTTP client for backend master data + production-run actions.
 
-Adapted from AI_ML_Service patterns (auth headers, RUNNING-run filter);
-no imports from AI_ML_Service.
-
-Detection uses live signals:
-  GET /signal-catalog + GET /signal-timeseries/latest
+Multi-company / multi-line capable. Detection uses:
+  GET /signal-catalog (with production_line_id) + GET /signal-timeseries/latest
 """
 
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime, time, timezone
 from typing import Any, Optional
 
@@ -22,13 +20,14 @@ from production_detector import evaluate_production_active
 logger = logging.getLogger(__name__)
 
 RUNNING_STATUS = "RUNNING"
+DEFAULT_PAGE_SIZE = 100
+DEFAULT_MAX_PAGES = 50
 
 
 def _parse_hhmmss(value: str | None) -> time | None:
     if not value:
         return None
     text = str(value).strip()
-    # Backend may return "HH:MM:SS" or ISO time strings
     if "T" in text:
         text = text.split("T", 1)[-1]
     text = text.replace("Z", "").split(".")[0]
@@ -41,7 +40,6 @@ def _parse_hhmmss(value: str | None) -> time | None:
 
 
 def _time_in_shift_window(current: time, start: time, end: time) -> bool:
-    """Return True if current falls in [start, end), supporting overnight windows."""
     if start == end:
         return True
     if start < end:
@@ -50,7 +48,6 @@ def _time_in_shift_window(current: time, start: time, end: time) -> bool:
 
 
 def _iso_z(dt: datetime) -> str:
-    """ISO timestamp with trailing Z (backend expects UTC-naive + Z)."""
     if dt.tzinfo is not None:
         dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
     return dt.isoformat() + "Z"
@@ -58,6 +55,21 @@ def _iso_z(dt: datetime) -> str:
 
 def _utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+@dataclass(frozen=True)
+class LineTarget:
+    """One managed production line under a company."""
+
+    company_id: int
+    company_name: str
+    production_line_id: int
+    production_line_name: str
+    signal_count: int = 0
+
+    @property
+    def label(self) -> str:
+        return f"{self.company_name}/{self.production_line_name}#{self.production_line_id}"
 
 
 class BackendClient:
@@ -76,6 +88,11 @@ class BackendClient:
         self._http = http_client
         self._owns_http = http_client is None
         self._catalog_cache: list[dict] | None = None
+        self._shift_cache: list[dict] | None = None
+        # Shared snapshot for one poll cycle (set by begin_poll_snapshot)
+        self._tick_catalog: list[dict] | None = None
+        self._tick_latest: list[dict] | None = None
+        self._tick_runs: list[dict] | None = None
 
     async def _client(self) -> httpx.AsyncClient:
         if self._http is None:
@@ -109,76 +126,205 @@ class BackendClient:
             )
         return resp
 
-    # ── Startup resolution ────────────────────────────────────────────
+    async def _paginate(
+        self,
+        path: str,
+        *,
+        params: dict | None = None,
+        page_size: int = DEFAULT_PAGE_SIZE,
+        max_pages: int = DEFAULT_MAX_PAGES,
+    ) -> list[dict]:
+        """Fetch all pages from a skip/limit list endpoint."""
+        items: list[dict] = []
+        skip = 0
+        base = dict(params or {})
+        for _ in range(max_pages):
+            page_params = {**base, "skip": skip, "limit": page_size}
+            resp = await self._request("GET", path, params=page_params)
+            resp.raise_for_status()
+            data = resp.json()
+            batch = data if isinstance(data, list) else data.get("items") or []
+            if not isinstance(batch, list):
+                break
+            items.extend(batch)
+            if len(batch) < page_size:
+                break
+            skip += page_size
+        return items
 
-    async def resolve_company_id(self) -> int:
-        name = self._pc_config.get("company_name", "Sunpor")
-        resp = await self._request("GET", "/companies", params={"limit": 100})
-        resp.raise_for_status()
-        for item in resp.json():
-            if item.get("name") == name:
-                return int(item["id"])
-        raise ValueError(f"Company not found: {name!r}")
+    # ── Discovery ─────────────────────────────────────────────────────
 
-    async def resolve_production_line_id(self, company_id: int) -> int:
-        name = self._pc_config.get("production_line_name", "Extrusion E10")
-        resp = await self._request("GET", "/production-lines", params={"limit": 100})
-        resp.raise_for_status()
-        for item in resp.json():
-            if (
-                item.get("name") == name
-                and int(item.get("company_id", -1)) == int(company_id)
-            ):
-                return int(item["id"])
-        for item in resp.json():
-            if item.get("name") == name:
-                return int(item["id"])
-        raise ValueError(
-            f"Production line not found: {name!r} (company_id={company_id})"
-        )
+    async def list_companies(self) -> list[dict]:
+        return await self._paginate("/companies")
+
+    async def list_production_lines(self) -> list[dict]:
+        return await self._paginate("/production-lines")
 
     async def resolve_default_material_type_id(self) -> int:
-        resp = await self._request("GET", "/material-types", params={"limit": 100})
-        resp.raise_for_status()
-        items = resp.json()
+        items = await self._paginate("/material-types")
         if not items:
             raise ValueError("No material types returned by GET /material-types")
         return int(items[0]["id"])
 
+    async def discover_managed_lines(self) -> list[LineTarget]:
+        """Companies → production lines, filtered by config + signal_catalog links.
+
+        A line is managed only if signal_catalog has at least one active signal
+        with matching production_line_id (WinCC linkage).
+        """
+        cfg = self._pc_config
+        only_active = bool(cfg.get("only_active_lines", True))
+        skip_no_signals = bool(cfg.get("skip_lines_without_signals", True))
+
+        company_ids = {int(x) for x in (cfg.get("company_ids") or [])}
+        company_names = {str(x) for x in (cfg.get("company_names") or [])}
+        line_ids = {int(x) for x in (cfg.get("production_line_ids") or [])}
+        line_names = {str(x) for x in (cfg.get("production_line_names") or [])}
+
+        # Optional single-target env overrides from Settings
+        if self._settings.COMPANY_ID is not None:
+            company_ids.add(int(self._settings.COMPANY_ID))
+        if self._settings.PRODUCTION_LINE_ID is not None:
+            line_ids.add(int(self._settings.PRODUCTION_LINE_ID))
+
+        companies = await self.list_companies()
+        lines = await self.list_production_lines()
+        catalog = await self.fetch_catalog(force=True)
+
+        signal_counts: dict[int, int] = {}
+        for row in catalog:
+            if row.get("production_line_id") is None:
+                continue
+            if row.get("active") is False or row.get("is_deleted") is True:
+                continue
+            lid = int(row["production_line_id"])
+            signal_counts[lid] = signal_counts.get(lid, 0) + 1
+
+        companies_by_id = {int(c["id"]): c for c in companies if c.get("id") is not None}
+        targets: list[LineTarget] = []
+
+        for line in lines:
+            try:
+                lid = int(line["id"])
+                cid = int(line["company_id"])
+            except (KeyError, TypeError, ValueError):
+                continue
+
+            company = companies_by_id.get(cid)
+            if company is None:
+                continue
+
+            if company_ids and cid not in company_ids:
+                continue
+            if company_names and str(company.get("name")) not in company_names:
+                continue
+            if line_ids and lid not in line_ids:
+                continue
+            if line_names and str(line.get("name")) not in line_names:
+                continue
+            if only_active and line.get("active") is False:
+                continue
+
+            n_signals = signal_counts.get(lid, 0)
+            if skip_no_signals and n_signals == 0:
+                logger.info(
+                    "Skipping line %s/%s#%s — no signal_catalog rows",
+                    company.get("name"),
+                    line.get("name"),
+                    lid,
+                )
+                continue
+
+            targets.append(
+                LineTarget(
+                    company_id=cid,
+                    company_name=str(company.get("name") or cid),
+                    production_line_id=lid,
+                    production_line_name=str(line.get("name") or lid),
+                    signal_count=n_signals,
+                )
+            )
+
+        targets.sort(key=lambda t: (t.company_name, t.production_line_name, t.production_line_id))
+        logger.info(
+            "Discovered %d managed line(s) across %d company(ies)",
+            len(targets),
+            len({t.company_id for t in targets}),
+        )
+        return targets
+
+    # ── Poll snapshot (shared across all lines each tick) ─────────────
+
+    async def begin_poll_snapshot(self) -> None:
+        """Load catalog + latest signals + production runs once per poll cycle."""
+        self._tick_catalog = await self.fetch_catalog()
+        self._tick_latest = await self.fetch_latest_signals()
+        self._tick_runs = await self._paginate("/production-runs")
+        logger.debug(
+            "Poll snapshot: catalog=%d latest=%d runs=%d",
+            len(self._tick_catalog or []),
+            len(self._tick_latest or []),
+            len(self._tick_runs or []),
+        )
+
+    def end_poll_snapshot(self) -> None:
+        self._tick_catalog = None
+        self._tick_latest = None
+        self._tick_runs = None
+
+    # ── Signals ───────────────────────────────────────────────────────
+
     async def fetch_catalog(self, *, force: bool = False) -> list[dict]:
-        """GET /signal-catalog — cached after first successful fetch."""
         if self._catalog_cache is not None and not force:
             return self._catalog_cache
-        resp = await self._request("GET", "/signal-catalog", params={"limit": 500})
-        resp.raise_for_status()
-        data = resp.json()
-        items = data if isinstance(data, list) else data.get("items") or []
+        # signal-catalog can be large — page through
+        items = await self._paginate("/signal-catalog", page_size=500)
         self._catalog_cache = items
         logger.info("Loaded signal catalog: %d signals", len(items))
         return items
 
     async def fetch_latest_signals(self) -> list[dict]:
-        """GET /signal-timeseries/latest — current snapshot of all signals."""
         resp = await self._request("GET", "/signal-timeseries/latest")
         resp.raise_for_status()
         data = resp.json()
         return data if isinstance(data, list) else []
 
-    async def is_production_active(self) -> tuple[bool, dict]:
-        """Evaluate live sensors → production active or not."""
-        catalog = await self.fetch_catalog()
-        latest = await self.fetch_latest_signals()
+    async def is_production_active(
+        self, production_line_id: int
+    ) -> tuple[bool, dict]:
+        """Evaluate live sensors for one production line only."""
+        catalog = (
+            self._tick_catalog
+            if self._tick_catalog is not None
+            else await self.fetch_catalog()
+        )
+        latest = (
+            self._tick_latest
+            if self._tick_latest is not None
+            else await self.fetch_latest_signals()
+        )
         if not latest:
-            return False, {"reason": "no_latest_signals"}
-        return evaluate_production_active(catalog, latest, self._pc_config)
+            return False, {
+                "reason": "no_latest_signals",
+                "production_line_id": production_line_id,
+            }
+        return evaluate_production_active(
+            catalog,
+            latest,
+            self._pc_config,
+            production_line_id=production_line_id,
+        )
+
+    # ── Production runs ───────────────────────────────────────────────
 
     async def get_active_run(self, production_line_id: int) -> Optional[dict]:
         """Return first RUNNING run for the line, or None."""
-        resp = await self._request(
-            "GET", "/production-runs", params={"limit": 100, "skip": 0}
+        runs = (
+            self._tick_runs
+            if self._tick_runs is not None
+            else await self._paginate("/production-runs")
         )
-        resp.raise_for_status()
-        for run in resp.json() or []:
+        for run in runs:
             if (
                 str(run.get("status")) == RUNNING_STATUS
                 and int(run.get("production_line_id", -1)) == int(production_line_id)
@@ -186,10 +332,17 @@ class BackendClient:
                 return run
         return None
 
-    async def resolve_current_shift_id(self) -> int:
-        resp = await self._request("GET", "/shifts", params={"limit": 100})
+    async def get_production_run(self, run_id: int) -> Optional[dict]:
+        resp = await self._request("GET", f"/production-runs/{run_id}")
+        if resp.status_code == 404:
+            return None
         resp.raise_for_status()
-        shifts = resp.json() or []
+        return resp.json()
+
+    async def resolve_current_shift_id(self) -> int:
+        if self._shift_cache is None:
+            self._shift_cache = await self._paginate("/shifts")
+        shifts = self._shift_cache or []
         now = _utcnow().time()
         for shift in shifts:
             start = _parse_hhmmss(shift.get("start_time"))
@@ -199,8 +352,6 @@ class BackendClient:
             if _time_in_shift_window(now, start, end):
                 return int(shift["id"])
         raise ValueError("No shift matched current time-of-day")
-
-    # ── Actions ───────────────────────────────────────────────────────
 
     async def create_production_run(
         self,
@@ -228,12 +379,17 @@ class BackendClient:
         resp = await self._request("POST", "/production-runs", json=payload)
         if resp.status_code == 400:
             logger.warning(
-                "create_production_run conflict (400): %s",
+                "create_production_run conflict (400) line=%s: %s",
+                production_line_id,
                 resp.text[:300],
             )
             return None
         resp.raise_for_status()
-        return resp.json()
+        created = resp.json()
+        # Keep tick snapshot coherent if we created mid-cycle
+        if self._tick_runs is not None and isinstance(created, dict):
+            self._tick_runs.append(created)
+        return created
 
     async def complete_production_run(
         self, run_id: int, end_time: datetime

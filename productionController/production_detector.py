@@ -2,6 +2,9 @@
 
 Uses catalog group/role + latest timeseries values only — no process_state
 ML predictions (those require an existing run and cannot bootstrap).
+
+Catalog rows are scoped by production_line_id (signal_catalog FK) so each
+line is evaluated only on its own WinCC signals.
 """
 
 from __future__ import annotations
@@ -26,23 +29,60 @@ def _mean(values: list[float]) -> Optional[float]:
     return sum(values) / len(values)
 
 
+def filter_catalog_for_line(
+    catalog: list[dict],
+    production_line_id: int,
+    *,
+    active_only: bool = True,
+) -> list[dict]:
+    """Keep catalog rows linked to this production line via signal_catalog."""
+    out: list[dict] = []
+    for row in catalog:
+        if row.get("production_line_id") is None:
+            continue
+        if int(row["production_line_id"]) != int(production_line_id):
+            continue
+        if active_only and row.get("active") is False:
+            continue
+        if row.get("is_deleted") is True:
+            continue
+        out.append(row)
+    return out
+
+
 def evaluate_production_active(
     catalog: list[dict],
     latest: list[dict],
     pc_config: dict,
+    *,
+    production_line_id: int | None = None,
 ) -> tuple[bool, dict[str, Any]]:
     """Return (is_active, debug_info) from a latest signal snapshot.
 
-    catalog items need: id, signal_group, signal_role
+    catalog items need: id, signal_group, signal_role [, production_line_id]
     latest items need: signal_id, value_scaled, quality
+
+    When production_line_id is set, only that line's catalog signals are used.
     """
+    if production_line_id is not None:
+        catalog = filter_catalog_for_line(catalog, production_line_id)
+
     rule = pc_config.get("production_active") or {}
     conditions = rule.get("conditions") or []
     min_ratio = float(rule.get("min_conditions_ratio", 1.0))
     require_good = bool(rule.get("require_good_quality", True))
 
     if not conditions:
-        return False, {"reason": "no_conditions_configured"}
+        return False, {
+            "reason": "no_conditions_configured",
+            "production_line_id": production_line_id,
+        }
+
+    if not catalog:
+        return False, {
+            "reason": "no_signals_for_line",
+            "production_line_id": production_line_id,
+        }
 
     by_id = {int(s["id"]): s for s in catalog if s.get("id") is not None}
     latest_by_id: dict[int, dict] = {}
@@ -105,16 +145,22 @@ def evaluate_production_active(
         )
 
     if evaluated == 0:
-        return False, {"reason": "no_conditions_evaluated", "details": details}
+        return False, {
+            "reason": "no_conditions_evaluated",
+            "production_line_id": production_line_id,
+            "details": details,
+        }
 
     ratio = passed / evaluated
     is_active = ratio >= min_ratio
     info = {
         "is_active": is_active,
+        "production_line_id": production_line_id,
         "passed": passed,
         "evaluated": evaluated,
         "ratio": round(ratio, 3),
         "min_ratio": min_ratio,
+        "catalog_signals": len(catalog),
         "details": details,
     }
     logger.debug("production_active eval: %s", info)

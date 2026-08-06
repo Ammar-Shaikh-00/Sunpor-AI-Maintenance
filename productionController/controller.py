@@ -1,4 +1,4 @@
-"""productionController entry point — poll sensors and manage runs."""
+"""productionController entry point — multi-company / multi-line poll loop."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from auth_client import AuthClient
 from backend_client import BackendClient
 from config import Settings, load_pc_config
-from run_manager import RunManager
+from orchestrator import ProductionOrchestrator
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,14 +30,10 @@ async def main() -> None:
 
     async with httpx.AsyncClient(timeout=30.0) as http:
         auth = AuthClient(settings, http)
-        await auth.login()  # also sets auth.authenticated_user_id via /auth/me
+        await auth.login()
 
         client = BackendClient(auth, settings, pc_config, http_client=http)
 
-        company_id = settings.COMPANY_ID or await client.resolve_company_id()
-        production_line_id = settings.PRODUCTION_LINE_ID or (
-            await client.resolve_production_line_id(company_id)
-        )
         operator_id = settings.OPERATOR_ID or auth.authenticated_user_id
         if operator_id is None:
             raise RuntimeError(
@@ -47,24 +43,28 @@ async def main() -> None:
             await client.resolve_default_material_type_id()
         )
 
-        cached_ids = {
-            "company_id": int(company_id),
-            "production_line_id": int(production_line_id),
-            "operator_id": int(operator_id),
-            "default_material_type_id": int(material_type_id),
-        }
-        logger.info("Resolved IDs at startup: %s", cached_ids)
+        orchestrator = ProductionOrchestrator(
+            client,
+            pc_config,
+            operator_id=int(operator_id),
+            default_material_type_id=int(material_type_id),
+        )
+        await orchestrator.startup()
+        for status in orchestrator.get_status():
+            logger.info("Initial line status: %s", status)
 
-        manager = RunManager(client, pc_config, cached_ids)
-        await manager.startup()
-        logger.info("Initial status: %s", manager.get_status())
+        poll_sec = int(pc_config.get("poll_interval_sec", 5))
+        logger.info(
+            "Polling every %ss across %d production line(s)",
+            poll_sec,
+            orchestrator.line_count,
+        )
 
-        poll_sec = int(pc_config.get("poll_interval_sec", 30))
         while True:
             try:
-                await manager.on_tick()
-            except Exception as exc:  # never crash the loop
-                logger.exception("on_tick failed: %s", exc)
+                await orchestrator.on_tick()
+            except Exception as exc:  # never crash the outer loop
+                logger.exception("orchestrator tick failed: %s", exc)
             await asyncio.sleep(poll_sec)
 
 

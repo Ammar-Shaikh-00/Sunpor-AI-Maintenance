@@ -1,56 +1,61 @@
-# productionController — sensor-based production-run detection
+# productionController — multi-company / multi-line sensor detection
 #
-# Goal: detect that Line E10 is producing from live WinCC signals in the
-# backend DB, then auto-CREATE a RUNNING production_run BEFORE the operator
-# confirms/fills the form. Complete the run when sensors show production stopped.
+# Discovers all companies and their production lines from the backend.
+# For each line that has signal_catalog WinCC rows (production_line_id FK),
+# evaluates sensors and auto-creates / completes production runs.
 #
-# Thresholds aligned with AI_ML_Service/state/rules_config.yaml confirmed /
-# low_production floors (Line E10). Tune here only — no code change.
+# Thresholds aligned with AI_ML_Service/state/rules_config.yaml low_production
+# floors. Tune here only — no code change.
 
 # Debounce: consecutive polling ticks required before acting
 start_debounce_ticks: 3   # N ticks active → CREATE run
 stop_debounce_ticks: 5    # N ticks inactive → COMPLETE run
 
 # Polling interval (seconds)
-poll_interval_sec: 30
+poll_interval_sec: 5
 
-# Backend entity names — resolve IDs at startup
-company_name: "Sunpor"
-production_line_name: "Extrusion E10"
+# Re-discover companies / lines / catalog links (seconds)
+topology_refresh_sec: 300
+
+# Discovery filters
+only_active_lines: true
+skip_lines_without_signals: true   # require signal_catalog.production_line_id
+
+# Optional scope filters (empty = all). Env COMPANY_ID / PRODUCTION_LINE_ID
+# also act as filters when set.
+company_ids: []
+company_names: []
+production_line_ids: []
+production_line_names: []
 
 # Auto-detected runs are never trial runs
 is_trial: false
 
 # Comment written on auto-created runs (operator can edit later)
-auto_run_comment: "Auto-detected from sensors — awaiting operator confirmation"
+auto_run_comment: "Automatisch aus Sensoren erkannt — wartet auf Bestätigung durch den Bediener"
 
-# On startup: if a RUNNING run already exists for this line, adopt it
+# On startup / topology refresh: adopt existing RUNNING run for each line
 adopt_existing_run_on_startup: true
 
-# ─── Production-active detection (from GET /signal-timeseries/latest) ───
-# Each condition aggregates value_scaled for matching catalog signals
-# (signal_group + optional signal_role). Aggregate = mean of matching values.
-# Production is ACTIVE when enough conditions pass (min_conditions_ratio).
+# ─── Production-active detection (per production_line_id) ───
+# Uses only signal_catalog rows linked to that line.
+# Aggregate = mean of matching value_scaled (group + optional role).
 production_active:
   min_conditions_ratio: 1.0   # all must pass
-  require_good_quality: true  # ignore non-GOOD samples when possible
+  require_good_quality: true
   conditions:
-    # [CONFIRMED] production status bit / flag
     - group: status
-      role: null              # any role in group
+      role: null
       operator: gte
       threshold: 1.0
-    # [ESTIMATED low_production floor] some material flowing
     - group: feeders
       role: actual
       operator: gte
       threshold: 50.0
-    # [ESTIMATED] screw running
     - group: extruder_meltpump
       role: actual
       operator: gte
       threshold: 15.0
-    # [ESTIMATED] some melt pressure present
     - group: melt_pressure
       role: actual
       operator: gte
